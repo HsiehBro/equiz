@@ -1,0 +1,430 @@
+/* ==========================================================================
+   收藏页样式 (EduPrep - My Collections / Bookmarked)
+   100% 还原 Stitch 原型设计系统规范
+   ========================================================================== */
+
+.page-container {
+  min-height: 100vh;
+  background-color: var(--color-background, #f8f9fa);
+  color: var(--color-on-surface, #191c1d);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
+/* 1. 自定义顶部导航栏 (Custom TopAppBar) */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50;
+  background-color: #ffffff;
+  border-bottom: 1rpx solid #e1e3e4;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: relative;
+}
+
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.nav-btn:active {
+  opacity: 0.8;
+  transform: scale(0.95);
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-title {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: #0058bc;
+  letter-spacing: -0.2px;
+}
+
+.nav-btn-right {
+  width: 36px;
+  visibility: hidden;
+}
+
+/* 2. 主体内容画布 (Main Content Canvas) */
+.main-content {
+  flex: 1;
+  padding: 20px 16px 32px;
+  box-sizing: border-box;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 头部标题区域 (Display Header) */
+.header-section {
+  margin-bottom: 20px;
+}
+
+.display-title {
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 700;
+  color: #191c1d;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+.subtitle-text {
+  font-size: 14px;
+  line-height: 20px;
+  color: #414755;
+  font-weight: 400;
+}
+
+/* 筛选芯片栏 (Filter Chips) */
+.chips-scroll {
+  width: 100%;
+  white-space: nowrap;
+  margin-bottom: 24px;
+}
+
+.chips-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 6px;
+}
+
+.chip-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chip-active {
+  background-color: #0058bc;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 88, 188, 0.25);
+}
+
+.chip-inactive {
+  background-color: #f3f4f5;
+  color: #414755;
+  border: 1rpx solid #c1c6d7;
+}
+
+.chip-inactive:active {
+  background-color: #e7e8e9;
+}
+
+/* 试题分组与卡片 (Grouped Sections) */
+.groups-container {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.subject-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+  border-bottom: 1rpx solid #e1e3e4;
+}
+
+.section-title-text {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #0058bc;
+}
+
+.btn-group-practice {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background-color: #edf4fe;
+  transition: background-color 0.15s ease;
+}
+
+.btn-group-practice:active {
+  background-color: #d8e2ff;
+}
+
+.group-practice-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.group-practice-text {
+  font-size: 12px;
+  line-height: 16px;
+  color: #0058bc;
+  font-weight: 500;
+}
+
+/* 试题卡片列表 (Cards List) */
+.cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.question-card {
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  border: 1rpx solid #edeeef;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  position: relative;
+  transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.2s ease;
+}
+
+.question-card:active {
+  background-color: #fafbfc;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.card-removing {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.card-left-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.badge-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: #e7e8e9;
+  color: #414755;
+}
+
+.meta-date {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  color: #717786;
+}
+
+.question-body-text {
+  font-size: 15px;
+  line-height: 22px;
+  color: #191c1d;
+  font-weight: 400;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+/* 卡片右侧操作按钮组 (Vertical Action Buttons) */
+.card-actions-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.action-circle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+  border: 1rpx solid #edeeef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.action-circle-btn:active {
+  transform: scale(0.92);
+}
+
+.btn-remove:active {
+  background-color: #ffdad6;
+}
+
+.btn-play {
+  background-color: #edf4fe;
+  border-color: #adc6ff;
+}
+
+.btn-play:active {
+  background-color: #0070eb;
+}
+
+.btn-play:active .action-btn-icon {
+  filter: brightness(0) invert(1);
+}
+
+.action-btn-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* 空状态组件 (Empty State) */
+.empty-state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1rpx solid #edeeef;
+  margin-top: 10px;
+}
+
+.empty-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #d8e2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.empty-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.empty-title {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #191c1d;
+  margin-bottom: 8px;
+}
+
+.empty-desc {
+  font-size: 14px;
+  line-height: 20px;
+  color: #717786;
+  max-width: 280px;
+  margin-bottom: 24px;
+}
+
+.btn-go-practice {
+  padding: 10px 28px;
+  background-color: #0058bc;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 88, 188, 0.25);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-go-practice:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* 3. 底部固定导航栏 (BottomNavBar) */
+.bottom-navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: calc(60px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background-color: #ffffff;
+  border-top: 1rpx solid #e1e3e4;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 50;
+}
+
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 52px;
+  border-radius: 8px;
+  transition: transform 0.15s ease;
+}
+
+.tab-item:active {
+  transform: scale(0.94);
+  background-color: #f3f4f5;
+}
+
+.tab-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 2px;
+}
+
+.tab-label {
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 500;
+  color: #414755;
+}
+
+.tab-active .tab-label {
+  color: #0058bc;
+  font-weight: 700;
+}

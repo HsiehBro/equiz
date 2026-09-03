@@ -1,0 +1,759 @@
+/* pages/mock-record/mock-record.wxss */
+
+.page-container {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  color: #191c1d;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* 1. 自定义顶部导航栏 (Custom TopAppBar) */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: -8px;
+}
+
+.nav-btn:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-title-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-title {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #0058bc;
+}
+
+.nav-btn-right {
+  width: 40px;
+  height: 40px;
+}
+
+/* 2. 主体内容滚动区 */
+.main-content {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.content-wrapper {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 16px 16px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* 2.1 页面主标题区 */
+.page-header-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 2px;
+}
+
+.page-headline {
+  font-size: 24px;
+  font-weight: 700;
+  color: #191c1d;
+  letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #717786;
+  line-height: 20px;
+}
+
+/* 2.2 Bento Dashboard 核心成绩看板 */
+.bento-dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 核心得分卡片 */
+.score-primary-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0070eb 0%, #0058bc 100%);
+  color: #ffffff;
+  border-radius: 18px;
+  padding: 24px 22px 26px;
+  box-shadow: 0 6px 20px rgba(0, 88, 188, 0.22);
+}
+
+.score-glow-circle {
+  position: absolute;
+  right: -30px;
+  bottom: -30px;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  filter: blur(25px);
+  z-index: 1;
+}
+
+.score-card-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.score-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.88);
+  letter-spacing: 1px;
+}
+
+.score-number-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 10px 0 16px;
+}
+
+.score-big-num {
+  font-size: 58px;
+  font-weight: 800;
+  line-height: 1;
+  color: #ffffff;
+  letter-spacing: -1.5px;
+}
+
+.score-total-unit {
+  font-size: 20px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.ranking-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  align-self: flex-start;
+}
+
+.ranking-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.ranking-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* 2 宫格统计卡片 */
+.stats-cards-col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.stat-info-card {
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 14px 14px;
+  border: 1px solid #e1e3e4;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-icon-wrapper {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bg-green-light {
+  background-color: #dcfce7;
+}
+
+.bg-gray-light {
+  background-color: #edeeef;
+}
+
+.stat-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.stat-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #717786;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+/* 2.3 逐题解析列表 (Question Analysis Section) */
+.analysis-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.section-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e1e3e4;
+}
+
+.section-main-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.section-count-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #414755;
+  background-color: #edeeef;
+  padding: 3px 10px;
+  border-radius: 9999px;
+}
+
+/* 筛选 Tab */
+.filter-tab-bar {
+  display: flex;
+  background-color: #edeeef;
+  padding: 3px;
+  border-radius: 10px;
+  gap: 4px;
+}
+
+.filter-tab-btn {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #717786;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.filter-active {
+  background-color: #ffffff;
+  color: #0058bc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* 逐题卡片 */
+.analysis-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.question-analysis-card {
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid #e1e3e4;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.question-analysis-card:active {
+  background-color: #f8f9fa;
+  transform: scale(0.99);
+}
+
+.card-left-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.status-circle-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.bg-secondary-container {
+  background-color: #dcfce7;
+}
+
+.bg-error-container {
+  background-color: #ffdad6;
+}
+
+.status-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.q-detail-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.q-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+}
+
+.q-number-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #717786;
+  background-color: #edeeef;
+  padding: 0 6px;
+  border-radius: 4px;
+  line-height: 20px;
+  box-sizing: border-box;
+}
+
+.q-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 8px;
+  border-radius: 4px;
+  line-height: 20px;
+  box-sizing: border-box;
+}
+
+.badge-correct {
+  background-color: #dcfce7;
+  color: #006e28;
+}
+
+.badge-incorrect {
+  background-color: #ffdad6;
+  color: #ba1a1a;
+}
+
+.q-type-mini {
+  font-size: 11px;
+  color: #717786;
+  margin-left: 2px;
+}
+
+.q-title-text {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #191c1d;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.q-answer-meta {
+  font-size: 13px;
+  color: #717786;
+  margin-top: 4px;
+}
+
+.meta-label {
+  color: #717786;
+}
+
+.meta-ans {
+  font-weight: 700;
+}
+
+.text-secondary {
+  color: #006e28;
+}
+
+.text-error {
+  color: #ba1a1a;
+}
+
+.meta-divider {
+  margin: 0 6px;
+}
+
+/* 查看解析胶囊按钮 */
+.btn-view-analysis {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid #c1c6d7;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.btn-view-analysis:active {
+  background-color: #0070eb;
+  border-color: #0070eb;
+}
+
+.btn-view-analysis:active .btn-analysis-text {
+  color: #ffffff;
+}
+
+.btn-analysis-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0058bc;
+}
+
+.btn-arrow-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* 底部操作按钮 */
+.action-footer-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-back-home {
+  width: 100%;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #0070eb 0%, #0058bc 100%);
+  color: #ffffff;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 4px 14px rgba(0, 88, 188, 0.22);
+}
+
+.btn-back-home:active {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+
+.btn-back-home::after {
+  border: none;
+}
+
+.bottom-spacer {
+  height: 70px;
+}
+
+/* 3. 底部固定导航栏 */
+.bottom-navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: calc(56px + env(safe-area-inset-bottom, 16px));
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  border-top: 1px solid rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+}
+
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 100%;
+  transition: all 0.15s ease;
+}
+
+.tab-item:active {
+  transform: scale(0.92);
+}
+
+.tab-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.tab-label {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 3px;
+  color: #717786;
+}
+
+.text-primary {
+  color: #0058bc !important;
+}
+
+.tab-active .tab-label {
+  color: #0058bc;
+  font-weight: 700;
+}
+
+/* 2.2.5 大纲考点掌握诊断卡片 (Syllabus Diagnostics) */
+.diagnostics-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.diagnostics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.diag-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-left: 4px solid #0058bc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.diag-card.level-success {
+  border-left-color: #166534;
+}
+
+.diag-card.level-info {
+  border-left-color: #0058bc;
+}
+
+.diag-card.level-warning {
+  border-left-color: #ba1a1a;
+  background-color: #fffbfa;
+}
+
+.diag-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.diag-name-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.diag-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.diag-weight-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background-color: #f1f3f5;
+  color: #45464f;
+}
+
+.diag-status-pill {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.diag-status-pill.level-success {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.diag-status-pill.level-info {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.diag-status-pill.level-warning {
+  background-color: #fee2e2;
+  color: #ba1a1a;
+}
+
+.diag-stats-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.diag-score-rate {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.diag-rate-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0058bc;
+}
+
+.diag-rate-val.level-success {
+  color: #166534;
+}
+
+.diag-rate-val.level-warning {
+  color: #ba1a1a;
+}
+
+.diag-rate-label {
+  font-size: 12px;
+  color: #717786;
+}
+
+.diag-count-info {
+  font-size: 13px;
+  color: #45464f;
+  font-weight: 500;
+}
+
+.highlight-num {
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.diag-progress-track {
+  width: 100%;
+  height: 6px;
+  background-color: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.diag-progress-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.diag-progress-bar.level-success {
+  background-color: #16a34a;
+}
+
+.diag-progress-bar.level-info {
+  background-color: #0058bc;
+}
+
+.diag-progress-bar.level-warning {
+  background-color: #ba1a1a;
+}
+
+.diag-advice-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  background-color: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-top: 2px;
+}
+
+.advice-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.advice-text {
+  font-size: 12px;
+  line-height: 18px;
+  color: #45464f;
+}

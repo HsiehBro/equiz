@@ -1,0 +1,140 @@
+<!-- 登录页总容器 (100% 还原 Stitch 原型) -->
+<view class="login-page">
+  <!-- 自定义顶部安全区与轻量导航 -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <view class="nav-btn" bindtap="onNavBack">
+        <image class="nav-icon" src="/assets/icons/arrow_back_primary.svg" mode="aspectFit" />
+      </view>
+      <view class="nav-title"></view>
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 居中主体区域 -->
+  <view class="login-main">
+    <!-- App Logo Area -->
+    <view class="logo-section">
+      <view class="logo-box">
+        <image class="logo-icon" src="/assets/icons/menu_book_primary.svg" mode="aspectFit" />
+      </view>
+      <view class="app-title">Exam Prep</view>
+      <view class="app-subtitle">高效备考，从这里开始</view>
+    </view>
+
+    <!-- Login Actions -->
+    <view class="actions-section">
+      <!-- 微信一键登录按钮 (WeChat Login Button) -->
+      <button class="btn-wechat" hover-class="btn-wechat-active" bindtap="onWeChatLogin">
+        <image class="btn-wechat-icon" src="/assets/icons/chat_bubble_white.svg" mode="aspectFit" />
+        <text class="btn-wechat-text">微信一键登录</text>
+      </button>
+
+      <!-- 手机号登录按钮 (Phone Login Option) -->
+      <button class="btn-phone" hover-class="btn-phone-active" bindtap="onOpenPhoneModal">
+        <text class="btn-phone-text">手机号登录</text>
+      </button>
+    </view>
+
+    <!-- 协议与隐私勾选区域 (Terms and Privacy Checkbox) -->
+    <view class="terms-section {{isShaking ? 'shake-anim' : ''}}">
+      <view class="checkbox-container" bindtap="onToggleTerms">
+        <view class="custom-checkbox {{isAgreed ? 'checked' : ''}}">
+          <image wx:if="{{isAgreed}}" class="check-icon" src="/assets/icons/check_white.svg" mode="aspectFit" />
+        </view>
+      </view>
+      <view class="terms-label">
+        <text bindtap="onToggleTerms">我已阅读并同意 </text>
+        <text class="terms-link" catchtap="onOpenAgreementModal" data-type="service">《用户服务协议》</text>
+        <text bindtap="onToggleTerms"> 和 </text>
+        <text class="terms-link" catchtap="onOpenAgreementModal" data-type="privacy">《隐私政策》</text>
+        <text bindtap="onToggleTerms">，未注册绑定的手机号验证后将自动注册。</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 手机号快速登录弹窗 (Bottom Sheet Modal) -->
+  <view class="modal-mask {{showPhoneModal ? 'modal-visible' : ''}}" bindtap="onClosePhoneModal">
+    <view class="phone-modal" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">手机号验证登录</text>
+        <view class="modal-close" bindtap="onClosePhoneModal">
+          <image class="close-icon" src="/assets/icons/close_gray.svg" mode="aspectFit" />
+        </view>
+      </view>
+
+      <view class="modal-body">
+        <view class="input-group">
+          <view class="input-label">手机号</view>
+          <view class="input-wrapper">
+            <input 
+              class="phone-input" 
+              type="number" 
+              maxlength="11" 
+              placeholder="请输入11位手机号码" 
+              placeholder-class="input-placeholder"
+              value="{{phoneNumber}}"
+              bindinput="onPhoneInput"
+            />
+          </view>
+        </view>
+
+        <view class="input-group">
+          <view class="input-label">验证码</view>
+          <view class="input-wrapper code-wrapper">
+            <input 
+              class="code-input" 
+              type="number" 
+              maxlength="6" 
+              placeholder="请输入验证码 (测试填 123456)" 
+              placeholder-class="input-placeholder"
+              value="{{smsCode}}"
+              bindinput="onCodeInput"
+            />
+            <button 
+              class="btn-send-code {{countdown > 0 ? 'btn-disabled' : ''}}" 
+              disabled="{{countdown > 0}}" 
+              catchtap="onSendSmsCode"
+            >
+              {{countdown > 0 ? countdown + 's后重发' : '获取验证码'}}
+            </button>
+          </view>
+        </view>
+
+        <button class="btn-submit-phone" hover-class="btn-submit-phone-active" bindtap="onSubmitPhoneLogin">
+          立即登录
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 协议阅读模态弹窗 (Protocol Content Modal) -->
+  <view class="modal-mask {{showAgreementModal ? 'modal-visible' : ''}}" bindtap="onCloseAgreementModal">
+    <view class="agreement-modal" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">{{agreementTitle}}</text>
+        <view class="modal-close" bindtap="onCloseAgreementModal">
+          <image class="close-icon" src="/assets/icons/close_gray.svg" mode="aspectFit" />
+        </view>
+      </view>
+
+      <scroll-view class="agreement-scroll" scroll-y="true">
+        <view class="agreement-text-content">
+          <view class="agreement-paragraph">{{agreementContent}}</view>
+          <view class="agreement-points">
+            <view class="agreement-point-item" wx:for="{{agreementPoints}}" wx:key="index">
+              <text class="point-num">{{index + 1}}. </text>
+              <text class="point-text">{{item}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="modal-footer">
+        <button class="btn-agree-modal" bindtap="onAgreeInModal">
+          我已阅读并同意
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

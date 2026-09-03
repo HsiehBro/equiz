@@ -1,0 +1,243 @@
+<!-- 页面总容器 -->
+<view class="page-container">
+  <!-- 自定义适配导航栏 (防止被胶囊和状态栏遮挡) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack">
+        <image class="nav-icon" src="/assets/icons/arrow_back_primary.svg" mode="aspectFit" />
+      </view>
+      
+      <!-- 居中标题 -->
+      <view class="nav-title">Exam Prep</view>
+      
+      <!-- 右侧通知按钮 (预留避让胶囊按钮) -->
+      <view class="nav-btn nav-btn-right" bindtap="onOpenNotifications">
+        <view class="notification-box">
+          <image class="nav-icon" src="/assets/icons/notifications_primary.svg" mode="aspectFit" />
+          <view class="unread-dot"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块，确保内容不被悬浮导航遮挡 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 主内容滚动区 -->
+  <view class="main-content">
+    <!-- 1. 搜索栏 Search Bar -->
+    <view class="search-section">
+      <view class="search-bar">
+        <image class="search-icon" src="/assets/icons/search_gray.svg" mode="aspectFit" bindtap="onSearchConfirm" />
+        <input 
+          class="search-input" 
+          placeholder="搜索题库名称..." 
+          placeholder-class="search-placeholder"
+          type="text"
+          value="{{searchKeyword}}"
+          bindinput="onSearchInput"
+          bindconfirm="onSearchConfirm"
+          bindblur="onSearchBlur"
+          confirm-type="search"
+        />
+        <view class="search-clear-btn" wx:if="{{searchKeyword}}" catchtap="onClearSearch">
+          <image class="clear-icon" src="/assets/icons/close_gray.svg" mode="aspectFit" />
+        </view>
+        <view class="search-action-btn" wx:if="{{searchKeyword}}" bindtap="onSearchConfirm">
+          搜索
+        </view>
+      </view>
+    </view>
+
+    <!-- 2. 邀请好友 Banner (Invite Friends) -->
+    <view class="banner-card">
+      <view class="banner-left">
+        <view class="banner-icon-wrapper">
+          <image class="banner-icon" src="/assets/icons/campaign_white.svg" mode="aspectFit" />
+        </view>
+        <view class="banner-text">
+          <view class="banner-title">邀请好友领福利</view>
+          <view class="banner-subtitle">邀请新用户，双方得题库时长</view>
+        </view>
+      </view>
+      <view class="banner-btn" bindtap="onInviteFriends">
+        立即邀请
+      </view>
+    </view>
+
+    <!-- 3. 分类题库 (Bento Grid) -->
+    <view class="section-container">
+      <view class="section-title">分类题库</view>
+      <view class="bento-grid">
+        <!-- 医学类 -->
+        <view class="bento-item {{selectedCategory === '医学类' ? 'bento-item-active' : ''}}" bindtap="onSelectCategory" data-category="医学类">
+          <view class="bento-icon-box bg-blue-light">
+            <image class="bento-icon" src="/assets/icons/medical_services_primary.svg" mode="aspectFit" />
+          </view>
+          <view class="bento-info">
+            <view class="bento-name">医学类</view>
+            <view class="bento-desc">执业医师 / 药师</view>
+          </view>
+        </view>
+
+        <!-- 财经类 (VIP) -->
+        <view class="bento-item {{selectedCategory === '财经类' ? 'bento-item-active' : ''}}" bindtap="onSelectCategory" data-category="财经类">
+          <view class="vip-badge">
+            <image class="vip-lock-icon" src="/assets/icons/lock_gold.svg" mode="aspectFit" />
+            <text class="vip-text">VIP</text>
+          </view>
+          <view class="bento-icon-box bg-gray-light">
+            <image class="bento-icon" src="/assets/icons/account_balance_gray.svg" mode="aspectFit" />
+          </view>
+          <view class="bento-info">
+            <view class="bento-name">财经类</view>
+            <view class="bento-desc">CPA / 会计初级</view>
+          </view>
+        </view>
+
+        <!-- IT互联网 (VIP) -->
+        <view class="bento-item {{selectedCategory === 'IT互联网' ? 'bento-item-active' : ''}}" bindtap="onSelectCategory" data-category="IT互联网">
+          <view class="vip-badge">
+            <image class="vip-lock-icon" src="/assets/icons/lock_gold.svg" mode="aspectFit" />
+            <text class="vip-text">VIP</text>
+          </view>
+          <view class="bento-icon-box bg-gray-light">
+            <image class="bento-icon" src="/assets/icons/terminal_gray.svg" mode="aspectFit" />
+          </view>
+          <view class="bento-info">
+            <view class="bento-name">IT互联网</view>
+            <view class="bento-desc">软考 / PMP</view>
+          </view>
+        </view>
+
+        <!-- 全部分类 -->
+        <view class="bento-item {{(!selectedCategory || selectedCategory === '全部分类') ? 'bento-item-active' : ''}}" bindtap="onSelectCategory" data-category="全部分类">
+          <view class="bento-icon-box bg-gray-light">
+            <image class="bento-icon" src="/assets/icons/grid_view_gray.svg" mode="aspectFit" />
+          </view>
+          <view class="bento-info">
+            <view class="bento-name">全部分类</view>
+            <view class="bento-desc">查看全部题库</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 4. 我的题库 (My Libraries) -->
+    <view class="section-container">
+      <view class="section-header">
+        <view class="section-title">
+          我的题库
+          <text class="search-filter-tag" wx:if="{{searchKeyword || selectedCategory}}">
+            ({{libraries.length}} 个结果)
+          </text>
+        </view>
+        <view class="section-header-right">
+          <view class="btn-import" bindtap="onImportLibrary">
+            <image class="import-icon" src="/assets/icons/upload_file_white.svg" mode="aspectFit" />
+            <text>导入题库</text>
+          </view>
+          <view class="link-view-all" bindtap="onViewAllLibraries">查看全部</view>
+        </view>
+      </view>
+
+      <!-- 题库卡片列表 -->
+      <view class="library-list">
+        <block wx:if="{{libraries.length > 0}}">
+          <block wx:for="{{libraries}}" wx:key="id">
+            <view class="library-card">
+              <!-- 左侧主题色指示条 -->
+              <view class="card-accent-bar {{item.isPrimary ? 'bg-primary' : 'bg-subtle'}}"></view>
+              
+              <!-- 卡片主体内容 -->
+              <view class="card-main">
+                <!-- 标题与题量 -->
+                <view class="card-title-row">
+                  <view class="card-title-wrap">
+                    <view class="card-title">{{item.title}}</view>
+                    <!-- 公开 / 私有 权限徽标 -->
+                    <view class="lib-vis-badge badge-public" wx:if="{{item.visibility === 'public' || item.isOfficial}}">
+                      <image class="lib-badge-icon" src="/assets/icons/public_green.svg" mode="aspectFit" />
+                      <text>公开</text>
+                    </view>
+                    <view class="lib-vis-badge badge-private" wx:else>
+                      <image class="lib-badge-icon" src="/assets/icons/lock_gray.svg" mode="aspectFit" />
+                      <text>私有</text>
+                    </view>
+                  </view>
+                  <view class="card-meta">共 {{item.totalCount}} 题 · 已完成 {{item.progress}}%</view>
+                </view>
+
+                <!-- 进度条 -->
+                <view class="progress-track">
+                  <view class="progress-fill" style="width: {{item.progress}}%;"></view>
+                </view>
+
+                <!-- 底部操作与时间 -->
+                <view class="card-footer">
+                  <view class="last-practice">
+                    <image class="schedule-icon" src="/assets/icons/schedule_gray.svg" mode="aspectFit" />
+                    <text>上次练习: {{item.lastPractice}}</text>
+                  </view>
+                  
+                  <view 
+                    class="btn-continue {{item.isPrimary ? 'btn-continue-primary' : 'btn-continue-outline'}}" 
+                    bindtap="onContinuePractice" 
+                    data-id="{{item.id}}"
+                  >
+                    继续刷题
+                  </view>
+                </view>
+              </view>
+
+              <!-- 右上角删除按钮 (公开题库不可删除，仅私有题库显示删除按钮) -->
+              <view 
+                class="card-delete-btn" 
+                wx:if="{{item.visibility === 'private' && !item.isOfficial}}" 
+                catchtap="onDeleteLibrary" 
+                data-id="{{item.id}}"
+              >
+                <image class="delete-icon" src="/assets/icons/delete_gray.svg" mode="aspectFit" />
+              </view>
+            </view>
+          </block>
+        </block>
+
+        <!-- 搜索无结果空状态 -->
+        <view class="empty-search-container" wx:else>
+          <view class="empty-icon-circle">
+            <image class="empty-search-icon" src="/assets/icons/search_gray.svg" mode="aspectFit" />
+          </view>
+          <view class="empty-search-title">未找到匹配题库</view>
+          <view class="empty-search-desc">未找到包含“{{searchKeyword || selectedCategory}}”的题库，可尝试更换搜索词或导入自建题库</view>
+          <view class="empty-action-row">
+            <view class="btn-empty-reset" bindtap="onViewAllLibraries">查看全部题库</view>
+            <view class="btn-empty-import" bindtap="onImportLibrary">立即导入</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 5. 底部固定导航栏 (BottomNavBar) -->
+  <view class="bottom-navbar">
+    <!-- 题库 (激活高亮) -->
+    <view class="tab-item {{currentTab === 'library' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="library">
+      <image class="tab-icon" src="/assets/icons/library_books_active.svg" mode="aspectFit" />
+      <text class="tab-label">题库</text>
+    </view>
+
+    <!-- 错题集 -->
+    <view class="tab-item {{currentTab === 'errors' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="errors">
+      <image class="tab-icon" src="/assets/icons/error_outline_gray.svg" mode="aspectFit" />
+      <text class="tab-label">错题集</text>
+    </view>
+
+    <!-- 个人中心 -->
+    <view class="tab-item {{currentTab === 'profile' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="profile">
+      <image class="tab-icon" src="/assets/icons/person_gray.svg" mode="aspectFit" />
+      <text class="tab-label">个人中心</text>
+    </view>
+  </view>
+</view>

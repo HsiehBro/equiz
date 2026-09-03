@@ -1,0 +1,214 @@
+<!-- 个人中心页面总容器 -->
+<view class="page-container">
+  <!-- 1. 自定义顶部导航栏 (Custom TopAppBar with Safe Area) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack">
+        <image class="nav-icon" src="/assets/icons/arrow_back_primary.svg" mode="aspectFit" />
+      </view>
+      
+      <!-- 居中标题 -->
+      <view class="nav-title">Exam Prep</view>
+      
+      <!-- 右侧主题切换按钮 (避让微信胶囊按钮) -->
+      <view class="nav-btn nav-btn-right" bindtap="onToggleTheme">
+        <image class="nav-icon" src="{{isDarkMode ? '/assets/icons/dark_mode_primary.svg' : '/assets/icons/light_mode_primary.svg'}}" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块，确保内容不被悬浮导航遮挡 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 主内容滚动区 -->
+  <view class="main-content">
+    
+    <!-- 2. 个人信息卡片 (Profile Header & Glass Card) -->
+    <view class="profile-header-card">
+      <view class="avatar-wrapper">
+        <image class="avatar-image" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
+        <!-- VIP / 管理员 徽标角标 -->
+        <view class="vip-badge-corner" wx:if="{{userInfo.isVip || userInfo.role === 'admin'}}">
+          <image class="vip-star-icon" src="/assets/icons/star_white.svg" mode="aspectFit" />
+          <text class="vip-badge-text">{{userInfo.role === 'admin' ? 'ADMIN' : 'VIP'}}</text>
+        </view>
+      </view>
+
+      <view class="profile-info-box">
+        <view class="user-nickname">{{userInfo.nickname}}</view>
+        <view class="user-level-tag">{{userInfo.level}} {{userInfo.title}}</view>
+      </view>
+
+      <view class="btn-edit-profile" bindtap="onEditProfile">
+        <image class="edit-icon" src="/assets/icons/edit_gray.svg" mode="aspectFit" />
+      </view>
+    </view>
+
+    <!-- 3. 今日目标激励卡片 (Motivation Card - 已根据原型调整至头像信息卡片下方) -->
+    <view class="motivation-card">
+      <view class="motivation-content">
+        <view class="motivation-title">{{motivationTitle || '今日目标未完成'}}</view>
+        <view class="motivation-desc">{{motivationDesc || '保持手感，坚持练习，考试必过！'}}</view>
+        <view class="btn-go-quiz" bindtap="onGoQuiz">
+          去刷题
+        </view>
+      </view>
+      <!-- 背景巨型星光水印图标 -->
+      <image class="motivation-watermark" src="/assets/icons/auto_awesome_primary.svg" mode="aspectFit" />
+    </view>
+
+    <!-- 4. 学习数据看板 (Learning Stats 3-Grid) -->
+    <view class="stats-grid">
+      <!-- 累计打卡 -->
+      <view class="stat-card">
+        <text class="stat-label">累计打卡</text>
+        <view class="stat-value-box text-primary">
+          <text class="stat-num">{{stats.checkInDays}}</text>
+          <text class="stat-unit">天</text>
+        </view>
+      </view>
+
+      <!-- 累计答题 -->
+      <view class="stat-card">
+        <text class="stat-label">累计答题</text>
+        <view class="stat-value-box text-primary">
+          <text class="stat-num">{{stats.totalQuestions}}</text>
+          <text class="stat-unit">题</text>
+        </view>
+      </view>
+
+      <!-- 平均正确率 -->
+      <view class="stat-card">
+        <text class="stat-label">平均正确率</text>
+        <view class="stat-value-box text-secondary">
+          <text class="stat-num">{{stats.accuracyRate}}</text>
+          <text class="stat-unit">%</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 5. 开通 VIP 会员金卡横幅 (VIP Banner) -->
+    <view class="vip-banner-card" bindtap="onOpenVip">
+      <view class="vip-banner-left">
+        <view class="vip-banner-icon-box">
+          <image class="vip-crown-icon" src="/assets/icons/workspace_premium_gold.svg" mode="aspectFit" />
+        </view>
+        <view class="vip-banner-text-box">
+          <view class="vip-banner-title">{{userInfo.role === 'admin' ? '系统管理员专享特权' : (userInfo.isVip ? 'VIP 畅学尊享特权' : '开通 VIP 会员')}}</view>
+          <view class="vip-banner-subtitle">{{userInfo.isVip || userInfo.role === 'admin' ? '已解锁全量题库、视频精讲与无限模考' : '解锁全部精选真题与名师解析'}}</view>
+        </view>
+      </view>
+      <view class="btn-unlock-all" catchtap="onOpenVip">
+        {{userInfo.isVip || userInfo.role === 'admin' ? '查看特权' : '解锁全部'}}
+      </view>
+    </view>
+
+    <!-- 6. 功能菜单列表 (Menu List - 包含模拟考试入口) -->
+    <view class="menu-section-card">
+      <view class="menu-list">
+        <!-- 我的收藏 -->
+        <view class="menu-item" bindtap="onTapMenu" data-key="bookmark">
+          <view class="menu-item-left">
+            <view class="menu-icon-circle bg-primary-fixed">
+              <image class="menu-icon" src="/assets/icons/bookmark_primary.svg" mode="aspectFit" />
+            </view>
+            <text class="menu-item-title">我的收藏</text>
+          </view>
+          <view class="menu-item-right">
+            <image class="menu-chevron" src="/assets/icons/chevron_right_gray.svg" mode="aspectFit" />
+          </view>
+        </view>
+
+
+        <!-- 模拟考试 (新增) -->
+        <view class="menu-item" bindtap="onTapMenu" data-key="mockExam">
+          <view class="menu-item-left">
+            <view class="menu-icon-circle bg-primary-fixed">
+              <image class="menu-icon" src="/assets/icons/assignment_primary.svg" mode="aspectFit" />
+            </view>
+            <text class="menu-item-title">模拟考试</text>
+          </view>
+          <view class="menu-item-right">
+            <image class="menu-chevron" src="/assets/icons/chevron_right_gray.svg" mode="aspectFit" />
+          </view>
+        </view>
+
+        <!-- 学习笔记 -->
+        <view class="menu-item" bindtap="onTapMenu" data-key="notes">
+          <view class="menu-item-left">
+            <view class="menu-icon-circle bg-primary-fixed">
+              <image class="menu-icon" src="/assets/icons/description_primary.svg" mode="aspectFit" />
+            </view>
+            <text class="menu-item-title">学习笔记</text>
+          </view>
+          <view class="menu-item-right">
+            <view class="notes-badge">{{notesCount}}条笔记</view>
+            <image class="menu-chevron" src="/assets/icons/chevron_right_gray.svg" mode="aspectFit" />
+          </view>
+        </view>
+
+        <!-- 学习规划 -->
+        <view class="menu-item" bindtap="onTapMenu" data-key="planning">
+          <view class="menu-item-left">
+            <view class="menu-icon-circle bg-primary-fixed">
+              <image class="menu-icon" src="/assets/icons/calendar_today_primary.svg" mode="aspectFit" />
+            </view>
+            <text class="menu-item-title">学习规划</text>
+          </view>
+          <view class="menu-item-right">
+            <image class="menu-chevron" src="/assets/icons/chevron_right_gray.svg" mode="aspectFit" />
+          </view>
+        </view>
+
+        <!-- 帮助与设置 -->
+        <view class="menu-item" bindtap="onTapMenu" data-key="settings">
+          <view class="menu-item-left">
+            <view class="menu-icon-circle bg-surface-container">
+              <image class="menu-icon" src="/assets/icons/settings_gray.svg" mode="aspectFit" />
+            </view>
+            <text class="menu-item-title">帮助与设置</text>
+          </view>
+          <view class="menu-item-right">
+            <image class="menu-chevron" src="/assets/icons/chevron_right_gray.svg" mode="aspectFit" />
+          </view>
+        </view>
+
+        <!-- 账号与登录 -->
+        <view class="menu-item menu-item-last" bindtap="onTapMenu" data-key="login">
+          <view class="menu-item-left">
+            <view class="menu-icon-circle bg-primary-fixed">
+              <image class="menu-icon" src="/assets/icons/person_primary.svg" mode="aspectFit" />
+            </view>
+            <text class="menu-item-title">账号与登录</text>
+          </view>
+          <view class="menu-item-right">
+            <text style="font-size: 13px; color: #717786; margin-right: 4px;">切换/重新登录</text>
+            <image class="menu-chevron" src="/assets/icons/chevron_right_gray.svg" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 7. 底部固定导航栏 (BottomNavBar) -->
+  <view class="bottom-navbar">
+    <!-- 题库 -->
+    <view class="tab-item {{currentTab === 'library' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="library">
+      <image class="tab-icon" src="/assets/icons/library_books_gray.svg" mode="aspectFit" />
+      <text class="tab-label">题库</text>
+    </view>
+
+    <!-- 错题集 -->
+    <view class="tab-item {{currentTab === 'errors' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="errors">
+      <image class="tab-icon" src="/assets/icons/error_outline_gray.svg" mode="aspectFit" />
+      <text class="tab-label">错题集</text>
+    </view>
+
+    <!-- 个人中心 (激活高亮) -->
+    <view class="tab-item tab-active" bindtap="onSwitchTab" data-tab="profile">
+      <image class="tab-icon" src="/assets/icons/person_primary.svg" mode="aspectFit" />
+      <text class="tab-label">个人中心</text>
+    </view>
+  </view>
+</view>

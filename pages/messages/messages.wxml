@@ -1,0 +1,166 @@
+<!-- 消息中心页面总容器 -->
+<view class="page-container">
+  <!-- 1. 自定义顶部导航栏 (Custom TopAppBar) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack">
+        <image class="nav-icon" src="/assets/icons/arrow_back_primary.svg" mode="aspectFit" />
+      </view>
+      
+      <!-- 居中标题 -->
+      <view class="nav-title">消息中心</view>
+      
+      <!-- 右侧占位 (保持标题居中) -->
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块，确保内容不被悬浮导航遮挡 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 2. 主体内容滚动区 (Main Content Area) -->
+  <view class="main-content">
+    
+    <!-- 2.1 置顶活动消息 (Pinned Activity Message) -->
+    <view class="pinned-section">
+      <view class="pinned-card" bindtap="onTapActivity">
+        <!-- 顶部装饰渐变条 (Subtle Top Gradient Bar) -->
+        <view class="top-gradient-bar"></view>
+        
+        <view class="card-header-row">
+          <!-- 活动图标 (Icon Container) -->
+          <view class="activity-icon-box">
+            <image class="activity-icon" src="/assets/icons/campaign_primary.svg" mode="aspectFit" />
+          </view>
+          
+          <!-- 活动主体内容 -->
+          <view class="activity-info">
+            <view class="activity-title-row">
+              <text class="activity-title">活动消息</text>
+              <!-- 置顶标签 (Pin Badge) -->
+              <view class="pin-badge">
+                <image class="pin-icon" src="/assets/icons/push_pin_tertiary.svg" mode="aspectFit" />
+                <text class="pin-text">置顶</text>
+              </view>
+            </view>
+            
+            <text class="activity-desc">邀请好友注册 EduPrep，即可赢取高达 30 天的高级会员时长！快来参与吧。</text>
+          </view>
+        </view>
+        
+        <!-- 底部操作与时间 (Action / Time) -->
+        <view class="card-footer-row">
+          <text class="time-label">刚刚</text>
+          <view class="btn-detail" catchtap="onTapActivity">
+            <text>查看详情</text>
+            <image class="chevron-icon" src="/assets/icons/chevron_right_primary.svg" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 2.2 分割线 (Divider) -->
+    <view class="section-divider"></view>
+
+    <!-- 2.3 回复消息列表 (Replies List) -->
+    <view class="replies-section">
+      <view class="replies-header-row">
+        <view class="section-subtitle">回复消息</view>
+        <view class="replies-hint-badge" wx:if="{{replies.length > 0}}">
+          <text class="hint-text">左滑取消展示</text>
+        </view>
+      </view>
+      
+      <view class="replies-list" wx:if="{{replies.length > 0}}">
+        <block wx:for="{{replies}}" wx:key="id">
+          <!-- 单条可左滑消息容器 (Swipe Item Container) -->
+          <view class="swipe-item-container {{item.isRemoving ? 'item-removing' : ''}}">
+            <!-- 水平滑动轨道 (Horizontal Track) -->
+            <view 
+              class="swipe-track"
+              style="transform: translateX({{item.swipeOffset || 0}}px); transition: {{item.isSwiping ? 'none' : 'transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1)'}};"
+              data-id="{{item.id}}"
+              bindtouchstart="onTouchStart"
+              bindtouchmove="onTouchMove"
+              bindtouchend="onTouchEnd"
+            >
+              <!-- 主体卡片 (Main Card Content) -->
+              <view 
+                class="swipe-main-card reply-card {{item.isRead ? 'card-read' : ''}}"
+                bindtap="onTapReplyCard"
+                data-item="{{item}}"
+              >
+                <view class="reply-main-row">
+                  <!-- 头像 Avatar -->
+                  <view class="avatar-container">
+                    <image wx:if="{{item.avatarUrl}}" class="avatar-img" src="{{item.avatarUrl}}" mode="aspectFill" />
+                    <view wx:else class="avatar-letter bg-letter-secondary">
+                      <text class="letter-text">{{item.avatarLetter}}</text>
+                    </view>
+                  </view>
+                  
+                  <!-- 回复内容区 -->
+                  <view class="reply-content-box">
+                    <!-- 头部：用户名与时间 -->
+                    <view class="reply-user-row">
+                      <text class="user-name">{{item.userName}}</text>
+                      <text class="reply-time">{{item.time}}</text>
+                    </view>
+                    
+                    <!-- 回复评论正文 -->
+                    <text class="reply-text">{{item.content}}</text>
+                    
+                    <!-- 原公开评论/笔记引用链接卡片 (Original Note Reference Link) -->
+                    <view class="note-ref-card" catchtap="onTapNoteLink" data-note="{{item.note}}">
+                      <!-- 左侧主色竖条 -->
+                      <view class="note-accent-bar"></view>
+                      
+                      <view class="note-info">
+                        <text class="note-label">{{item.note.label || '你的笔记'}}</text>
+                        <text class="note-title">{{item.note.title}}</text>
+                      </view>
+                      
+                      <image class="note-open-icon" src="/assets/icons/open_in_new_gray.svg" mode="aspectFit" />
+                    </view>
+                  </view>
+                </view>
+              </view>
+
+              <!-- 右侧吸附操作按钮 (Side Action Button - 完全位于卡片右侧，不重叠不透光) -->
+              <view class="swipe-action-btn" catchtap="onCancelDisplay" data-id="{{item.id}}">
+                <image class="swipe-action-icon" src="/assets/icons/cancel_red.svg" mode="aspectFit" />
+                <text class="swipe-action-text">取消展示</text>
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+
+      <!-- 空状态 (当所有回复消息被取消展示或无公开笔记时呈现) -->
+      <view class="empty-replies-card" wx:else>
+        <view class="empty-replies-icon-box">
+          <image class="empty-replies-icon" src="/assets/icons/notifications_primary.svg" mode="aspectFit" />
+        </view>
+        <view class="empty-replies-title">暂无未读回复消息</view>
+        <view class="empty-replies-desc">暂无对你公开笔记的最新互动回复，或相关消息已取消展示</view>
+        <view class="empty-btn-row">
+          <view class="btn-goto-notes" bindtap="onGoToNotes">
+            <text>查看我的公开笔记</text>
+          </view>
+          <view class="btn-restore-replies" bindtap="onRestoreReplies" wx:if="{{hasCancelledMessages}}">
+            <image class="restore-icon" src="/assets/icons/history_primary.svg" mode="aspectFit" />
+            <text>恢复取消展示的消息</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 加载更多按钮 (仅在有消息时展示) -->
+      <view class="load-more-container" wx:if="{{replies.length > 0}}">
+        <view class="btn-load-more" bindtap="onLoadMore">
+          <text>{{hasMore ? '加载更多消息' : '已无更多消息'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

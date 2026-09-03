@@ -1,0 +1,548 @@
+<!-- 页面总容器 -->
+<view class="quiz-page">
+  <!-- 1. 自定义顶部导航栏 (Custom TopAppBar with integrated Progress Bar) -->
+  <view class="quiz-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack">
+        <image class="nav-icon" src="/assets/icons/arrow_back.svg" mode="aspectFit" />
+      </view>
+
+      <!-- 居中标题与考试进度信息 -->
+      <view class="nav-title-group">
+        <text class="nav-title">{{examTitle}}</text>
+        <text class="nav-subtitle">{{currentIndex + 1}}/{{questions.length}} • {{timerText}}</text>
+      </view>
+
+      <!-- 右侧空白占位，避让微信胶囊按钮 -->
+      <view class="nav-placeholder"></view>
+    </view>
+
+    <!-- 吸顶微进度条 (置于导航栏底部) -->
+    <view class="progress-bar-container">
+      <view class="progress-bar-fill" style="width: {{((currentIndex + 1) / questions.length) * 100}}%;"></view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块 -->
+  <view style="height: {{statusBarHeight + navBarHeight + 2}}px;"></view>
+
+  <!-- 2. 主体内容滚动区 -->
+  <scroll-view scroll-y class="main-content-scroll" enable-back-to-top>
+    <view class="main-content-inner">
+      <!-- 模式切换器 (Mode Toggle) -->
+      <view class="mode-toggle-wrapper">
+        <view class="mode-toggle-pill">
+          <view 
+            class="mode-btn {{mode === 'practice' ? 'mode-btn-active' : ''}}" 
+            bindtap="onSwitchMode" 
+            data-mode="practice"
+          >
+            答题模式
+          </view>
+          <view 
+            class="mode-btn {{mode === 'recite' ? 'mode-btn-active' : ''}}" 
+            bindtap="onSwitchMode" 
+            data-mode="recite"
+          >
+            背题模式
+          </view>
+        </view>
+      </view>
+
+      <!-- 题目卡片 (Question Card) -->
+      <view class="question-card">
+        <!-- 题目标头与题干 (支持单选与多选徽标，错题模式下显示移除错题按钮) -->
+        <view class="question-header">
+          <view class="question-header-top">
+            <view class="question-type-badge {{questions[currentIndex].type === '多选' ? 'badge-multi' : 'badge-single'}}">
+              {{questions[currentIndex].type}}
+            </view>
+            <!-- 错题模式专属：移除错题按钮 -->
+            <view class="btn-remove-error" wx:if="{{isErrorMode}}" bindtap="onRemoveFromErrors">
+              <image class="remove-error-icon" src="/assets/icons/delete_gray.svg" mode="aspectFit" />
+              <text class="remove-error-text">移出错题</text>
+            </view>
+          </view>
+          <view class="question-title-text">{{questions[currentIndex].title}}</view>
+        </view>
+
+        <!-- 选项列表 (Options) -->
+        <view class="options-list">
+          <block wx:for="{{questions[currentIndex].options}}" wx:key="key">
+            <!-- 模式1: 背题模式 (直接高亮正确答案) -->
+            <view 
+              wx:if="{{mode === 'recite'}}"
+              class="option-item {{currentCorrectMap[item.key] ? 'option-correct' : 'option-default'}}"
+            >
+              <view class="option-marker {{questions[currentIndex].type === '多选' ? 'marker-checkbox' : 'marker-radio'}} {{currentCorrectMap[item.key] ? 'marker-correct' : ''}}">
+                <text>{{item.key}}</text>
+              </view>
+              <text class="option-text {{currentCorrectMap[item.key] ? 'text-correct' : ''}}">{{item.text}}</text>
+              <image 
+                wx:if="{{currentCorrectMap[item.key]}}" 
+                class="option-status-icon" 
+                src="/assets/icons/check_circle.svg" 
+                mode="aspectFit" 
+              />
+            </view>
+
+            <!-- 模式2: 答题模式 (用户选择交互与判题反馈) -->
+            <view 
+              wx:else
+              class="option-item {{confirmedMap[questions[currentIndex].id] ? (currentCorrectMap[item.key] ? (questions[currentIndex].type === '多选' && !currentSelectedMap[item.key] ? 'option-missed' : 'option-correct') : (currentSelectedMap[item.key] ? 'option-error' : 'option-default')) : (currentSelectedMap[item.key] ? 'option-selected' : 'option-default')}}"
+              bindtap="onSelectOption"
+              data-key="{{item.key}}"
+            >
+              <view class="option-marker {{questions[currentIndex].type === '多选' ? 'marker-checkbox' : 'marker-radio'}} {{confirmedMap[questions[currentIndex].id] ? (currentCorrectMap[item.key] ? (questions[currentIndex].type === '多选' && !currentSelectedMap[item.key] ? 'marker-missed' : 'marker-correct') : (currentSelectedMap[item.key] ? 'marker-error' : '')) : (currentSelectedMap[item.key] ? 'marker-selected' : '')}}">
+                <text>{{item.key}}</text>
+              </view>
+              <text class="option-text {{confirmedMap[questions[currentIndex].id] ? (currentCorrectMap[item.key] ? (questions[currentIndex].type === '多选' && !currentSelectedMap[item.key] ? 'text-missed' : 'text-correct') : (currentSelectedMap[item.key] ? 'text-error' : '')) : (currentSelectedMap[item.key] ? 'text-selected' : '')}}">{{item.text}}</text>
+              
+              <!-- 判题状态图标与漏选徽标 -->
+              <block wx:if="{{confirmedMap[questions[currentIndex].id]}}">
+                <!-- 1. 正确项 (单选题判题后无论选错选对均显示绿色对勾；多选题仅在选中的正确项显示绿色对勾) -->
+                <image 
+                  wx:if="{{currentCorrectMap[item.key] && (questions[currentIndex].type !== '多选' || currentSelectedMap[item.key])}}" 
+                  class="option-status-icon" 
+                  src="/assets/icons/check_circle.svg" 
+                  mode="aspectFit" 
+                />
+                <!-- 2. 漏选徽标 (仅多选题且未选该正确项时展示) -->
+                <view wx:if="{{questions[currentIndex].type === '多选' && currentCorrectMap[item.key] && !currentSelectedMap[item.key]}}" class="status-badge-missed">
+                  <text>漏选</text>
+                </view>
+                <!-- 3. 错选 (错误选项却选中，红色叉号) -->
+                <image 
+                  wx:if="{{!currentCorrectMap[item.key] && currentSelectedMap[item.key]}}" 
+                  class="option-status-icon" 
+                  src="/assets/icons/cancel.svg" 
+                  mode="aspectFit" 
+                />
+              </block>
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <!-- 背题模式或已判定题目下的常驻解析卡片 -->
+      <view class="analysis-inline-card" wx:if="{{mode === 'recite' || confirmedMap[questions[currentIndex].id]}}">
+        <view class="analysis-header-row">
+          <view class="analysis-title-group">
+            <image class="analysis-icon" src="/assets/icons/insights.svg" mode="aspectFit" />
+            <text class="analysis-title">考点与精析</text>
+          </view>
+          <view class="analysis-tags">
+            <text class="analysis-tag tag-type">{{questions[currentIndex].type}}题</text>
+            <text class="analysis-tag tag-difficulty">难度: {{questions[currentIndex].difficulty}}</text>
+            <text class="analysis-tag tag-point">{{questions[currentIndex].knowledgePoint}}</text>
+          </view>
+        </view>
+
+        <!-- 正确答案指示 -->
+        <view class="correct-answer-banner">
+          <text class="correct-label">正确答案：</text>
+          <text class="correct-val">{{currentAnswerFormatted}}</text>
+        </view>
+
+        <!-- 解析内容 -->
+        <view class="analysis-body-box">
+          <view class="analysis-section-title">【试题解析】</view>
+          <view class="analysis-paragraph">{{questions[currentIndex].analysis}}</view>
+
+          <view class="analysis-section-title mt-sm">【知识拓展】</view>
+          <view class="analysis-paragraph">{{questions[currentIndex].knowledgeDetail}}</view>
+        </view>
+      </view>
+
+      <!-- 题目翻页与确定导航按钮组 (Navigation Buttons: 上一题 / 确定(仅答题模式) / 下一题) -->
+      <view class="question-nav-buttons">
+        <view 
+          class="nav-action-btn btn-prev {{currentIndex === 0 ? 'btn-disabled' : ''}}" 
+          bindtap="onPrevQuestion"
+        >
+          <image class="nav-arrow-icon" src="/assets/icons/chevron_left.svg" mode="aspectFit" />
+          <text>上一题</text>
+        </view>
+
+        <!-- 仅在答题模式下显示确定按钮，背题模式自动隐藏 -->
+        <view 
+          wx:if="{{mode === 'practice'}}" 
+          class="nav-action-btn btn-confirm" 
+          bindtap="onConfirmAnswer"
+        >
+          <text>确定</text>
+        </view>
+
+        <view class="nav-action-btn btn-next" bindtap="onNextQuestion">
+          <text>{{currentIndex === questions.length - 1 ? '完成' : '下一题'}}</text>
+          <image class="nav-arrow-icon" src="/assets/icons/chevron_right.svg" mode="aspectFit" />
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 3. 底部固定交互工具栏 (Footer Interactive Bar - 严格基线对齐) -->
+  <view class="quiz-footer-bar">
+    <!-- 收藏 -->
+    <view class="footer-tool-btn" bindtap="onToggleBookmark">
+      <view class="footer-icon-box footer-icon-bookmark">
+        <image 
+          class="footer-tool-icon icon-bookmark" 
+          src="{{bookmarkMap[questions[currentIndex].id] ? '/assets/icons/bookmark_add.svg' : '/assets/icons/bookmark.svg'}}" 
+          mode="aspectFit" 
+        />
+      </view>
+      <text class="footer-tool-label {{bookmarkMap[questions[currentIndex].id] ? 'text-primary font-bold' : ''}}">
+        {{bookmarkMap[questions[currentIndex].id] ? '已收藏' : '收藏'}}
+      </text>
+    </view>
+
+    <!-- 评论 -->
+    <view class="footer-tool-btn" bindtap="onToggleCommentsDrawer">
+      <view class="footer-icon-box">
+        <image class="footer-tool-icon" src="/assets/icons/comment.svg" mode="aspectFit" />
+        <view class="comment-count-badge">{{commentList.length}}</view>
+      </view>
+      <text class="footer-tool-label">评论</text>
+    </view>
+
+    <!-- 题库导航 (答题卡) -->
+    <view class="footer-tool-btn" bindtap="onToggleQuestionDrawer">
+      <view class="footer-icon-box">
+        <image class="footer-tool-icon" src="/assets/icons/apps.svg" mode="aspectFit" />
+      </view>
+      <text class="footer-tool-label">题库导航</text>
+    </view>
+
+    <!-- 解析 -->
+    <view class="footer-tool-btn" bindtap="onToggleAnalysis">
+      <view class="footer-icon-box">
+        <image class="footer-tool-icon" src="/assets/icons/visibility.svg" mode="aspectFit" />
+      </view>
+      <text class="footer-tool-label {{showAnalysisDrawer ? 'text-primary font-bold' : ''}}">解析</text>
+    </view>
+
+    <!-- 错题模式专属：移除错题 -->
+    <view class="footer-tool-btn" wx:if="{{isErrorMode}}" bindtap="onRemoveFromErrors">
+      <view class="footer-icon-box">
+        <image class="footer-tool-icon" src="/assets/icons/delete_gray.svg" mode="aspectFit" />
+      </view>
+      <text class="footer-tool-label text-remove-label">移除</text>
+    </view>
+  </view>
+
+  <!-- ========================================================================= -->
+  <!-- 4. 抽屉弹窗层 (Drawers) -->
+  <!-- ========================================================================= -->
+
+  <!-- 4.1 题库导航 / 答题卡抽屉 (Question Bank Navigation Drawer) -->
+  <view class="drawer-mask {{showQuestionDrawer ? 'mask-visible' : ''}}" bindtap="onToggleQuestionDrawer" catchtouchmove="true">
+    <view class="drawer-container {{showQuestionDrawer ? 'drawer-open' : ''}}" catchtap="true">
+      <!-- 拖拽条与头部 -->
+      <view class="drawer-header">
+        <view class="drawer-handle-bar"></view>
+        <view class="drawer-header-row">
+          <view class="drawer-title">题库导航 (答题卡)</view>
+          <view class="drawer-close-btn" bindtap="onToggleQuestionDrawer">
+            <image class="drawer-close-icon" src="/assets/icons/close.svg" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+
+      <!-- 图例 (Legend) -->
+      <view class="drawer-legend-row">
+        <view class="legend-item">
+          <view class="legend-box legend-box-answered">
+            <image class="legend-check-icon" src="/assets/icons/check.svg" mode="aspectFit" />
+          </view>
+          <text class="legend-text">已作答</text>
+        </view>
+        <view class="legend-item">
+          <view class="legend-box legend-box-current"></view>
+          <text class="legend-text">当前题</text>
+        </view>
+        <view class="legend-item">
+          <view class="legend-box legend-box-unanswered"></view>
+          <text class="legend-text">未作答</text>
+        </view>
+      </view>
+
+      <!-- 题号网格滚动区 (5大 Section，单选多选混合) -->
+      <scroll-view scroll-y class="drawer-grid-scroll">
+        <view class="section-group-title">Section 1: 基础理论 (1-20)</view>
+        <view class="question-number-grid">
+          <block wx:for="{{questions}}" wx:key="id" wx:if="{{item.id <= 20}}">
+            <view 
+              class="grid-number-btn {{index === currentIndex ? 'grid-num-current' : (userAnswers[item.id] ? 'grid-num-answered' : 'grid-num-unanswered')}}"
+              bindtap="onJumpToQuestion"
+              data-index="{{index}}"
+            >
+              {{item.id}}
+            </view>
+          </block>
+        </view>
+
+        <view class="section-group-title mt-md">Section 2: 范围与进度 (21-40)</view>
+        <view class="question-number-grid">
+          <block wx:for="{{questions}}" wx:key="id" wx:if="{{item.id > 20 && item.id <= 40}}">
+            <view 
+              class="grid-number-btn {{index === currentIndex ? 'grid-num-current' : (userAnswers[item.id] ? 'grid-num-answered' : 'grid-num-unanswered')}}"
+              bindtap="onJumpToQuestion"
+              data-index="{{index}}"
+            >
+              {{item.id}}
+            </view>
+          </block>
+        </view>
+
+        <view class="section-group-title mt-md">Section 3: 成本与质量 (41-60)</view>
+        <view class="question-number-grid">
+          <block wx:for="{{questions}}" wx:key="id" wx:if="{{item.id > 40 && item.id <= 60}}">
+            <view 
+              class="grid-number-btn {{index === currentIndex ? 'grid-num-current' : (userAnswers[item.id] ? 'grid-num-answered' : 'grid-num-unanswered')}}"
+              bindtap="onJumpToQuestion"
+              data-index="{{index}}"
+            >
+              {{item.id}}
+            </view>
+          </block>
+        </view>
+
+        <view class="section-group-title mt-md">Section 4: 风险与采购 (61-80)</view>
+        <view class="question-number-grid">
+          <block wx:for="{{questions}}" wx:key="id" wx:if="{{item.id > 60 && item.id <= 80}}">
+            <view 
+              class="grid-number-btn {{index === currentIndex ? 'grid-num-current' : (userAnswers[item.id] ? 'grid-num-answered' : 'grid-num-unanswered')}}"
+              bindtap="onJumpToQuestion"
+              data-index="{{index}}"
+            >
+              {{item.id}}
+            </view>
+          </block>
+        </view>
+
+        <view class="section-group-title mt-md">Section 5: 综合实务 (81-100)</view>
+        <view class="question-number-grid">
+          <block wx:for="{{questions}}" wx:key="id" wx:if="{{item.id > 80}}">
+            <view 
+              class="grid-number-btn {{index === currentIndex ? 'grid-num-current' : (userAnswers[item.id] ? 'grid-num-answered' : 'grid-num-unanswered')}}"
+              bindtap="onJumpToQuestion"
+              data-index="{{index}}"
+            >
+              {{item.id}}
+            </view>
+          </block>
+        </view>
+      </scroll-view>
+
+      <!-- 抽屉底部提交栏 -->
+      <view class="drawer-footer-action">
+        <view class="drawer-stats-row">
+          <text class="stats-answered-text">已完成: {{userAnswers ? Object.keys(userAnswers).length : 0}}/{{questions.length}}</text>
+          <view class="stats-timer">
+            <image class="stats-timer-icon" src="/assets/icons/timer.svg" mode="aspectFit" />
+            <text>{{timerText}}</text>
+          </view>
+        </view>
+        <view class="btn-submit-exam" bindtap="onSubmitExam">
+          <text>确认交卷</text>
+          <image class="submit-icon" src="/assets/icons/send.svg" mode="aspectFit" />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 4.2 详解与知识点抽屉 (Expert Analysis Drawer) -->
+  <view class="drawer-mask {{showAnalysisDrawer ? 'mask-visible' : ''}}" bindtap="onToggleAnalysis" catchtouchmove="true">
+    <view class="drawer-container analysis-drawer-container {{showAnalysisDrawer ? 'drawer-open' : ''}}" catchtap="true">
+      <view class="drawer-header">
+        <view class="drawer-handle-bar"></view>
+        <view class="drawer-header-row">
+          <view class="analysis-title-group">
+            <image class="analysis-icon" src="/assets/icons/insights.svg" mode="aspectFit" />
+            <text class="drawer-title text-primary">专家解析与考点</text>
+          </view>
+          <view class="drawer-close-btn" bindtap="onToggleAnalysis">
+            <image class="drawer-close-icon" src="/assets/icons/close.svg" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+
+      <!-- 解析滚动内容 -->
+      <scroll-view scroll-y class="drawer-analysis-scroll">
+        <view class="analysis-sheet-content">
+          <!-- 标签区 -->
+          <view class="analysis-sheet-tags">
+            <text class="analysis-tag tag-type">{{questions[currentIndex].type}}题</text>
+            <text class="analysis-tag tag-difficulty">难度：{{questions[currentIndex].difficulty}}</text>
+            <text class="analysis-tag tag-point">考点：{{questions[currentIndex].knowledgePoint}}</text>
+          </view>
+
+          <!-- 答案判定卡 -->
+          <view class="analysis-result-card">
+            <view class="result-row">
+              <text class="result-label">正确答案：</text>
+              <text class="result-correct-val">{{currentAnswerFormatted}}</text>
+            </view>
+            <view class="result-row" wx:if="{{userAnswers[questions[currentIndex].id]}}">
+              <text class="result-label">你的选择：</text>
+              <text class="result-user-val {{confirmedMap[questions[currentIndex].id] ? (currentUserAnswerFormatted === currentAnswerFormatted ? 'text-secondary' : 'text-error') : ''}}">
+                {{currentUserAnswerFormatted}}
+              </text>
+            </view>
+          </view>
+
+          <!-- 深度解析 -->
+          <view class="analysis-box">
+            <view class="analysis-box-title">【考点精析】</view>
+            <view class="analysis-box-text">{{questions[currentIndex].analysis}}</view>
+            
+            <view class="analysis-box-title mt-md">【知识总结】</view>
+            <view class="analysis-box-text">{{questions[currentIndex].knowledgeDetail}}</view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <!-- 底部快捷操作 -->
+      <view class="drawer-footer-action">
+        <view class="analysis-action-buttons">
+          <view class="btn-sheet-secondary" bindtap="onToggleBookmark">
+            <image class="sheet-btn-icon" src="/assets/icons/bookmark_add.svg" mode="aspectFit" />
+            <text>{{bookmarkMap[questions[currentIndex].id] ? '已收藏' : '收藏错题'}}</text>
+          </view>
+          <view class="btn-sheet-primary" bindtap="onNextQuestion">
+            <text>下一题</text>
+            <image class="sheet-btn-icon" src="/assets/icons/arrow_forward.svg" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 4.3 评论互动抽屉 (Comments Drawer) -->
+  <view class="drawer-mask {{showCommentsDrawer ? 'mask-visible' : ''}}" bindtap="onToggleCommentsDrawer" catchtouchmove="true">
+    <view class="drawer-container comments-drawer-container {{showCommentsDrawer ? 'drawer-open' : ''}}" catchtap="true">
+      <view class="drawer-header">
+        <view class="drawer-handle-bar"></view>
+        <view class="drawer-header-row">
+          <view class="drawer-title">精选讨论 ({{commentList.length}})</view>
+          <view class="drawer-close-btn" bindtap="onToggleCommentsDrawer">
+            <image class="drawer-close-icon" src="/assets/icons/close.svg" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+
+      <!-- 评论列表滚动区 -->
+      <scroll-view scroll-y class="drawer-comments-scroll">
+        <view class="comments-list">
+          <!-- 空状态：该题目暂无评论时展示 -->
+          <view class="comments-empty" wx:if="{{commentList.length === 0}}">
+            <image class="comments-empty-icon" src="/assets/icons/chat_gray.svg" mode="aspectFit" />
+            <view class="comments-empty-text">本题暂无讨论与笔记</view>
+            <view class="comments-empty-sub">写下你的解题思路或心得，成为第一个留言的学员吧！</view>
+          </view>
+
+          <block wx:for="{{commentList}}" wx:key="id">
+            <view class="comment-item">
+              <view class="comment-avatar">{{item.avatarText}}</view>
+              <view class="comment-content-main">
+                <view class="comment-author-row">
+                  <view class="comment-author-left">
+                    <text class="comment-author-name">{{item.author}}</text>
+                    <!-- 仅自己可见 / 公开 徽章 -->
+                    <view wx:if="{{item.visibility === 'private'}}" class="comment-vis-badge badge-private">
+                      <image class="badge-icon" src="/assets/icons/lock_gray.svg" mode="aspectFit" />
+                      <text class="badge-text">仅自己可见</text>
+                    </view>
+                    <view wx:elif="{{item.isMine && item.visibility === 'public'}}" class="comment-vis-badge badge-public">
+                      <image class="badge-icon" src="/assets/icons/public_green.svg" mode="aspectFit" />
+                      <text class="badge-text">公开</text>
+                    </view>
+                  </view>
+                  <text class="comment-time">{{item.time}}</text>
+                </view>
+                <view class="comment-text-body">{{item.content}}</view>
+                <view class="comment-footer-row">
+                  <!-- 自己发布的评论：切换可见性按钮 -->
+                  <view 
+                    wx:if="{{item.isMine}}" 
+                    class="comment-toggle-vis-btn" 
+                    catchtap="onToggleItemVisibility" 
+                    data-id="{{item.id}}"
+                  >
+                    <image class="comment-action-icon" src="{{item.visibility === 'private' ? '/assets/icons/public_green.svg' : '/assets/icons/lock_gray.svg'}}" mode="aspectFit" />
+                    <text>{{item.visibility === 'private' ? '设为公开' : '仅自己可见'}}</text>
+                  </view>
+
+                  <!-- 自己发布的评论显示删除按钮 -->
+                  <view 
+                    wx:if="{{item.isMine}}" 
+                    class="comment-delete-btn" 
+                    catchtap="onDeleteComment" 
+                    data-id="{{item.id}}"
+                  >
+                    <image class="comment-delete-icon" src="/assets/icons/delete.svg" mode="aspectFit" />
+                    <text>删除</text>
+                  </view>
+
+                  <!-- 点赞按钮 -->
+                  <view class="comment-like-btn" bindtap="onLikeComment" data-id="{{item.id}}">
+                    <image 
+                      class="like-icon" 
+                      src="/assets/icons/thumb_up.svg" 
+                      mode="aspectFit" 
+                    />
+                    <text class="like-count {{item.isLiked ? 'text-primary font-bold' : ''}}">{{item.likes}}</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </block>
+        </view>
+      </scroll-view>
+
+      <!-- 底部发送评论区域 -->
+      <view class="comment-bottom-container">
+        <!-- 可见性选择条 (Visibility Selector) -->
+        <view class="comment-visibility-bar">
+          <text class="vis-bar-label">发布可见范围：</text>
+          <view class="vis-bar-options">
+            <view 
+              class="vis-bar-option {{newCommentVisibility === 'public' ? 'vis-bar-active' : ''}}"
+              catchtap="onSelectNewCommentVisibility"
+              data-vis="public"
+            >
+              <image class="vis-bar-icon" src="/assets/icons/public_green.svg" mode="aspectFit" />
+              <text>公开</text>
+            </view>
+            <view 
+              class="vis-bar-option {{newCommentVisibility === 'private' ? 'vis-bar-active' : ''}}"
+              catchtap="onSelectNewCommentVisibility"
+              data-vis="private"
+            >
+              <image class="vis-bar-icon" src="{{newCommentVisibility === 'private' ? '/assets/icons/lock_gold.svg' : '/assets/icons/lock_gray.svg'}}" mode="aspectFit" />
+              <text>仅自己可见</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 评论输入栏 -->
+        <view class="comment-input-bar">
+          <input 
+            class="comment-input" 
+            placeholder="{{newCommentVisibility === 'private' ? '写下仅自己可见的备考笔记与心得...' : '写下你的解题思路或疑问...'}}" 
+            placeholder-class="comment-placeholder"
+            value="{{newCommentText}}"
+            bindinput="onCommentInput"
+            confirm-type="send"
+            bindconfirm="onSubmitComment"
+          />
+          <view class="btn-send-comment" bindtap="onSubmitComment">
+            <text>发送</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

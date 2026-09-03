@@ -1,0 +1,29 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/import/import",
+    "pages/quiz/quiz",
+    "pages/messages/messages",
+    "pages/errors/errors",
+    "pages/profile/profile",
+    "pages/planning/planning",
+    "pages/favorite/favorite",
+    "pages/mock-exam/mock-exam",
+    "pages/mock-run/mock-run",
+    "pages/mock-submit/mock-submit",
+    "pages/mock-record/mock-record",
+    "pages/vip/vip",
+    "pages/vip-activity/vip-activity",
+    "pages/notes/notes",
+    "pages/login/login"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#f8f9fa",
+    "navigationBarTitleText": "Exam Prep",
+    "navigationBarTextStyle": "black",
+    "navigationStyle": "custom"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

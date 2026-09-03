@@ -1,0 +1,289 @@
+<!-- 导入题库页面总容器 (100% 还原 Stitch 原型) -->
+<view class="page-container">
+
+  <!-- 1. 顶部自定义导航栏 (TopAppBar) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack">
+        <image class="nav-icon" src="/assets/icons/arrow_back_primary.svg" mode="aspectFit" />
+      </view>
+
+      <!-- 居中标题 -->
+      <view class="nav-title">Exam Prep</view>
+
+      <!-- 右侧更多操作按钮 -->
+      <view class="nav-btn nav-btn-right" bindtap="onNavMore">
+        <image class="nav-icon" src="/assets/icons/more_horiz_primary.svg" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块，确保内容不被悬浮导航遮挡 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 2. 主体内容滚动区 (Main Content Area) -->
+  <scroll-view scroll-y class="main-content" enable-flex>
+    <!-- 头部说明区域 (Header Section) -->
+    <view class="header-section">
+      <view class="header-title">导入自定义题库</view>
+      <view class="header-desc">请按照以下规范和步骤导入您的题库文件，确保系统能正确解析并生成练习。</view>
+    </view>
+
+    <!-- Bento 卡片网格布局 (Bento Grid Layout) -->
+    <view class="bento-grid">
+      
+      <!-- 卡片 1: 格式与模板卡片 (Format & Template Card) -->
+      <view class="bento-card format-card">
+        <!-- 右上角扇形装饰半圆弧 -->
+        <view class="fan-decorator"></view>
+        
+        <!-- 卡片头部与格式说明 -->
+        <view class="format-header">
+          <view class="format-icon-box">
+            <image class="format-icon" src="/assets/icons/description_primary.svg" mode="aspectFit" />
+          </view>
+          <view class="format-info">
+            <view class="format-title">格式要求</view>
+            <view class="format-text">
+              仅支持 <text class="format-tag">.xlsx</text> 和 <text class="format-tag">.csv</text> 格式文件。文件大小不超过 10MB。
+            </view>
+          </view>
+        </view>
+
+        <!-- 卡片底部下载标准模板按钮 -->
+        <view class="format-footer">
+          <view class="btn-download-template" bindtap="onDownloadTemplate">
+            <image class="download-icon" src="/assets/icons/download_primary.svg" mode="aspectFit" />
+            <text>下载标准模板</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 卡片 2: 内容约束规范卡片 (Content Rules Card) -->
+      <view class="bento-card rules-card">
+        <!-- 标题栏 -->
+        <view class="rules-header">
+          <image class="rule-title-icon" src="/assets/icons/rule_secondary.svg" mode="aspectFit" />
+          <view class="rules-title">内容约束规范</view>
+        </view>
+
+        <!-- 规范列表 -->
+        <view class="rules-list">
+          <!-- 必填字段 -->
+          <view class="rule-item">
+            <image class="rule-item-icon" src="/assets/icons/check_circle_secondary.svg" mode="aspectFit" />
+            <view class="rule-content">
+              <text class="rule-item-name">必填字段</text>
+              <text class="rule-item-desc">题目、选项A/B/C/D、正确答案。缺失将导致导入失败。</text>
+            </view>
+          </view>
+
+          <!-- 选填字段 -->
+          <view class="rule-item">
+            <image class="rule-item-icon" src="/assets/icons/info_gray.svg" mode="aspectFit" />
+            <view class="rule-content">
+              <text class="rule-item-name">选填字段</text>
+              <text class="rule-item-desc">解析、题目分类、难度级别。</text>
+            </view>
+          </view>
+
+          <!-- 特殊符号 -->
+          <view class="rule-item">
+            <image class="rule-item-icon" src="/assets/icons/warning_error.svg" mode="aspectFit" />
+            <view class="rule-content">
+              <text class="rule-item-name">特殊符号</text>
+              <text class="rule-item-desc">请勿在单元格内使用特殊换行符或不可见字符。</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 卡片 3: 导入步骤引导卡片 (Steps Card) -->
+      <view class="bento-card steps-card">
+        <!-- 标题栏 -->
+        <view class="steps-header">
+          <image class="steps-title-icon" src="/assets/icons/format_list_numbered_primary.svg" mode="aspectFit" />
+          <view class="steps-title">导入步骤引导</view>
+        </view>
+
+        <!-- 竖向时间轴步进器 -->
+        <view class="timeline-container">
+          <!-- 步骤 1 -->
+          <view class="step-row">
+            <view class="step-badge step-badge-active">1</view>
+            <view class="step-info">
+              <view class="step-name">准备文件</view>
+              <view class="step-desc">下载模板并按照规范要求填写您的题库数据，保存为支持的格式。</view>
+            </view>
+          </view>
+
+          <!-- 步骤 2 -->
+          <view class="step-row">
+            <view class="step-badge step-badge-inactive">2</view>
+            <view class="step-info">
+              <view class="step-name">上传校验</view>
+              <view class="step-desc">点击下方按钮上传文件，系统将自动进行格式和字段的初步校验。</view>
+            </view>
+          </view>
+
+          <!-- 步骤 3 -->
+          <view class="step-row">
+            <view class="step-badge step-badge-inactive">3</view>
+            <view class="step-info">
+              <view class="step-name">确认导入</view>
+              <view class="step-desc">校验通过后，预览并确认导入，完成题库创建。</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+    </view>
+  </scroll-view>
+
+  <!-- 3. 底部固定操作栏 (Bottom Action Area) -->
+  <view class="bottom-action-bar">
+    <view class="action-buttons-wrapper">
+      <view class="btn-cancel" bindtap="onCancel">
+        取消
+      </view>
+      <view class="btn-upload" bindtap="onUploadFile">
+        <image class="upload-icon" src="/assets/icons/upload_white.svg" mode="aspectFit" />
+        <text>立即上传</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 4. 模板预览与下载弹窗 (Modal) -->
+  <view class="modal-backdrop" wx:if="{{showTemplateModal}}" bindtap="onCloseTemplateModal">
+    <view class="modal-container" catchtap="preventDumbTap">
+      <view class="modal-header">
+        <view class="modal-title">标准题库模板说明</view>
+        <view class="modal-close" bindtap="onCloseTemplateModal">×</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="template-table-wrapper">
+          <view class="table-row table-header-row">
+            <text class="th col-title">题目(必填)</text>
+            <text class="th col-opt">选项A</text>
+            <text class="th col-opt">选项B</text>
+            <text class="th col-ans">答案</text>
+            <text class="th col-exp">解析</text>
+          </view>
+          <view class="table-row">
+            <text class="td col-title">下列属于呼吸系统疾病的是？</text>
+            <text class="td col-opt">A. 支气管哮喘</text>
+            <text class="td col-opt">B. 胃炎</text>
+            <text class="td col-ans">A</text>
+            <text class="td col-exp">支气管为呼吸系统器官...</text>
+          </view>
+        </view>
+
+        <view class="template-tips">
+          💡 支持 .xlsx 或 .csv，第一行为表头。如需多选题，答案填写如 "AB" 或 "ACD"。
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <view class="btn-modal-action btn-copy-link" bindtap="onDownloadTemplate">下载标准CSV模板</view>
+        <view class="btn-modal-action btn-save-sample" bindtap="onUseSampleData">直接加载示例题库</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 5. 文件校验与确认导入预览弹窗 (Modal) -->
+  <view class="modal-backdrop" wx:if="{{showPreviewModal}}" bindtap="onClosePreviewModal">
+    <view class="modal-container preview-modal" catchtap="preventDumbTap">
+      <view class="modal-header">
+        <view class="modal-title">题库校验结果</view>
+        <view class="modal-close" bindtap="onClosePreviewModal">×</view>
+      </view>
+
+      <view class="modal-body">
+        <!-- 校验成功状态卡片 -->
+        <view class="valid-status-card">
+          <image class="valid-icon" src="/assets/icons/check_circle_secondary.svg" mode="aspectFit" />
+          <view class="valid-info">
+            <view class="valid-title">文件格式与内容校验通过</view>
+            <view class="valid-meta">解析出 {{previewData.totalQuestions}} 道题目 · 格式合规</view>
+          </view>
+        </view>
+
+        <!-- 题库信息表单 (全局唯一强校验) -->
+        <view class="form-group">
+          <view class="form-label-row">
+            <text class="form-label">题库名称</text>
+            <text class="conflict-badge" wx:if="{{nameConflictError}}">名称已被占用</text>
+          </view>
+          <input 
+            class="form-input {{nameConflictError ? 'form-input-error' : ''}}" 
+            value="{{libraryNameInput}}" 
+            placeholder="请输入自定义题库名称（须全局唯一）" 
+            bindinput="onLibraryNameInput"
+          />
+          <view class="conflict-error-text" wx:if="{{nameConflictError}}">
+            <image class="error-inline-icon" src="/assets/icons/error_red.svg" mode="aspectFit" />
+            <text>{{nameConflictError}}</text>
+          </view>
+          <view class="input-desc-text" wx:else>题库名称全局唯一，若与已有题库重名将提示强制修改。</view>
+        </view>
+
+        <!-- 题库可见性选择 (公开 / 私有) -->
+        <view class="form-group visibility-form-group">
+          <view class="form-label">发布可见范围与管理权限</view>
+          <view class="visibility-selector">
+            <!-- 私有选项 -->
+            <view 
+              class="vis-card {{libraryVisibility === 'private' ? 'vis-card-active' : ''}}" 
+              bindtap="onSelectVisibility" 
+              data-visibility="private"
+            >
+              <view class="vis-card-header">
+                <image class="vis-card-icon" src="/assets/icons/lock_gray.svg" mode="aspectFit" />
+                <text class="vis-card-title">私有题库</text>
+                <view class="vis-radio {{libraryVisibility === 'private' ? 'vis-radio-checked' : ''}}"></view>
+              </view>
+              <view class="vis-card-desc">仅自己可见，支持随时删除与重新导入</view>
+            </view>
+
+            <!-- 公开选项 -->
+            <view 
+              class="vis-card {{libraryVisibility === 'public' ? 'vis-card-active' : ''}}" 
+              bindtap="onSelectVisibility" 
+              data-visibility="public"
+            >
+              <view class="vis-card-header">
+                <image class="vis-card-icon" src="/assets/icons/public_green.svg" mode="aspectFit" />
+                <text class="vis-card-title">公开题库</text>
+                <view class="vis-radio {{libraryVisibility === 'public' ? 'vis-radio-checked' : ''}}"></view>
+              </view>
+              <view class="vis-card-desc">所有人可见，已发布公开不可删除</view>
+            </view>
+          </view>
+        </view>
+
+        <view class="preview-summary">
+          <view class="summary-item">
+            <text class="summary-key">单选题数：</text>
+            <text class="summary-val">{{previewData.singleChoiceCount || 0}} 题</text>
+          </view>
+          <view class="summary-item">
+            <text class="summary-key">多选题数：</text>
+            <text class="summary-val">{{previewData.multipleChoiceCount || 0}} 题</text>
+          </view>
+          <view class="summary-item">
+            <text class="summary-key">包含解析：</text>
+            <text class="summary-val">{{previewData.hasAnalysis ? '是' : '否'}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <view class="btn-modal-action btn-secondary-modal" bindtap="onClosePreviewModal">重新选择</view>
+        <view class="btn-modal-action btn-confirm-import" bindtap="onConfirmImport">确认导入题库</view>
+      </view>
+    </view>
+  </view>
+
+</view>

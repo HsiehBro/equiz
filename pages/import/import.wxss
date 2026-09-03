@@ -1,0 +1,807 @@
+/* ==========================================================================
+   智学刷题助手 - 导入题库页面专属样式 (100% 像素级精细还原 Stitch 原型)
+   ========================================================================== */
+
+.page-container {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 1. 自定义顶部导航栏 (TopAppBar) */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #f8f9fa;
+  z-index: 999;
+  box-sizing: border-box;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: relative;
+}
+
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.nav-btn:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.nav-btn-right {
+  /* 右侧胶囊避让 */
+  margin-right: 85px;
+}
+
+.nav-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.nav-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: #0058bc;
+  letter-spacing: -0.3px;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Inter", Arial, sans-serif;
+  text-align: center;
+}
+
+/* 2. 主体内容滚动区 (Main Content Area) */
+.main-content {
+  flex: 1;
+  padding: 16px 16px calc(92px + env(safe-area-inset-bottom)) 16px;
+  box-sizing: border-box;
+}
+
+/* 头部说明区域 (Header Section) */
+.header-section {
+  margin-bottom: 20px;
+}
+
+.header-title {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+  color: #191c1d;
+  margin-bottom: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Inter", Arial, sans-serif;
+}
+
+.header-desc {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 400;
+  color: #414755;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Inter", Arial, sans-serif;
+}
+
+/* Bento 卡片网格布局 (Bento Grid Layout) */
+.bento-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bento-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(193, 198, 215, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+/* 卡片 1: 格式与模板卡片 (Format & Template Card) */
+.format-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.fan-decorator {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 96px;
+  height: 96px;
+  background-color: rgba(216, 226, 255, 0.35);
+  border-bottom-left-radius: 100%;
+  margin-right: -16px;
+  margin-top: -16px;
+  pointer-events: none;
+  transition: transform 0.3s ease;
+}
+
+.format-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 10;
+}
+
+.format-icon-box {
+  background-color: rgba(0, 112, 235, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.format-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.format-info {
+  flex: 1;
+}
+
+.format-title {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #191c1d;
+  margin-bottom: 4px;
+}
+
+.format-text {
+  font-size: 15px;
+  line-height: 22px;
+  color: #414755;
+}
+
+.format-tag {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: #0058bc;
+  background-color: rgba(216, 226, 255, 0.6);
+  padding: 1px 7px;
+  border-radius: 4px;
+  display: inline-block;
+  margin: 0 2px;
+}
+
+.format-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(193, 198, 215, 0.3);
+  position: relative;
+  z-index: 10;
+}
+
+.btn-download-template {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background-color: #f3f4f5;
+  color: #0058bc;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  border: 1px solid rgba(193, 198, 215, 0.5);
+  box-sizing: border-box;
+  transition: background-color 0.15s, opacity 0.15s;
+}
+
+.btn-download-template:active {
+  background-color: #e7e8e9;
+  opacity: 0.9;
+}
+
+.download-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* 卡片 2: 内容约束规范卡片 (Content Rules Card) */
+.rules-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.rules-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.rule-title-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.rules-title {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #191c1d;
+}
+
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.rule-item-icon {
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.rule-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.rule-item-name {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: #191c1d;
+  display: block;
+}
+
+.rule-item-desc {
+  font-size: 15px;
+  line-height: 22px;
+  color: #414755;
+  margin-top: 1px;
+}
+
+/* 卡片 3: 导入步骤引导卡片 (Steps Card) */
+.steps-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.steps-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.steps-title-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.steps-title {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #191c1d;
+}
+
+.timeline-container {
+  position: relative;
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 贯穿时间轴细线 */
+.timeline-container::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 11px;
+  width: 2px;
+  background-color: #e1e3e4;
+  border-radius: 1px;
+}
+
+.step-row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.step-badge {
+  position: absolute;
+  left: -30px;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 10;
+  box-shadow: 0 0 0 4px #ffffff;
+}
+
+.step-badge-active {
+  background-color: #0058bc;
+  color: #ffffff;
+}
+
+.step-badge-inactive {
+  background-color: #e7e8e9;
+  color: #191c1d;
+}
+
+.step-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.step-name {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: #191c1d;
+}
+
+.step-desc {
+  font-size: 15px;
+  line-height: 22px;
+  color: #414755;
+  margin-top: 3px;
+}
+
+/* 3. 底部固定操作栏 (Bottom Action Area) */
+.bottom-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border-top: 1px solid rgba(193, 198, 215, 0.6);
+  padding: 16px;
+  padding-bottom: max(env(safe-area-inset-bottom), 16px);
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+  z-index: 40;
+  box-sizing: border-box;
+}
+
+.action-buttons-wrapper {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.btn-cancel {
+  flex: 1;
+  background-color: #f3f4f5;
+  color: #191c1d;
+  height: 48px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(193, 198, 215, 0.5);
+  box-sizing: border-box;
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+.btn-cancel:active {
+  background-color: #e7e8e9;
+  transform: scale(0.98);
+}
+
+.btn-upload {
+  flex: 2;
+  background-color: #0058bc;
+  color: #ffffff;
+  height: 48px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 88, 188, 0.2);
+  box-sizing: border-box;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn-upload:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+.upload-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* 4. 弹窗交互组件 (Modals) */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-container {
+  width: 100%;
+  max-width: 480px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.25s ease-out;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #edeeef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.modal-close {
+  font-size: 24px;
+  color: #717786;
+  line-height: 1;
+  padding: 4px;
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.template-table-wrapper {
+  border: 1px solid #e1e3e4;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 11px;
+}
+
+.table-row {
+  display: flex;
+  border-bottom: 1px solid #edeeef;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-header-row {
+  background-color: #f3f4f5;
+  font-weight: 600;
+  color: #191c1d;
+}
+
+.th, .td {
+  padding: 8px 6px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.col-title { width: 120px; flex-shrink: 0; }
+.col-opt { width: 60px; flex-shrink: 0; }
+.col-ans { width: 45px; flex-shrink: 0; text-align: center; }
+.col-exp { width: 100px; flex-shrink: 0; }
+
+.template-tips {
+  font-size: 12px;
+  line-height: 18px;
+  color: #414755;
+  background-color: #ebf5ff;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #edeeef;
+  display: flex;
+  gap: 12px;
+}
+
+.btn-modal-action {
+  flex: 1;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s;
+}
+
+.btn-modal-action:active {
+  opacity: 0.85;
+}
+
+.btn-copy-link {
+  background-color: #f3f4f5;
+  color: #0058bc;
+  border: 1px solid rgba(193, 198, 215, 0.5);
+}
+
+.btn-save-sample {
+  background-color: #0058bc;
+  color: #ffffff;
+}
+
+/* 校验成功卡片 */
+.valid-status-card {
+  background-color: #eefbf1;
+  border: 1px solid #72fe88;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.valid-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.valid-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #006e28;
+}
+
+.valid-meta {
+  font-size: 12px;
+  color: #414755;
+  margin-top: 2px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #191c1d;
+}
+
+.form-input {
+  height: 40px;
+  border: 1px solid #c1c6d7;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #191c1d;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.conflict-badge {
+  font-size: 11px;
+  color: #ba1a1a;
+  background-color: #ffdad6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.form-input-error {
+  border-color: #ba1a1a !important;
+  background-color: #fff8f7 !important;
+}
+
+.conflict-error-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #ba1a1a;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.error-inline-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.input-desc-text {
+  font-size: 11px;
+  color: #717786;
+  line-height: 1.3;
+}
+
+/* 题库可见性选择卡片 */
+.visibility-form-group {
+  margin-top: 4px;
+}
+
+.visibility-selector {
+  display: flex;
+  gap: 10px;
+}
+
+.vis-card {
+  flex: 1;
+  background-color: #f8f9fa;
+  border: 1.5px solid #e1e3e4;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vis-card-active {
+  border-color: #0058bc !important;
+  background-color: #edf4ff !important;
+  box-shadow: 0 2px 8px rgba(0, 88, 188, 0.12);
+}
+
+.vis-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vis-card-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.vis-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #191c1d;
+  flex: 1;
+}
+
+.vis-radio {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid #c1c6d7;
+  box-sizing: border-box;
+}
+
+.vis-radio-checked {
+  border-color: #0058bc !important;
+  background-color: #0058bc !important;
+  box-shadow: inset 0 0 0 2.5px #ffffff;
+}
+
+.vis-card-desc {
+  font-size: 11px;
+  color: #717786;
+  line-height: 1.35;
+}
+
+.preview-summary {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.summary-key {
+  color: #717786;
+}
+
+.summary-val {
+  font-weight: 600;
+  color: #191c1d;
+}
+
+.btn-secondary-modal {
+  background-color: #f3f4f5;
+  color: #717786;
+  border: 1px solid #c1c6d7;
+}
+
+.btn-confirm-import {
+  background-color: #0058bc;
+  color: #ffffff;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

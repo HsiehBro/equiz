@@ -1,0 +1,141 @@
+/* ==========================================================================
+   智学刷题助手 - 全局设计系统样式 (基于 DESIGN.md & Stitch 原型规范)
+   ========================================================================== */
+
+/* 1. Design Tokens (CSS Variables) */
+page {
+  --color-primary: #0058bc;
+  --color-primary-container: #0070eb;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #fefcff;
+  
+  --color-secondary: #006e28;
+  --color-secondary-container: #6ffb85;
+  
+  --color-surface: #f8f9fa;
+  --color-surface-dim: #d9dadb;
+  --color-surface-container: #edeeef;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-high: #e7e8e9;
+  
+  --color-on-surface: #191c1d;
+  --color-on-surface-variant: #414755;
+  --color-outline: #717786;
+  --color-outline-variant: #c1c6d7;
+  
+  --color-error: #ba1a1a;
+  --color-background: #f8f9fa;
+
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Inter", Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+view, text, button, input, image {
+  box-sizing: border-box;
+}
+
+/* 2. 基础布局与 Flex 工具类 */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.flex-1 { flex: 1 1 0%; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.justify-around { justify-content: space-around; }
+.justify-end { justify-content: flex-end; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+.top-0 { top: 0; }
+.bottom-0 { bottom: 0; }
+.left-0 { left: 0; }
+.right-0 { right: 0; }
+.z-10 { z-index: 10; }
+.z-50 { z-index: 50; }
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.min-h-screen { min-height: 100vh; }
+.overflow-hidden { overflow: hidden; }
+.shrink-0 { flex-shrink: 0; }
+
+/* 3. 颜色类 */
+.bg-primary { background-color: var(--color-primary); }
+.bg-primary-container { background-color: var(--color-primary-container); }
+.bg-surface { background-color: var(--color-surface); }
+.bg-surface-container { background-color: var(--color-surface-container); }
+.bg-surface-container-low { background-color: var(--color-surface-container-low); }
+.bg-surface-container-lowest { background-color: var(--color-surface-container-lowest); }
+.bg-background { background-color: var(--color-background); }
+.bg-error { background-color: var(--color-error); }
+
+.text-primary { color: var(--color-primary); }
+.text-on-primary { color: var(--color-on-primary); }
+.text-on-primary-container { color: var(--color-on-primary-container); }
+.text-on-surface { color: var(--color-on-surface); }
+.text-on-surface-variant { color: var(--color-on-surface-variant); }
+.text-error { color: var(--color-error); }
+
+/* 4. 间距类 (基于 4px 基准) */
+.px-margin-mobile { padding-left: 16px; padding-right: 16px; }
+.p-sm { padding: 12px; }
+.p-md { padding: 16px; }
+.p-2 { padding: 8px; }
+.py-sm { padding-top: 12px; padding-bottom: 12px; }
+.py-md { padding-top: 16px; padding-bottom: 16px; }
+.pb-24 { padding-bottom: 96px; }
+.pb-lg { padding-bottom: 24px; }
+.pt-3 { padding-top: 12px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-sm { gap: 12px; }
+.gap-md { gap: 16px; }
+.gap-lg { gap: 24px; }
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mb-1 { margin-bottom: 4px; }
+.h-14 { height: 56px; }
+.h-16 { height: 64px; }
+.w-16 { width: 64px; }
+.w-10 { width: 40px; }
+.h-10 { height: 40px; }
+.w-6 { width: 24px; }
+.h-6 { height: 24px; }
+.w-5 { width: 20px; }
+.h-5 { height: 20px; }
+.w-4 { width: 16px; }
+.h-4 { height: 16px; }
+.w-2 { width: 8px; }
+.h-2 { height: 8px; }
+
+/* 5. 圆角与阴影 */
+.rounded-full { border-radius: 9999px; }
+.rounded-xl { border-radius: 12px; }
+.rounded-lg { border-radius: 8px; }
+.rounded-sm { border-radius: 4px; }
+.rounded-bl-lg { border-bottom-left-radius: 8px; }
+.shadow-sm { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+.shadow-card { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03); }
+
+/* 6. 字阶排版规范 (Typography) */
+.font-headline-lg { font-size: 22px; line-height: 28px; font-weight: 600; }
+.font-headline-md { font-size: 18px; line-height: 24px; font-weight: 600; }
+.font-body-lg { font-size: 17px; line-height: 26px; font-weight: 400; }
+.font-body-md { font-size: 15px; line-height: 22px; font-weight: 400; }
+.font-label-md { font-size: 13px; line-height: 18px; font-weight: 500; }
+.font-label-sm { font-size: 11px; line-height: 16px; font-weight: 500; }
+
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.font-extrabold { font-weight: 800; }
+.text-center { text-align: center; }
+
+/* 7. 交互反馈 */
+.transition-all { transition: all 0.15s ease-in-out; }
+.transition-transform { transition: transform 0.15s ease-in-out; }

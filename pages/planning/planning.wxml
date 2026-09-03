@@ -1,0 +1,138 @@
+<!-- 学习规划页面 (100% 还原 Stitch 原型) -->
+<view class="page-container">
+
+  <!-- 1. 顶部自定义导航栏 (TopAppBar) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack">
+        <image class="nav-icon" src="/assets/icons/arrow_back_gray.svg" mode="aspectFit" />
+      </view>
+
+      <!-- 居中标题 -->
+      <view class="nav-title">学习规划</view>
+
+      <!-- 右侧更多操作按钮 -->
+      <view class="nav-btn nav-btn-right" bindtap="onNavMore">
+        <image class="nav-icon" src="/assets/icons/more_horiz_gray.svg" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块，确保内容不被悬浮导航遮挡 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 2. 主体内容滚动区 (Main Content) -->
+  <scroll-view scroll-y class="main-content" enable-flex>
+    <view class="content-wrapper">
+      
+      <!-- Section: 目标题库 -->
+      <view class="section-block">
+        <view class="section-title">目标题库</view>
+        <view class="card select-card">
+          <picker bindchange="onBankChange" value="{{selectedBankIndex}}" range="{{banks}}" range-key="title">
+            <view class="select-box">
+              <view class="select-text">{{banks[selectedBankIndex].title}}</view>
+              <view class="select-icon-box">
+                <image class="select-icon" src="/assets/icons/expand_more_gray.svg" mode="aspectFit" />
+              </view>
+            </view>
+          </picker>
+        </view>
+      </view>
+
+      <!-- Section: 每日目标 -->
+      <view class="section-block">
+        <view class="section-header">
+          <view class="section-title">每日目标</view>
+        </view>
+        <view class="card goal-card">
+          <!-- 步进器调节区 -->
+          <view class="stepper-row">
+            <view class="stepper-btn {{dailyGoal <= 1 ? 'disabled' : ''}}" bindtap="onDecreaseGoal">
+              <image class="stepper-icon" src="/assets/icons/remove_gray.svg" mode="aspectFit" />
+            </view>
+            
+            <view class="input-wrapper">
+              <input 
+                class="goal-input" 
+                type="number" 
+                value="{{dailyGoal}}" 
+                bindinput="onGoalInput" 
+                bindblur="onGoalBlur"
+                aria-label="输入每日目标题数"
+              />
+              <view class="input-suffix">题/天</view>
+            </view>
+
+            <view class="stepper-btn {{dailyGoal >= 1000 ? 'disabled' : ''}}" bindtap="onIncreaseGoal">
+              <image class="stepper-icon" src="/assets/icons/add_gray.svg" mode="aspectFit" />
+            </view>
+          </view>
+
+          <!-- 预计完成日期展示卡片 -->
+          <view class="estimated-badge">
+            <view class="event-icon-box">
+              <image class="event-icon" src="/assets/icons/event_available_primary.svg" mode="aspectFit" />
+            </view>
+            <view class="estimated-info">
+              <text class="estimated-label">预计完成日期</text>
+              <text class="estimated-value">{{estimatedDateText}} (需 {{daysNeeded}} 天)</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- Section: 提醒设置 -->
+      <view class="section-block">
+        <view class="section-title">提醒设置</view>
+        <view class="card reminder-card">
+          <!-- 应用内提示 -->
+          <view class="reminder-row">
+            <view class="reminder-left">
+              <image class="reminder-icon" src="/assets/icons/notifications_gray.svg" mode="aspectFit" />
+              <view class="reminder-texts">
+                <view class="reminder-title">应用内提示</view>
+                <view class="reminder-desc">每天 20:00 提醒未完成任务</view>
+              </view>
+            </view>
+            <view class="switch-box" bindtap="onToggleAppReminder">
+              <view class="custom-switch {{appReminder ? 'switch-active' : ''}}">
+                <view class="switch-thumb"></view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 微信消息提示 -->
+          <view class="reminder-row">
+            <view class="reminder-left">
+              <image class="reminder-icon" src="/assets/icons/chat_gray.svg" mode="aspectFit" />
+              <view class="reminder-texts">
+                <view class="reminder-title">微信消息提示</view>
+                <view class="reminder-desc">绑定公众号接收进度提醒</view>
+              </view>
+            </view>
+            <view class="switch-box" bindtap="onToggleWechatReminder">
+              <view class="custom-switch {{wechatReminder ? 'switch-active' : ''}}">
+                <view class="switch-thumb"></view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 底部安全间距 -->
+      <view class="bottom-spacer"></view>
+
+    </view>
+  </scroll-view>
+
+  <!-- 3. 底部固定操作栏 (Bottom Action Area) -->
+  <view class="bottom-action-bar">
+    <view class="action-btn" bindtap="onStartPlan">
+      <image class="action-btn-icon" src="/assets/icons/rocket_launch_white.svg" mode="aspectFit" />
+      <text class="action-btn-text">开启规划</text>
+    </view>
+  </view>
+
+</view>

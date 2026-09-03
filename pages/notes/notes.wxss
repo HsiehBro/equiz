@@ -1,0 +1,536 @@
+/* ==========================================================================
+   学习笔记与题目评论页面样式 (Learning Notes - My Comments List)
+   100% 还原 Stitch 原型设计系统与 Material 3 规范
+   ========================================================================== */
+
+.page-container {
+  min-height: 100vh;
+  background-color: var(--color-background, #f8f9fa);
+  color: var(--color-on-surface, #191c1d);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  position: relative;
+}
+
+/* 1. 自定义顶部导航栏 (Custom TopAppBar) */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50;
+  background-color: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: relative;
+}
+
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.nav-btn:active {
+  opacity: 0.8;
+  transform: scale(0.95);
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-title {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: #0058bc;
+  letter-spacing: -0.2px;
+}
+
+.nav-btn-right {
+  width: 40px;
+}
+
+/* 2. 主体内容画布 (Main Content Canvas) */
+.main-content {
+  flex: 1;
+  padding: 16px 16px 32px;
+  box-sizing: border-box;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 搜索与筛选区域 (Search and Filter Section) */
+.search-filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+/* 搜索框 (Search Bar) */
+.search-bar-wrapper {
+  width: 100%;
+  height: 44px;
+  background-color: #e1e3e4;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-bar-wrapper:focus-within {
+  background-color: #ffffff;
+  border-color: #0058bc;
+  box-shadow: 0 0 0 1px #0058bc;
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  height: 100%;
+  min-height: 44px;
+  line-height: 44px;
+  font-size: 14px;
+  color: #191c1d;
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.search-placeholder {
+  color: #717786;
+  font-size: 14px;
+  line-height: 44px;
+  height: 44px;
+}
+
+.clear-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+
+.clear-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* 筛选组与分类滑动栏 */
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-label {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #717786;
+  padding-left: 4px;
+}
+
+.chips-scroll {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.chips-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 2px;
+}
+
+.chip-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chip-active {
+  background-color: #0058bc;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 88, 188, 0.25);
+}
+
+.chip-inactive {
+  background-color: #e7e8e9;
+  color: #414755;
+}
+
+.chip-inactive:active {
+  background-color: #e1e3e4;
+}
+
+/* 评论列表区域 (Notes / Comments List Section) */
+.notes-list-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 评论卡片 (Note / Comment Card) */
+.note-card {
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  border: 1rpx solid #e1e3e4;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+/* 高亮定位卡片态 (由消息中心跳转而来) */
+.note-card-highlight {
+  border-color: #0058bc !important;
+  box-shadow: 0 0 0 3px rgba(0, 88, 188, 0.18), 0 4px 16px rgba(0, 88, 188, 0.12) !important;
+  animation: notePulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes notePulse {
+  0% {
+    box-shadow: 0 0 0 2px rgba(0, 88, 188, 0.12), 0 4px 12px rgba(0, 88, 188, 0.08);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgba(0, 88, 188, 0.28), 0 6px 20px rgba(0, 88, 188, 0.18);
+  }
+}
+
+/* 卡片头部 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.header-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* 所属题库标签 */
+.bank-tag-badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #0058bc;
+  background-color: #d8e2ff;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.note-title {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #191c1d;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+/* 可见性徽标 (支持点击直接切换) */
+.visibility-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.visibility-badge:active {
+  transform: scale(0.92);
+  opacity: 0.8;
+}
+
+.badge-public {
+  background-color: #dcfce7;
+  color: #00732a;
+  border: 1rpx solid #bbf7d0;
+}
+
+.badge-private {
+  background-color: #e7e8e9;
+  color: #414755;
+  border: 1rpx solid #d1d5db;
+}
+
+.badge-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.badge-text {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+/* 评论内容 */
+.note-content {
+  font-size: 14px;
+  line-height: 22px;
+  color: #30353c;
+  font-weight: 400;
+  background-color: #f8f9fa;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border-left: 3px solid #0058bc;
+  word-break: break-word;
+}
+
+/* 分割线 */
+.card-divider {
+  height: 1rpx;
+  background-color: #edf0f2;
+  margin: 2px 0;
+}
+
+/* 卡片底部 */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.note-date {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: #717786;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 跳转至原题入口按钮 */
+.action-jump-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background-color: #f0f4fd;
+  border: 1rpx solid #d8e2ff;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.action-jump-btn:active {
+  background-color: #d8e2ff;
+  transform: scale(0.95);
+}
+
+.jump-text {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #0058bc;
+}
+
+.jump-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* 删除按钮 */
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.action-btn:active {
+  transform: scale(0.9);
+}
+
+.action-btn-delete:active {
+  background-color: #ffdad6;
+}
+
+.action-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* 空状态组件 (Empty State) */
+.empty-state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1rpx solid #edeeef;
+  margin-top: 10px;
+}
+
+.empty-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #d8e2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.empty-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.empty-title {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #191c1d;
+  margin-bottom: 8px;
+}
+
+.empty-desc {
+  font-size: 14px;
+  line-height: 20px;
+  color: #717786;
+  max-width: 280px;
+  margin-bottom: 24px;
+}
+
+.btn-create-note {
+  padding: 10px 28px;
+  background-color: #0058bc;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 88, 188, 0.25);
+  transition: transform 0.15s ease;
+}
+
+.btn-create-note:active {
+  transform: scale(0.96);
+}
+
+/* 3. 底部固定导航栏 (BottomNavBar) */
+.bottom-navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background-color: #f8f9fa;
+  border-top: 1rpx solid #e1e3e4;
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 50;
+}
+
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 100%;
+  border-radius: 8px;
+  transition: transform 0.15s ease;
+}
+
+.tab-item:active {
+  transform: scale(0.95);
+  background-color: #f3f4f5;
+}
+
+.tab-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 2px;
+}
+
+.tab-label {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  color: #414755;
+  margin-top: 2px;
+}
+
+.tab-active .tab-label {
+  color: #0058bc;
+  font-weight: 600;
+}
+

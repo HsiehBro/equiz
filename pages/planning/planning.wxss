@@ -1,0 +1,424 @@
+/* ==========================================================================
+   学习规划页面样式 (100% 还原 Stitch 原型规范)
+   ========================================================================== */
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-background, #f8f9fa);
+  color: var(--color-on-surface, #191c1d);
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* 1. 顶部自定义导航栏 (TopAppBar) */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: var(--color-background, #f8f9fa);
+  box-sizing: border-box;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: relative;
+  max-width: 448px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  transition: transform 0.15s ease-in-out, opacity 0.15s ease-in-out;
+}
+
+.nav-btn:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.nav-btn-right {
+  margin-right: -4px;
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--color-primary, #0058bc);
+}
+
+/* 2. 主体滚动区域 */
+.main-content {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.content-wrapper {
+  max-width: 448px;
+  margin: 0 auto;
+  padding: 12px 16px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+}
+
+/* 区块与卡片通用样式 */
+.section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  color: var(--color-on-surface-variant, #414755);
+}
+
+.card {
+  background-color: var(--color-surface-container-lowest, #ffffff);
+  border-radius: 12px;
+  border: 1px solid rgba(193, 198, 215, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+}
+
+/* 题库选择卡片 */
+.select-card {
+  padding: 16px;
+}
+
+.select-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background-color: var(--color-surface-container-lowest, #ffffff);
+  border: 1px solid var(--color-outline-variant, #c1c6d7);
+  border-radius: 8px;
+  min-height: 48px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.select-box:active {
+  border-color: var(--color-primary, #0058bc);
+}
+
+.select-text {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 400;
+  color: var(--color-on-surface, #191c1d);
+  flex: 1;
+  padding-right: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.select-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* 每日目标卡片 */
+.goal-card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.stepper-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--color-outline-variant, #c1c6d7);
+  background-color: var(--color-surface-container-lowest, #ffffff);
+  flex-shrink: 0;
+  transition: transform 0.15s ease-in-out, opacity 0.15s ease-in-out;
+}
+
+.stepper-btn:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.stepper-btn.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.stepper-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.input-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-outline-variant, #c1c6d7);
+  border-radius: 8px;
+  background-color: var(--color-surface-container-lowest, #ffffff);
+  height: 40px;
+  box-sizing: border-box;
+}
+
+.goal-input {
+  width: 100%;
+  height: 100%;
+  padding: 0 48px 0 12px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--color-on-surface, #191c1d);
+  font-weight: 500;
+  box-sizing: border-box;
+}
+
+.input-suffix {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-on-surface-variant, #414755);
+  pointer-events: none;
+}
+
+/* 预计完成日期展示卡片 */
+.estimated-badge {
+  background-color: rgba(0, 88, 188, 0.05);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.event-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background-color: rgba(0, 88, 188, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.event-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.estimated-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.estimated-label {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--color-on-surface-variant, #414755);
+}
+
+.estimated-value {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--color-on-surface, #191c1d);
+  margin-top: 2px;
+}
+
+/* 提醒设置卡片 */
+.reminder-card {
+  overflow: hidden;
+}
+
+.reminder-row {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reminder-row:not(:last-child) {
+  border-bottom: 1px solid rgba(193, 198, 215, 0.3);
+}
+
+.reminder-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.reminder-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.reminder-texts {
+  display: flex;
+  flex-direction: column;
+}
+
+.reminder-title {
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--color-on-surface, #191c1d);
+}
+
+.reminder-desc {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--color-on-surface-variant, #414755);
+  margin-top: 2px;
+}
+
+/* Stitch 高保真自定义开关组件 */
+.switch-box {
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.custom-switch {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  border-radius: 9999px;
+  background-color: #e1e3e4;
+  transition: background-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.custom-switch.switch-active {
+  background-color: var(--color-primary-container, #0070eb);
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 4px solid #717786;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.custom-switch.switch-active .switch-thumb {
+  transform: translateX(24px);
+  border-color: var(--color-primary-container, #0070eb);
+}
+
+/* 底部占位与操作栏 */
+.bottom-spacer {
+  height: 80px;
+}
+
+.bottom-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background-color: var(--color-surface-container-lowest, #ffffff);
+  border-top: 1px solid rgba(193, 198, 215, 0.3);
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom)) 16px;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+.action-btn {
+  max-width: 448px;
+  margin: 0 auto;
+  height: 48px;
+  border-radius: 9999px;
+  background-color: var(--color-primary, #0058bc);
+  color: var(--color-on-primary, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out;
+  box-sizing: border-box;
+}
+
+.action-btn:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+.action-btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.action-btn-text {
+  color: #ffffff;
+}

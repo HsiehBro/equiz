@@ -1,0 +1,610 @@
+/* pages/mock-run/mock-run.wxss */
+
+.mock-run-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  color: #191c1d;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 1. 考场专属顶部导航栏 (Exam TopAppBar) */
+.exam-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: #f8f9fa;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 16px;
+  box-sizing: border-box;
+  border-bottom: 1px solid #e1e3e4;
+}
+
+.nav-btn-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin-left: -4px;
+}
+
+.nav-btn-close:active {
+  background-color: #e7e8e9;
+}
+
+.nav-close-icon {
+  width: 22px;
+  height: 22px;
+}
+
+/* 浮动倒计时胶囊气泡 (Timer Countdown Badge) */
+.timer-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #e7e8e9;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+}
+
+.timer-badge-low {
+  background-color: #ffdad6;
+}
+
+.timer-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.timer-text {
+  font-family: 'Courier New', Courier, monospace, 'Inter';
+  font-size: 13px;
+  font-weight: 700;
+  color: #191c1d;
+  letter-spacing: 0.5px;
+}
+
+.text-error {
+  color: #ba1a1a !important;
+}
+
+/* 交卷按钮 */
+.btn-submit-nav {
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.btn-submit-nav:active {
+  transform: scale(0.95);
+  background-color: #e7e8e9;
+}
+
+.btn-submit-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0058bc;
+}
+
+/* 顶部微进度条 (Micro Progress Bar) */
+.progress-track {
+  width: 100%;
+  height: 4px;
+  background-color: #e1e3e4;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0070eb 0%, #0058bc 100%);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 2. 主体作答内容区 (Main Content Canvas) */
+.exam-main-scroll {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.exam-canvas-container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 16px 16px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+/* 题头指示 */
+.question-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+  min-height: 28px;
+}
+
+.meta-question-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #414755;
+  letter-spacing: 0.2px;
+}
+
+.meta-type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 24px;
+  box-sizing: border-box;
+}
+
+.badge-single {
+  background-color: #edeeef;
+  color: #414755;
+}
+
+.badge-multi {
+  background-color: #d8e2ff;
+  color: #004493;
+}
+
+/* 试题核心卡片 */
+.question-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e1e3e4;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  padding: 22px 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.question-title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  color: #191c1d;
+  letter-spacing: -0.2px;
+}
+
+.question-context {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  color: #414755;
+}
+
+/* 选项列表 */
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.option-item {
+  min-height: 52px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #c1c6d7;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.option-item:active {
+  background-color: #edeeef;
+}
+
+.option-selected {
+  background-color: #ebf5ff !important;
+  border-color: #0070eb !important;
+  box-shadow: 0 2px 8px rgba(0, 112, 235, 0.12);
+}
+
+/* 单选指示圆圈 */
+.radio-circle {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #c1c6d7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+  transition: border-color 0.2s ease;
+}
+
+.radio-circle-checked {
+  border-color: #0070eb !important;
+}
+
+.radio-inner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: transparent;
+  transform: scale(0);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.radio-inner-checked {
+  background-color: #0070eb !important;
+  transform: scale(1) !important;
+}
+
+/* 多选指示方框 */
+.checkbox-box {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 2px solid #c1c6d7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+
+.checkbox-checked {
+  background-color: #0070eb !important;
+  border-color: #0070eb !important;
+  box-shadow: 0 2px 6px rgba(0, 112, 235, 0.25);
+}
+
+.check-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.option-text-wrapper {
+  flex: 1;
+  font-size: 15px;
+  line-height: 22px;
+  color: #191c1d;
+  display: flex;
+  align-items: flex-start;
+}
+
+.option-label-prefix {
+  font-weight: 700;
+  color: #0058bc;
+  margin-right: 4px;
+}
+
+.option-text {
+  font-weight: 400;
+}
+
+.bottom-guard-spacer {
+  height: 80px;
+}
+
+/* 3. 底部考场控制栏 (Exam Controls BottomBar) */
+.exam-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: #ffffff;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+  box-sizing: border-box;
+}
+
+.bottom-bar-inner {
+  max-width: 680px;
+  height: 60px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.ctrl-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  background-color: #f3f4f5;
+  transition: all 0.2s ease;
+}
+
+.ctrl-btn:active {
+  background-color: #e7e8e9;
+  transform: scale(0.96);
+}
+
+.ctrl-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.ctrl-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #191c1d;
+}
+
+.ctrl-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* 题目导航中心键 (Question Navigator) */
+.ctrl-navigator-btn {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #f3f4f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.ctrl-navigator-btn:active {
+  background-color: #e7e8e9;
+  transform: scale(0.95);
+}
+
+.navigator-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.answered-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background-color: #0058bc;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+/* 4. 答题卡抽屉弹窗 (Answer Sheet Modal Drawer) */
+.sheet-drawer-mask {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(25, 28, 29, 0.5);
+  z-index: 60;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(2px);
+}
+
+.sheet-drawer-mask.mask-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sheet-drawer-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 80vh;
+  z-index: 65;
+  background-color: #ffffff;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 16px));
+  box-sizing: border-box;
+}
+
+.sheet-drawer-container.drawer-visible {
+  transform: translateY(0);
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e1e3e4;
+}
+
+.sheet-title-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sheet-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.sheet-subtitle {
+  font-size: 12px;
+  color: #717786;
+}
+
+.btn-sheet-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-sheet-close:active {
+  background-color: #e7e8e9;
+}
+
+.sheet-close-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* 图例 */
+.sheet-legend-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 12px 0 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dot-answered {
+  background-color: #0070eb;
+}
+
+.dot-unanswered {
+  background-color: #f3f4f5;
+  border: 1px solid #c1c6d7;
+}
+
+.dot-current {
+  background-color: #ffffff;
+  border: 2px solid #0058bc;
+}
+
+.legend-text {
+  font-size: 12px;
+  color: #414755;
+}
+
+/* 序号气泡矩阵 */
+.sheet-grid-scroll {
+  max-height: 320px;
+  width: 100%;
+}
+
+.sheet-number-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  padding: 4px 0 16px;
+}
+
+.grid-num-item {
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.grid-num-item:active {
+  transform: scale(0.92);
+}
+
+.num-item-answered {
+  background-color: #0070eb;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 112, 235, 0.2);
+}
+
+.num-item-unanswered {
+  background-color: #f3f4f5;
+  border: 1px solid #c1c6d7;
+  color: #414755;
+}
+
+.num-item-current {
+  background-color: #ffffff;
+  border: 2px solid #0058bc;
+  color: #0058bc;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 88, 188, 0.2);
+}
+
+/* 底部交卷按钮 */
+.sheet-footer {
+  padding-top: 12px;
+}
+
+.btn-sheet-submit {
+  width: 100%;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #0058bc 0%, #004493 100%);
+  color: #ffffff;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 4px 14px rgba(0, 88, 188, 0.25);
+}
+
+.btn-sheet-submit::after {
+  border: none;
+}
+
+.btn-sheet-submit:active {
+  transform: scale(0.98);
+  opacity: 0.95;
+}

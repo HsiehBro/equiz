@@ -1,0 +1,177 @@
+<!-- 模拟考试 - 参数设置与历史记录页面 -->
+<view class="page-container">
+
+  <!-- 1. 自定义顶部导航栏 (Custom TopAppBar with Safe Area) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 (已去除三个横杠汉堡菜单) -->
+      <view class="nav-btn" bindtap="onNavBack" aria-label="返回">
+        <image class="nav-icon" src="/assets/icons/arrow_back_primary.svg" mode="aspectFit" />
+      </view>
+
+      <!-- 居中应用标题 -->
+      <view class="nav-title-box">
+        <text class="nav-title">模拟考试</text>
+      </view>
+
+      <!-- 右侧空白占位，避让微信胶囊按钮 -->
+      <view class="nav-btn nav-btn-right"></view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块，确保内容不被悬浮导航遮挡 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 2. 主体内容滚动区 (Main Content Canvas) -->
+  <scroll-view scroll-y class="main-content" enable-flex enable-back-to-top>
+    <view class="content-wrapper">
+
+      <!-- 2.1 欢迎横幅卡片 (Welcome Banner - Bento style) -->
+      <view class="welcome-banner">
+        <view class="welcome-text-container">
+          <view class="welcome-title">欢迎回来，备考达人</view>
+          <view class="welcome-subtitle">距离正式考试还有 {{daysRemaining}} 天，全力以赴！</view>
+        </view>
+        <!-- 磨砂背景发光光晕装饰 -->
+        <view class="banner-glow-circle"></view>
+      </view>
+
+      <!-- 2.2 全真模拟参数设置 (Simulation Settings - Glass Bento Card) -->
+      <view class="simulation-glass-card">
+        <!-- 背景流光微渐变 -->
+        <view class="glass-gradient-overlay"></view>
+
+        <view class="simulation-inner">
+          <!-- 模块标题 -->
+          <view class="card-header-row">
+            <view class="header-icon-badge">
+              <image class="header-icon" src="/assets/icons/settings_gray.svg" mode="aspectFit" />
+            </view>
+            <view class="card-headline">模拟考试参数设置</view>
+          </view>
+
+          <!-- 设置项表单 -->
+          <view class="form-container">
+            <!-- 设置项 1: 考试类型 / 范围选择 -->
+            <view class="form-group">
+              <view class="label-row">
+                <text class="form-label">模考范围 / 考试类型</text>
+                <text class="badge badge-recommended">推荐</text>
+              </view>
+              
+              <picker bindchange="onSyllabusChange" value="{{selectedSyllabusIndex}}" range="{{syllabusList}}" range-key="name">
+                <view class="select-field">
+                  <text class="select-value">{{syllabusList[selectedSyllabusIndex].name}}</text>
+                  <image class="select-arrow-icon" src="/assets/icons/chevron_right_gray.svg" mode="aspectFit" />
+                </view>
+              </picker>
+              <view class="form-helper-text">已根据当前所选题库智能匹配推荐默认参数。</view>
+            </view>
+
+            <!-- 设置项 2: 考试时长 (分钟) -->
+            <view class="form-group">
+              <view class="label-row">
+                <text class="form-label">考试时长 (分钟)</text>
+                <text class="badge badge-recommended">推荐</text>
+              </view>
+              <view class="input-field-wrapper">
+                <input 
+                  class="custom-input" 
+                  type="number" 
+                  value="{{durationMinutes}}" 
+                  bindinput="onDurationInput"
+                  placeholder="请输入考试时长"
+                />
+                <text class="input-unit">分钟</text>
+              </view>
+            </view>
+
+            <!-- 设置项 3: 题目数量 -->
+            <view class="form-group">
+              <view class="label-row">
+                <text class="form-label">题目数量</text>
+                <text class="badge badge-default">默认</text>
+              </view>
+              <view class="input-field-wrapper">
+                <input 
+                  class="custom-input" 
+                  type="number" 
+                  value="{{questionCount}}" 
+                  bindinput="onQuestionCountInput"
+                  placeholder="请输入题目数量"
+                />
+                <text class="input-unit">道题</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 启动模拟考试主操作按钮 (Start Simulation CTA) -->
+          <button class="btn-start-simulation" bindtap="onStartSimulation" hover-class="btn-start-hover">
+            <text class="btn-start-text">开始全真模拟</text>
+            <image class="btn-play-icon" src="/assets/icons/play_arrow_white.svg" mode="aspectFit" />
+          </button>
+        </view>
+      </view>
+
+      <!-- 2.3 模考历史记录 (Mock Exam Records Section) -->
+      <view class="records-section">
+        <!-- 章节标题栏 -->
+        <view class="records-header">
+          <view class="records-title">模考历史记录</view>
+          <view class="btn-view-all" bindtap="onToggleViewAll">
+            <text>{{showAllRecords ? '收起' : '查看全部'}}</text>
+          </view>
+        </view>
+
+        <!-- 历史记录卡片列表 -->
+        <view class="records-list">
+          <block wx:for="{{displayRecords}}" wx:key="id">
+            <view class="record-bento-card" bindtap="onTapRecord" data-record="{{item}}">
+              <view class="record-info-left">
+                <text class="record-date-tag">{{item.date}}</text>
+                <view class="record-exam-title">{{item.title}}</view>
+                <view class="record-score-text {{item.isCompleted ? 'text-secondary' : 'text-on-surface-variant'}}">
+                  {{item.scoreText}}
+                </view>
+              </view>
+              <view class="record-action-right">
+                <image class="record-chevron" src="/assets/icons/chevron_right_gray.svg" mode="aspectFit" />
+              </view>
+            </view>
+          </block>
+
+          <!-- 无记录缺省展示 -->
+          <view class="empty-records-card" wx:if="{{records.length === 0}}">
+            <image class="empty-icon" src="/assets/icons/assignment_primary.svg" mode="aspectFit" />
+            <text class="empty-text">暂无模拟考试记录，点击上方按钮开启首次模考吧！</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 底部安全留白 -->
+      <view class="bottom-spacer"></view>
+    </view>
+  </scroll-view>
+
+  <!-- 3. 底部固定导航栏 (仅保留: 题库, 模考分析, 个人中心) -->
+  <view class="bottom-navbar">
+    <!-- 1. 题库 -->
+    <view class="tab-item" bindtap="onSwitchTab" data-tab="study">
+      <image class="tab-icon" src="/assets/icons/menu_book_gray.svg" mode="aspectFit" />
+      <text class="tab-label">题库</text>
+    </view>
+
+    <!-- 2. 模考分析 (当前激活态) -->
+    <view class="tab-item tab-active" bindtap="onSwitchTab" data-tab="analysis">
+      <image class="tab-icon" src="/assets/icons/bar_chart_primary.svg" mode="aspectFit" />
+      <text class="tab-label text-primary">模考分析</text>
+    </view>
+
+    <!-- 3. 个人中心 -->
+    <view class="tab-item" bindtap="onSwitchTab" data-tab="profile">
+      <image class="tab-icon" src="/assets/icons/person_gray.svg" mode="aspectFit" />
+      <text class="tab-label">个人中心</text>
+    </view>
+  </view>
+
+</view>

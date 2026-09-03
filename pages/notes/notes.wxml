@@ -1,0 +1,156 @@
+<!-- 学习笔记与题目评论页面 -->
+<view class="page-container">
+  <!-- 1. 自定义顶部导航栏 (Custom TopAppBar with Safe Area) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack" aria-label="Go back">
+        <image class="nav-icon" src="/assets/icons/arrow_back_primary.svg" mode="aspectFit" />
+      </view>
+      
+      <!-- 居中标题 -->
+      <view class="nav-title">学习笔记</view>
+      
+      <!-- 右侧菜单按钮 -->
+      <view class="nav-btn nav-btn-right" bindtap="onOpenMenu" aria-label="Menu">
+        <image class="nav-icon" src="/assets/icons/menu_primary.svg" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块，确保内容不被悬浮导航遮挡 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 2. 主内容滚动区 (Main Content Canvas) -->
+  <view class="main-content">
+    
+    <!-- 搜索与筛选区域 (Search and Filter Section) -->
+    <view class="search-filter-section">
+      <!-- 搜索框 (Search Bar) -->
+      <view class="search-bar-wrapper">
+        <image class="search-icon" src="/assets/icons/search_gray.svg" mode="aspectFit" />
+        <input 
+          class="search-input" 
+          placeholder="搜索评论内容、知识点或关联题目..." 
+          placeholder-class="search-placeholder"
+          type="text"
+          value="{{searchKeyword}}"
+          bindinput="onSearchInput"
+          confirm-type="search"
+        />
+        <view class="clear-btn" wx:if="{{searchKeyword}}" bindtap="onClearSearch">
+          <image class="clear-icon" src="/assets/icons/cancel_red.svg" mode="aspectFit" />
+        </view>
+      </view>
+
+      <!-- 题库分类横向滑动栏 (Bank Categories Scroll) -->
+      <view class="filter-group">
+        <view class="filter-label">题库分类</view>
+        <scroll-view scroll-x class="chips-scroll" enable-flex show-scrollbar="{{false}}">
+          <view class="chips-container">
+            <block wx:for="{{bankCategories}}" wx:key="id">
+              <view 
+                class="chip-item {{selectedBank === item.id ? 'chip-active' : 'chip-inactive'}}"
+                bindtap="onSelectBank"
+                data-id="{{item.id}}"
+              >
+                {{item.name}}
+              </view>
+            </block>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+
+    <!-- 评论卡片列表 (Comments / Notes List) -->
+    <view class="notes-list-section" wx:if="{{filteredComments.length > 0}}">
+      <block wx:for="{{filteredComments}}" wx:key="id">
+        <view class="note-card {{highlightNoteId === item.id ? 'note-card-highlight' : ''}}" id="note-{{item.id}}">
+          <!-- 头部: 题库标签、题目标题与可见性调整按钮 -->
+          <view class="card-header">
+            <view class="header-left">
+              <view class="bank-tag-badge">{{item.bankTitle || '通用题库'}}</view>
+              <view class="note-title">{{item.questionTitle || item.title || '解题心得'}}</view>
+            </view>
+            <!-- 可见性标签 (点击可直接切换 Public / Private) -->
+            <view 
+              class="visibility-badge {{item.visibility === 'public' ? 'badge-public' : 'badge-private'}}"
+              catchtap="onToggleItemVisibility"
+              data-id="{{item.id}}"
+              aria-label="Toggle visibility"
+            >
+              <image 
+                class="badge-icon" 
+                src="{{item.visibility === 'public' ? '/assets/icons/public_green.svg' : '/assets/icons/lock_gray.svg'}}" 
+                mode="aspectFit" 
+              />
+              <text class="badge-text">{{item.visibility === 'public' ? 'Public' : 'Private'}}</text>
+            </view>
+          </view>
+
+          <!-- 评论内容正文 (不可编辑) -->
+          <view class="note-content">
+            {{item.content}}
+          </view>
+
+          <!-- 分割线 -->
+          <view class="card-divider"></view>
+
+          <!-- 底部: 创建日期、跳转题目按钮与删除操作 -->
+          <view class="card-footer">
+            <text class="note-date">{{item.date}}</text>
+            
+            <view class="card-actions">
+              <!-- 查看原题跳转入口 (仅点击此按钮跳转到对应题目) -->
+              <view class="action-jump-btn" bindtap="onJumpToQuestion" data-item="{{item}}" aria-label="View original question">
+                <text class="jump-text">查看原题</text>
+                <image class="jump-icon" src="/assets/icons/chevron_right_primary.svg" mode="aspectFit" />
+              </view>
+
+              <!-- 删除按钮 (无需编辑按钮，不可编辑) -->
+              <view class="action-btn action-btn-delete" catchtap="onDeleteComment" data-id="{{item.id}}" aria-label="Delete comment">
+                <image class="action-icon" src="/assets/icons/delete_error.svg" mode="aspectFit" />
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 空状态 (Empty State) -->
+    <view class="empty-state-card" wx:else>
+      <view class="empty-icon-box">
+        <image class="empty-icon" src="/assets/icons/description_primary.svg" mode="aspectFit" />
+      </view>
+      <view class="empty-title">暂无匹配评论</view>
+      <view class="empty-desc">当前分类或筛选条件下无个人评论。您可在做题时随手写下自己的心得与解析！</view>
+      <view class="btn-create-note" bindtap="onGoPractice">
+        去刷题写评论
+      </view>
+    </view>
+
+  </view>
+
+  <!-- 3. 底部固定导航栏 (BottomNavBar) -->
+  <view class="bottom-navbar">
+    <!-- 题库 (Study) -->
+    <view class="tab-item {{currentTab === 'library' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="library">
+      <image class="tab-icon" src="/assets/icons/library_books_gray.svg" mode="aspectFit" />
+      <text class="tab-label">题库</text>
+    </view>
+
+    <!-- 错题集 (Practice) -->
+    <view class="tab-item {{currentTab === 'errors' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="errors">
+      <image class="tab-icon" src="/assets/icons/error_outline_gray.svg" mode="aspectFit" />
+      <text class="tab-label">错题集</text>
+    </view>
+
+    <!-- 个人中心 (Profile - 激活态) -->
+    <view class="tab-item {{currentTab === 'profile' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="profile">
+      <image class="tab-icon" src="/assets/icons/person_primary.svg" mode="aspectFit" />
+      <text class="tab-label">个人中心</text>
+    </view>
+  </view>
+
+</view>
+

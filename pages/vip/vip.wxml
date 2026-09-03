@@ -1,0 +1,226 @@
+<!-- 会员解锁页面 (100% 还原 Stitch 原型 01f10fc35e0f474f8d0180e81ec66e12 中文本地化) -->
+<view class="vip-page-container">
+
+  <!-- 1. 自定义顶部导航栏 (TopAppBar) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack">
+        <image class="nav-icon" src="/assets/icons/arrow_back_gray.svg" mode="aspectFit" />
+      </view>
+
+      <!-- 居中标题 -->
+      <view class="nav-title">会员解锁</view>
+
+      <!-- 右侧帮助说明按钮 -->
+      <view class="nav-btn nav-btn-right" bindtap="onOpenHelp">
+        <image class="nav-icon" src="/assets/icons/help_outline_gray.svg" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块，确保内容不被悬浮导航遮挡 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 2. 主体内容滚动区 -->
+  <scroll-view scroll-y class="main-content" enable-flex>
+    <view class="content-wrapper">
+
+      <!-- VIP 专属特权区 (VIP Benefits) -->
+      <view class="section-vip-benefits">
+        <view class="section-header-row">
+          <image class="benefit-star-icon" src="/assets/icons/star_gold.svg" mode="aspectFit" />
+          <text class="benefit-header-title gold-text">VIP 专属特权</text>
+        </view>
+
+        <!-- 4 宫格特权卡片 -->
+        <view class="benefits-grid">
+          <!-- 特权 1: 解锁全量题库 -->
+          <view class="benefit-card">
+            <view class="benefit-icon-circle">
+              <image class="benefit-icon" src="/assets/icons/lock_open_primary.svg" mode="aspectFit" />
+            </view>
+            <text class="benefit-label">解锁全量题库</text>
+          </view>
+
+          <!-- 特权 2: 专家名师精讲 -->
+          <view class="benefit-card">
+            <view class="benefit-icon-circle">
+              <image class="benefit-icon" src="/assets/icons/play_circle_primary.svg" mode="aspectFit" />
+            </view>
+            <text class="benefit-label">名师视频解析</text>
+          </view>
+
+          <!-- 特权 3: 纯净无广告 -->
+          <view class="benefit-card">
+            <view class="benefit-icon-circle">
+              <image class="benefit-icon" src="/assets/icons/block_primary.svg" mode="aspectFit" />
+            </view>
+            <text class="benefit-label">纯净刷题无广告</text>
+          </view>
+
+          <!-- 特权 4: 独家模拟考试 -->
+          <view class="benefit-card">
+            <view class="benefit-icon-circle">
+              <image class="benefit-icon" src="/assets/icons/quiz_primary.svg" mode="aspectFit" />
+            </view>
+            <text class="benefit-label">独家全真模考</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 活动中心横幅入口 (Activity Center Banner) -->
+      <view class="activity-banner-card" bindtap="onGoActivityCenter">
+        <view class="activity-left">
+          <view class="activity-icon-box">
+            <image class="activity-icon" src="/assets/icons/card_giftcard_gold.svg" mode="aspectFit" />
+          </view>
+          <view class="activity-texts">
+            <view class="activity-title">会员活动中心</view>
+            <view class="activity-subtitle">邀请好友免费领会员时长</view>
+          </view>
+        </view>
+        <view class="activity-right">
+          <view class="hot-badge">热门</view>
+          <image class="chevron-icon" src="/assets/icons/chevron_right_gray.svg" mode="aspectFit" />
+        </view>
+      </view>
+
+      <!-- 订阅套餐选择区 (Select Plan) -->
+      <view class="section-select-plan">
+        <view class="plan-section-title">选择会员套餐</view>
+
+        <view class="plans-list">
+          <!-- 终身套餐 (Lifetime) -->
+          <view class="plan-card {{selectedPlanId === 'lifetime' ? 'plan-card-active' : ''}}" bindtap="onSelectPlan" data-id="lifetime">
+            <view class="plan-info">
+              <view class="plan-name">终身畅学卡</view>
+              <view class="plan-desc">一次付费 · 永久有效畅享所有题库</view>
+            </view>
+            <view class="plan-price-box">
+              <text class="plan-price {{selectedPlanId === 'lifetime' ? 'text-gold' : ''}}">¥398</text>
+            </view>
+          </view>
+
+          <!-- 月度套餐 (Monthly) -->
+          <view class="plan-card {{selectedPlanId === 'monthly' ? 'plan-card-active' : ''}}" bindtap="onSelectPlan" data-id="monthly">
+            <view class="plan-info">
+              <view class="plan-name">连续包月</view>
+              <view class="plan-desc">自动续费 · 到期前随时可取消</view>
+            </view>
+            <view class="plan-price-box">
+              <text class="plan-price {{selectedPlanId === 'monthly' ? 'text-gold' : ''}}">¥29</text>
+              <text class="plan-unit">/月</text>
+            </view>
+          </view>
+
+          <!-- 季度套餐 (Quarterly) -->
+          <view class="plan-card {{selectedPlanId === 'quarterly' ? 'plan-card-active' : ''}}" bindtap="onSelectPlan" data-id="quarterly">
+            <view class="plan-info">
+              <view class="plan-title-with-badge">
+                <text class="plan-name">连续包季</text>
+                <text class="discount-tag">立省 20%</text>
+              </view>
+              <view class="plan-desc">每 3 个月计费 · 畅享 90 天备考</view>
+            </view>
+            <view class="plan-price-box">
+              <text class="plan-price {{selectedPlanId === 'quarterly' ? 'text-gold' : ''}}">¥68</text>
+              <text class="plan-unit">/季</text>
+            </view>
+          </view>
+
+          <!-- 年度套餐 (Yearly - 推荐/默认选中) -->
+          <view class="plan-card plan-card-yearly {{selectedPlanId === 'yearly' ? 'plan-card-active' : ''}}" bindtap="onSelectPlan" data-id="yearly">
+            <!-- 推荐标签 (Best Value) -->
+            <view class="best-value-ribbon">
+              超值推荐
+            </view>
+            <view class="plan-info">
+              <view class="plan-title-with-badge">
+                <text class="plan-name">连续包年</text>
+                <text class="discount-tag gold-discount-tag">立省 40%</text>
+              </view>
+              <view class="plan-desc">按年计费 · 低至 0.54元/天</view>
+            </view>
+            <view class="plan-price-box">
+              <text class="plan-price {{selectedPlanId === 'yearly' ? 'text-gold' : ''}}">¥198</text>
+              <text class="plan-unit">/年</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 协议与恢复购买 (Terms & Restore) -->
+      <view class="terms-restore-row">
+        <text class="terms-link" bindtap="onOpenTerms">《VIP 会员服务与自动续费协议》</text>
+        <text class="restore-link" bindtap="onRestorePurchase">恢复购买</text>
+      </view>
+
+      <!-- 底部安全留白 -->
+      <view class="bottom-spacer"></view>
+
+    </view>
+  </scroll-view>
+
+  <!-- 3. 底部固定操作栏 (100% 还原原型按钮布局) -->
+  <view class="fixed-bottom-bar">
+    <view class="bottom-btn-wrapper">
+      <button class="btn-wechat-pay" bindtap="onUnlockWithWeChatPay" hover-class="btn-wechat-pay-hover">
+        <image class="btn-pay-icon" src="/assets/icons/wechat_white.svg" mode="aspectFit" />
+        <text class="btn-pay-text">微信支付立即解锁</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 帮助说明弹窗 (Help Modal) -->
+  <view class="modal-mask" wx:if="{{showHelpModal}}" bindtap="onCloseHelp">
+    <view class="modal-content" catchtap="preventProp">
+      <view class="modal-header">
+        <text class="modal-title">VIP 会员特权说明</text>
+        <view class="modal-close-btn" bindtap="onCloseHelp">✕</view>
+      </view>
+      <scroll-view scroll-y class="modal-body">
+        <view class="faq-item">
+          <view class="faq-q">Q: 会员购买后可以在哪些设备使用？</view>
+          <view class="faq-a">A: 绑定当前微信账号后，在微信小程序、移动端等各终端均支持同步会员权益与做题记录。</view>
+        </view>
+        <view class="faq-item">
+          <view class="faq-q">Q: 自动续费如何管理与取消？</view>
+          <view class="faq-a">A: 可在微信【我】->【服务】->【钱包】->【支付设置】->【自动续费】中随时管理或取消。</view>
+        </view>
+        <view class="faq-item">
+          <view class="faq-q">Q: 购买后是否支持退款？</view>
+          <view class="faq-a">A: 属于虚拟数字商品，购买即生效开通。如有任何订单疑问请联系人工客服协助解决。</view>
+        </view>
+      </scroll-view>
+      <view class="modal-footer">
+        <button class="modal-btn-confirm" bindtap="onCloseHelp">我知道了</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 协议说明弹窗 (Terms Modal) -->
+  <view class="modal-mask" wx:if="{{showTermsModal}}" bindtap="onCloseTerms">
+    <view class="modal-content" catchtap="preventProp">
+      <view class="modal-header">
+        <text class="modal-title">服务协议与自动续订规则</text>
+        <view class="modal-close-btn" bindtap="onCloseTerms">✕</view>
+      </view>
+      <scroll-view scroll-y class="modal-body terms-body">
+        <view class="terms-paragraph">
+          1. <text class="terms-strong">服务内容</text>：开通 VIP 会员后，您将获得全量精选题库答题权限、名师视频深度解析、无广告清爽刷题体验及专属全真模拟考试功能。
+        </view>
+        <view class="terms-paragraph">
+          2. <text class="terms-strong">计费与续期</text>：连续包月/包季/包年服务将在当前周期结束前 24 小时由微信自动扣费。若需退订，请在扣费日前提前解除签约。
+        </view>
+        <view class="terms-paragraph">
+          3. <text class="terms-strong">账号与安全</text>：会员权益仅限本人绑定微信账号使用，严禁转借、出租或倒卖，保障您的刷题进度与私密数据。
+        </view>
+      </scroll-view>
+      <view class="modal-footer">
+        <button class="modal-btn-confirm" bindtap="onCloseTerms">同意并返回</button>
+      </view>
+    </view>
+  </view>
+
+</view>

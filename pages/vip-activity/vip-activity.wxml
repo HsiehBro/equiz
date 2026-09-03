@@ -1,0 +1,137 @@
+<!-- 会员活动中心页面 (100% 还原 Stitch 原型 4e31772c6eb942349cf2b94c990ab531) -->
+<view class="activity-page-container">
+
+  <!-- 1. 自定义顶部导航栏 (TopAppBar) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack">
+        <image class="nav-icon" src="/assets/icons/arrow_back_gray.svg" mode="aspectFit" />
+      </view>
+
+      <!-- 居中标题 -->
+      <view class="nav-title">会员活动</view>
+
+      <!-- 占位保持居中 -->
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块，确保内容不被悬浮导航遮挡 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 2. 主体内容滚动区 -->
+  <scroll-view scroll-y class="main-content" enable-flex>
+    <view class="content-wrapper">
+
+      <!-- 我的奖励入口 (My Rewards Quick Access) -->
+      <view class="rewards-access-row">
+        <view class="btn-my-rewards" bindtap="onTapMyRewards">
+          <image class="reward-icon" src="/assets/icons/redeem_gold.svg" mode="aspectFit" />
+          <text class="reward-text">我的奖励</text>
+          <image class="reward-chevron" src="/assets/icons/chevron_right_gray.svg" mode="aspectFit" />
+        </view>
+      </view>
+
+      <!-- 主打活动：邀请好友，共享时长 (Featured Activity) -->
+      <view class="featured-card">
+        <view class="featured-header-gradient">
+          <view class="featured-title-box">
+            <view class="featured-title-texts">
+              <view class="featured-title">邀请好友，共享时长</view>
+              <view class="featured-subtitle">邀请好友购买会员，您将获得与TA同等的会员时长奖励！</view>
+            </view>
+            <image class="featured-top-icon" src="/assets/icons/diversity_3_gold.svg" mode="aspectFit" />
+          </view>
+
+          <!-- 参与步骤卡片 -->
+          <view class="steps-container-card">
+            <view class="steps-header">参与步骤</view>
+            <view class="steps-row">
+              <!-- 连接线 -->
+              <view class="steps-connecting-line"></view>
+
+              <!-- Step 1 -->
+              <view class="step-col">
+                <view class="step-number-circle bg-primary-container text-white">1</view>
+                <text class="step-desc">分享专属链接</text>
+              </view>
+
+              <!-- Step 2 -->
+              <view class="step-col">
+                <view class="step-number-circle bg-primary-container text-white">2</view>
+                <text class="step-desc">好友注册并购买</text>
+              </view>
+
+              <!-- Step 3 -->
+              <view class="step-col">
+                <view class="step-number-circle bg-gold text-white">3</view>
+                <text class="step-desc">双方自动获赠</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 立即邀请按钮 -->
+          <button class="btn-invite-now" open-type="share" hover-class="btn-invite-hover">
+            <image class="invite-btn-icon" src="/assets/icons/share_white.svg" mode="aspectFit" />
+            <text class="invite-btn-text">立即邀请</text>
+          </button>
+        </view>
+      </view>
+
+      <!-- 更多活动区 (More Activities Section) -->
+      <view class="section-more-activities">
+        <view class="section-title-bar">更多活动</view>
+
+        <view class="activities-grid">
+          <!-- 活动卡片 1: 每日学习打卡 -->
+          <view class="activity-item-card" bindtap="onTapCheckInActivity">
+            <view class="activity-card-icon-box">
+              <image class="activity-card-icon" src="/assets/icons/calendar_today_primary.svg" mode="aspectFit" />
+            </view>
+            <view class="activity-card-content">
+              <view class="activity-card-header">
+                <text class="activity-card-title">每日学习打卡</text>
+                <text class="tag-badge-ongoing">进行中</text>
+              </view>
+              <view class="activity-card-desc">连续打卡7天，领取模拟试卷一份。保持学习节奏，突破自我！</view>
+              <view class="activity-card-footer">
+                <text class="activity-participants">已有 1.2w 人参与</text>
+                <view class="btn-activity-action">
+                  <text class="action-link-text">去打卡</text>
+                  <image class="action-arrow-icon" src="/assets/icons/chevron_right_primary.svg" mode="aspectFit" />
+                </view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 活动卡片 2: 限时折扣季 -->
+          <view class="activity-item-card" bindtap="onTapDiscountActivity">
+            <view class="activity-card-icon-box">
+              <image class="activity-card-icon" src="/assets/icons/local_offer_primary.svg" mode="aspectFit" />
+            </view>
+            <view class="activity-card-content">
+              <view class="activity-card-header">
+                <text class="activity-card-title">限时折扣季</text>
+                <text class="tag-badge-upcoming">即将开始</text>
+              </view>
+              <view class="activity-card-desc">期末冲刺福利，全场课程限时8折起。提前订阅提醒，不错过优惠。</view>
+              <view class="activity-card-footer">
+                <text class="activity-participants">距开始还有 2 天</text>
+                <view class="btn-activity-action">
+                  <text class="action-link-text">{{hasSetReminder ? '已设提醒' : '提醒我'}}</text>
+                  <image class="action-arrow-icon" src="/assets/icons/notifications_primary.svg" mode="aspectFit" />
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 底部安全留白 -->
+      <view class="bottom-spacer"></view>
+
+    </view>
+  </scroll-view>
+
+</view>

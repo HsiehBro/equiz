@@ -1,0 +1,238 @@
+<!-- 模拟考试记录 - 结果与分析页面 (100% 还原 Stitch 原型) -->
+<view class="page-container">
+
+  <!-- 1. 自定义顶部导航栏 (Custom TopAppBar with Safe Area) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack" aria-label="返回">
+        <image class="nav-icon" src="/assets/icons/arrow_back_primary.svg" mode="aspectFit" />
+      </view>
+
+      <!-- 居中标题 -->
+      <view class="nav-title-box">
+        <text class="nav-title">模拟考试记录</text>
+      </view>
+
+      <!-- 右侧空白占位，避让微信胶囊按钮 -->
+      <view class="nav-btn nav-btn-right"></view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 2. 主体滚动内容区 -->
+  <scroll-view scroll-y class="main-content" enable-flex enable-back-to-top>
+    <view class="content-wrapper">
+
+      <!-- 2.1 页面主标题区 (Page Header) -->
+      <view class="page-header-box">
+        <view class="page-headline">{{record.title || '模拟考试报告'}}</view>
+        <view class="page-subtitle">回顾本次模考表现，深度解析试题与考点知识点。</view>
+      </view>
+
+      <!-- 2.2 Bento Grid 核心成绩看板 (Bento Dashboard) -->
+      <view class="bento-dashboard-grid">
+        <!-- 核心得分卡片 (Score Card - Primary Focus) -->
+        <view class="score-primary-card">
+          <!-- 磨砂微光背景发光圆 -->
+          <view class="score-glow-circle"></view>
+
+          <view class="score-card-inner">
+            <view class="score-label">总成绩 · TOTAL SCORE</view>
+            <view class="score-number-row">
+              <text class="score-big-num">{{record.score}}</text>
+              <text class="score-total-unit">/ {{record.total || 100}}</text>
+            </view>
+
+            <!-- 排名打败学员胶囊徽标 -->
+            <view class="ranking-pill">
+              <image class="ranking-icon" src="/assets/icons/trending_up_white.svg" mode="aspectFit" />
+              <text class="ranking-text">超越全站 {{rankingPercent}}% 的备考学员</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 答题数据 2 宫格卡片 (Contextual Stats) -->
+        <view class="stats-cards-col">
+          <!-- 答题用时卡片 (Time Spent) -->
+          <view class="stat-info-card">
+            <view class="stat-icon-wrapper bg-green-light">
+              <image class="stat-icon" src="/assets/icons/timer_primary.svg" mode="aspectFit" />
+            </view>
+            <view class="stat-text-group">
+              <text class="stat-label">答题用时</text>
+              <text class="stat-value">{{record.timeUsed}}</text>
+            </view>
+          </view>
+
+          <!-- 交卷日期卡片 (Completion Date) -->
+          <view class="stat-info-card">
+            <view class="stat-icon-wrapper bg-gray-light">
+              <image class="stat-icon" src="/assets/icons/calendar_today_primary.svg" mode="aspectFit" />
+            </view>
+            <view class="stat-text-group">
+              <text class="stat-label">交卷日期</text>
+              <text class="stat-value">{{record.date}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 2.2.5 大纲考点掌握多维诊断 (Syllabus Diagnostics Section) -->
+      <view class="diagnostics-section" wx:if="{{syllabusDiagnostics && syllabusDiagnostics.length > 0}}">
+        <view class="section-header-bar">
+          <view class="section-main-title">各大纲考点掌握诊断</view>
+          <view class="section-count-badge">覆盖 {{syllabusDiagnostics.length}} 大考纲模块</view>
+        </view>
+
+        <view class="diagnostics-list">
+          <block wx:for="{{syllabusDiagnostics}}" wx:key="name">
+            <view class="diag-card {{item.level_class}}">
+              <view class="diag-top-row">
+                <view class="diag-name-group">
+                  <text class="diag-name">{{item.name}}</text>
+                  <text class="diag-weight-tag">配比 {{item.target_weight}}%</text>
+                </view>
+                <view class="diag-status-pill {{item.level_class}}">
+                  {{item.status_tag}}
+                </view>
+              </view>
+
+              <view class="diag-stats-row">
+                <view class="diag-score-rate">
+                  <text class="diag-rate-val {{item.level_class}}">{{item.score_rate}}%</text>
+                  <text class="diag-rate-label">考点得分率</text>
+                </view>
+                <view class="diag-count-info">
+                  答对 <text class="highlight-num">{{item.correct_count}}</text> / {{item.total_count}} 题
+                </view>
+              </view>
+
+              <!-- 考点掌握进度条 -->
+              <view class="diag-progress-track">
+                <view class="diag-progress-bar {{item.level_class}}" style="width: {{item.score_rate}}%;"></view>
+              </view>
+
+              <!-- 诊断建议 -->
+              <view class="diag-advice-box" wx:if="{{item.advice}}">
+                <image class="advice-icon" src="/assets/icons/lightbulb_primary.svg" mode="aspectFit" />
+                <text class="advice-text">{{item.advice}}</text>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <!-- 2.3 试题解析与分析 (Question Analysis Section) -->
+      <view class="analysis-section">
+        <!-- 章节标头栏 -->
+        <view class="section-header-bar">
+          <view class="section-main-title">试题解析与分析</view>
+          <view class="section-count-badge">共 {{analysisQuestions.length}} 题 · 正确率 {{record.accuracy || '85%'}}</view>
+        </view>
+
+        <!-- 筛选标签栏 (全部 / 正确 / 错误) -->
+        <view class="filter-tab-bar">
+          <view 
+            class="filter-tab-btn {{activeFilter === 'all' ? 'filter-active' : ''}}"
+            bindtap="onSwitchFilter"
+            data-filter="all"
+          >
+            全部 ({{analysisQuestions.length}})
+          </view>
+          <view 
+            class="filter-tab-btn {{activeFilter === 'correct' ? 'filter-active' : ''}}"
+            bindtap="onSwitchFilter"
+            data-filter="correct"
+          >
+            正确 ({{correctCount}})
+          </view>
+          <view 
+            class="filter-tab-btn {{activeFilter === 'incorrect' ? 'filter-active' : ''}}"
+            bindtap="onSwitchFilter"
+            data-filter="incorrect"
+          >
+            错题 ({{incorrectCount}})
+          </view>
+        </view>
+
+        <!-- 逐题解析卡片列表 -->
+        <view class="analysis-list">
+          <block wx:for="{{displayQuestions}}" wx:key="id">
+            <view class="question-analysis-card" bindtap="onViewQuestionDetail" data-item="{{item}}">
+              <view class="card-left-content">
+                <!-- 正确/错误状态圆形指示图标 -->
+                <view class="status-circle-box {{item.isCorrect ? 'bg-secondary-container' : 'bg-error-container'}}">
+                  <image 
+                    class="status-icon" 
+                    src="{{item.isCorrect ? '/assets/icons/check_circle.svg' : '/assets/icons/cancel_red.svg'}}" 
+                    mode="aspectFit" 
+                  />
+                </view>
+
+                <!-- 试题信息 -->
+                <view class="q-detail-box">
+                  <view class="q-badge-row">
+                    <text class="q-number-tag">Q {{item.number}}</text>
+                    <text class="q-status-badge {{item.isCorrect ? 'badge-correct' : 'badge-incorrect'}}">{{item.isCorrect ? '正确' : '错误'}}</text>
+                    <text class="q-type-mini">{{item.type}}</text>
+                  </view>
+                  <view class="q-title-text">{{item.title}}</view>
+                  
+                  <!-- 答案对比预览 -->
+                  <view class="q-answer-meta">
+                    <text class="meta-label">你的作答: </text>
+                    <text class="meta-ans {{item.isCorrect ? 'text-secondary' : 'text-error'}}">{{item.userAnswer || '未作答'}}</text>
+                    <text class="meta-divider">·</text>
+                    <text class="meta-label">正确答案: </text>
+                    <text class="meta-ans text-secondary">{{item.correctAnswer}}</text>
+                  </view>
+                </view>
+              </view>
+
+              <!-- 右侧查看解析胶囊按钮 -->
+              <view class="btn-view-analysis" catchtap="onViewQuestionDetail" data-item="{{item}}">
+                <text class="btn-analysis-text">查看解析</text>
+                <image class="btn-arrow-icon" src="/assets/icons/arrow_forward_primary.svg" mode="aspectFit" />
+              </view>
+            </view>
+          </block>
+        </view>
+
+        <!-- 底部返回主页主操作 -->
+        <view class="action-footer-box">
+          <button class="btn-back-home" bindtap="onBackToHome">
+            <text>返回模考首页</text>
+          </button>
+        </view>
+      </view>
+
+      <!-- 底部安全留白 -->
+      <view class="bottom-spacer"></view>
+    </view>
+  </scroll-view>
+
+  <!-- 3. 底部固定导航栏 (保持 3 项一致) -->
+  <view class="bottom-navbar">
+    <!-- 1. 题库 -->
+    <view class="tab-item" bindtap="onSwitchTab" data-tab="study">
+      <image class="tab-icon" src="/assets/icons/menu_book_gray.svg" mode="aspectFit" />
+      <text class="tab-label">题库</text>
+    </view>
+
+    <!-- 2. 模考分析 (当前激活态) -->
+    <view class="tab-item tab-active" bindtap="onSwitchTab" data-tab="analysis">
+      <image class="tab-icon" src="/assets/icons/bar_chart_primary.svg" mode="aspectFit" />
+      <text class="tab-label text-primary">模考分析</text>
+    </view>
+
+    <!-- 3. 个人中心 -->
+    <view class="tab-item" bindtap="onSwitchTab" data-tab="profile">
+      <image class="tab-icon" src="/assets/icons/person_gray.svg" mode="aspectFit" />
+      <text class="tab-label">个人中心</text>
+    </view>
+  </view>
+
+</view>

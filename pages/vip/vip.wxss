@@ -1,0 +1,561 @@
+/* ==========================================================================
+   会员解锁页样式 (100% 还原 Stitch 原型 01f10fc35e0f474f8d0180e81ec66e12)
+   ========================================================================== */
+
+.vip-page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-background, #f8f9fa);
+  color: var(--color-on-surface, #191c1d);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Inter", Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+/* 1. 自定义顶部导航栏 (TopAppBar) */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: #f8f9fa;
+  z-index: 50;
+  box-sizing: border-box;
+}
+
+.navbar-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.nav-btn:active {
+  transform: scale(0.92);
+  background-color: #edeeef;
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-title {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: var(--color-primary, #0058bc);
+  letter-spacing: 0.5px;
+}
+
+/* 2. 主内容滚动区 */
+.main-content {
+  flex: 1;
+  width: 100%;
+}
+
+.content-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px 16px 32px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* VIP 专属特权区 (VIP Benefits) */
+.section-vip-benefits {
+  margin-bottom: 24px;
+}
+
+.section-header-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.benefit-star-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+}
+
+.benefit-header-title {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.gold-text {
+  background: linear-gradient(135deg, #D4AF37 0%, #AA8C26 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.benefit-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 18px 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.benefit-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background-color: #f3f4f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.benefit-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.benefit-label {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #191c1d;
+}
+
+/* 活动中心横幅 (Activity Center Banner) */
+.activity-banner-card {
+  background-color: #FFFDF5;
+  border: 1px solid #D4AF37;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(212, 175, 55, 0.08);
+  transition: transform 0.15s ease;
+}
+
+.activity-banner-card:active {
+  transform: scale(0.98);
+}
+
+.activity-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+
+.activity-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background-color: rgba(253, 185, 49, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.activity-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.activity-texts {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-title {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.activity-subtitle {
+  font-size: 12px;
+  line-height: 18px;
+  color: #414755;
+  margin-top: 2px;
+}
+
+.activity-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.hot-badge {
+  background-color: #FDB931;
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  margin-right: 4px;
+}
+
+.chevron-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.6;
+}
+
+/* 订阅套餐选择区 (Select Plan) */
+.section-select-plan {
+  margin-bottom: 24px;
+}
+
+.plan-section-title {
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 700;
+  color: #191c1d;
+  margin-bottom: 14px;
+}
+
+.plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.plan-card {
+  position: relative;
+  background-color: #ffffff;
+  border: 1px solid #e1e3e4;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.plan-card:active {
+  transform: scale(0.99);
+}
+
+.plan-card-active {
+  border: 2px solid #D4AF37 !important;
+  background-color: #FFFDF5 !important;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15) !important;
+  transform: translateY(-2px);
+}
+
+.plan-card-yearly {
+  position: relative;
+}
+
+.best-value-ribbon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-bottom-left-radius: 8px;
+}
+
+.plan-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-title-with-badge {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.plan-name {
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.discount-tag {
+  background-color: #edeeef;
+  color: #414755;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.gold-discount-tag {
+  background-color: rgba(253, 185, 49, 0.2);
+  color: #D4AF37;
+  border: 1px solid #D4AF37;
+}
+
+.plan-desc {
+  font-size: 12px;
+  line-height: 16px;
+  color: #717786;
+  margin-top: 4px;
+}
+
+.plan-price-box {
+  text-align: right;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  padding-top: 4px;
+}
+
+.plan-price {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.text-gold {
+  color: #D4AF37 !important;
+}
+
+.plan-unit {
+  font-size: 12px;
+  line-height: 16px;
+  color: #717786;
+  margin-left: 2px;
+}
+
+/* 协议与恢复购买 (Terms & Restore) */
+.terms-restore-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 6px;
+  margin-bottom: 24px;
+}
+
+.terms-link {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-primary, #0058bc);
+  font-weight: 500;
+}
+
+.terms-link:active {
+  opacity: 0.7;
+}
+
+.restore-link {
+  font-size: 12px;
+  line-height: 18px;
+  color: #717786;
+  font-weight: 500;
+}
+
+.restore-link:active {
+  color: #191c1d;
+}
+
+.bottom-spacer {
+  height: 96px;
+}
+
+/* 3. 底部固定操作栏 (100% 还原 Stitch 原型) */
+.fixed-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border-top: 1px solid #e1e3e4;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  z-index: 40;
+  box-sizing: border-box;
+}
+
+.bottom-btn-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+}
+
+.btn-wechat-pay {
+  width: 100%;
+  height: 48px;
+  background-color: #09B83E;
+  color: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: 48px;
+  transition: all 0.15s ease;
+}
+
+.btn-wechat-pay-hover {
+  background-color: #08a537;
+  transform: scale(0.98);
+}
+
+.btn-pay-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.btn-pay-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* 弹窗通用样式 (Help / Terms Modal) */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 480px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #edeeef;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.modal-close-btn {
+  font-size: 18px;
+  color: #717786;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-body {
+  padding: 20px;
+  max-height: 50vh;
+  box-sizing: border-box;
+}
+
+.faq-item {
+  margin-bottom: 16px;
+}
+
+.faq-q {
+  font-size: 14px;
+  font-weight: 700;
+  color: #191c1d;
+  margin-bottom: 4px;
+}
+
+.faq-a {
+  font-size: 13px;
+  line-height: 20px;
+  color: #414755;
+}
+
+.terms-paragraph {
+  font-size: 13px;
+  line-height: 22px;
+  color: #414755;
+  margin-bottom: 12px;
+}
+
+.terms-strong {
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.modal-footer {
+  padding: 12px 20px 16px 20px;
+  border-top: 1px solid #edeeef;
+}
+
+.modal-btn-confirm {
+  width: 100%;
+  height: 44px;
+  background-color: var(--color-primary, #0058bc);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

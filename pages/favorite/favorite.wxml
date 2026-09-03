@@ -1,0 +1,139 @@
+<!-- 收藏页总容器 (我的收藏 / Bookmarked) -->
+<view class="page-container">
+  <!-- 1. 自定义顶部导航栏 (Custom TopAppBar with Safe Area) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack">
+        <image class="nav-icon" src="/assets/icons/arrow_back_primary.svg" mode="aspectFit" />
+      </view>
+      
+      <!-- 居中标题 -->
+      <view class="nav-title">我的收藏</view>
+      
+      <!-- 右侧空白占位 (避让微信胶囊按钮) -->
+      <view class="nav-btn nav-btn-right"></view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块，确保内容不被悬浮导航遮挡 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 2. 主内容滚动区 (Main Content Canvas) -->
+  <view class="main-content">
+    <!-- 头部标题区域 (Header Section) -->
+    <view class="header-section">
+      <view class="display-title">我的收藏</view>
+      <view class="subtitle-text">回顾已收藏的重点题目，进行针对性强化练习。</view>
+    </view>
+
+    <!-- 筛选/排序标签栏 (Filter/Sort Chips) -->
+    <scroll-view scroll-x class="chips-scroll" enable-flex show-scrollbar="{{false}}">
+      <view class="chips-container">
+        <block wx:for="{{categories}}" wx:key="id">
+          <view 
+            class="chip-item {{selectedCategory === item.id ? 'chip-active' : 'chip-inactive'}}"
+            bindtap="onSelectCategory"
+            data-id="{{item.id}}"
+          >
+            {{item.name}}
+          </view>
+        </block>
+      </view>
+    </scroll-view>
+
+    <!-- 分组试题列表 (Grouped Sections) -->
+    <view class="groups-container" wx:if="{{filteredGroups.length > 0}}">
+      <block wx:for="{{filteredGroups}}" wx:key="subjectId" wx:for-item="group">
+        <view class="subject-section">
+          <!-- 科目分组标题与一键练习栏 -->
+          <view class="section-header-row">
+            <view class="section-title-text">{{group.subjectName}}</view>
+            <view class="btn-group-practice" bindtap="onPracticeSubject" data-subject="{{group.subjectName}}">
+              <image class="group-practice-icon" src="/assets/icons/play_arrow_primary.svg" mode="aspectFit" />
+              <text class="group-practice-text">练习本题库 ({{group.questions.length}}题)</text>
+            </view>
+          </view>
+
+          <!-- 试题卡片列表 -->
+          <view class="cards-list">
+            <block wx:for="{{group.questions}}" wx:key="id">
+              <view class="question-card {{removingId === item.id ? 'card-removing' : ''}}" bindtap="onTapCard" data-item="{{item}}">
+                <!-- 卡片左侧内容区 -->
+                <view class="card-left-content">
+                  <!-- 知识点标签与添加时间 -->
+                  <view class="card-meta-row">
+                    <view class="badge-tag">{{item.tag}}</view>
+                    <view class="meta-date">{{item.date}} 收藏</view>
+                  </view>
+
+                  <!-- 试题题干 (多行省略) -->
+                  <view class="question-body-text">
+                    {{item.title}}
+                  </view>
+                </view>
+
+                <!-- 卡片右侧独立操作按钮组 -->
+                <view class="card-actions-col">
+                  <!-- 移除收藏按钮 -->
+                  <view 
+                    class="action-circle-btn btn-remove" 
+                    catchtap="onRemoveBookmark" 
+                    data-id="{{item.id}}"
+                    data-title="{{item.title}}"
+                    aria-label="取消收藏"
+                  >
+                    <image class="action-btn-icon" src="/assets/icons/bookmark_remove_gray.svg" mode="aspectFit" />
+                  </view>
+
+                  <!-- 练习按钮 -->
+                  <view 
+                    class="action-circle-btn btn-play" 
+                    catchtap="onPracticeQuestion" 
+                    data-item="{{item}}"
+                    aria-label="练习题目"
+                  >
+                    <image class="action-btn-icon" src="/assets/icons/play_arrow_primary.svg" mode="aspectFit" />
+                  </view>
+                </view>
+              </view>
+            </block>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 空状态 (Empty State) -->
+    <view class="empty-state-card" wx:else>
+      <view class="empty-icon-box">
+        <image class="empty-icon" src="/assets/icons/bookmark_primary.svg" mode="aspectFit" />
+      </view>
+      <view class="empty-title">{{selectedBankTitle ? '《' + selectedBankTitle + '》暂无收藏' : '暂无收藏试题'}}</view>
+      <view class="empty-desc">{{selectedBankTitle ? '该题库下暂未收藏任何试题，点击下方按钮前往该题库开始刷题。' : '在刷题过程中点击题目底部的“收藏”按钮，即可在此集中复习重点难点。'}}</view>
+      <view class="btn-go-practice" bindtap="onGoPractice">
+        去题库刷题
+      </view>
+    </view>
+  </view>
+
+  <!-- 3. 底部固定导航栏 (BottomNavBar) -->
+  <view class="bottom-navbar">
+    <!-- 题库 -->
+    <view class="tab-item {{currentTab === 'library' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="library">
+      <image class="tab-icon" src="/assets/icons/library_books_gray.svg" mode="aspectFit" />
+      <text class="tab-label">题库</text>
+    </view>
+
+    <!-- 错题集 -->
+    <view class="tab-item {{currentTab === 'errors' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="errors">
+      <image class="tab-icon" src="/assets/icons/error_outline_gray.svg" mode="aspectFit" />
+      <text class="tab-label">错题集</text>
+    </view>
+
+    <!-- 个人中心 (激活高亮态) -->
+    <view class="tab-item {{currentTab === 'profile' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="profile">
+      <image class="tab-icon" src="/assets/icons/person_primary.svg" mode="aspectFit" />
+      <text class="tab-label">个人中心</text>
+    </view>
+  </view>
+</view>

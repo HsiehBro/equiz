@@ -1,0 +1,21 @@
+server:
+  port: 8080
+  mode: debug # debug | release
+
+database:
+  host: 192.168.100.88 # 虚拟机 PostgreSQL IP (请根据您的实际虚拟机IP进行修改)
+  port: 5432
+  user: equiz_user
+  password: equiz@123.com # 虚拟机 PostgreSQL 密码
+  dbname: equiz_db
+  sslmode: disable
+  max_idle_conns: 10
+  max_open_conns: 100
+
+jwt:
+  secret: exam_prep_secret_key_2026_super_safe
+  expire_hours: 72
+
+wechat:
+  app_id: your_wechat_appid # 微信小程序 AppID (选填，开发测试走 Mock 登录)
+  app_secret: your_wechat_appsecret # 微信小程序 AppSecret

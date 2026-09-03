@@ -1,0 +1,182 @@
+<!-- 错题集页面总容器 -->
+<view class="page-container">
+  <!-- 1. 自定义顶部导航栏 (Custom TopAppBar with Safe Area) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack">
+        <image class="nav-icon" src="/assets/icons/arrow_back_primary.svg" mode="aspectFit" />
+      </view>
+      
+      <!-- 居中标题 -->
+      <view class="nav-title">Exam Prep</view>
+      
+      <!-- 右侧空白占位 (避让微信胶囊按钮) -->
+      <view class="nav-btn nav-btn-right"></view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块，确保内容不被悬浮导航遮挡 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 2. 主内容滚动区 -->
+  <view class="main-content">
+    <!-- 头部与搜索栏 (Header & Search) -->
+    <view class="header-section">
+      <view class="section-title">错题集</view>
+      <view class="search-box">
+        <image class="search-icon" src="/assets/icons/search_gray.svg" mode="aspectFit" />
+        <input 
+          class="search-input" 
+          placeholder="搜索错题题干关键词..." 
+          placeholder-class="search-placeholder"
+          type="text"
+          value="{{searchKeyword}}"
+          bindinput="onSearchInput"
+        />
+        <view class="clear-btn" wx:if="{{searchKeyword}}" bindtap="onClearSearch">
+          <image class="clear-icon" src="/assets/icons/close.svg" mode="aspectFit" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 错题总览提示条 (无错题时展示) -->
+    <view class="errors-summary-banner" wx:if="{{totalErrorCount === 0 && !searchKeyword}}">
+      <view class="summary-icon-box">
+        <image class="summary-icon" src="/assets/icons/check_circle_secondary.svg" mode="aspectFit" />
+      </view>
+      <view class="summary-text-box">
+        <view class="summary-title">暂无未掌握错题</view>
+        <view class="summary-desc">在刷题或模拟考试中做错的题目将自动沉淀至下方对应题库</view>
+      </view>
+    </view>
+
+    <!-- Bento Grid 科目错题卡片布局 (Subject Cards) -->
+    <view class="subject-grid">
+      <block wx:for="{{filteredSubjects}}" wx:key="id">
+        <view class="subject-card">
+          <!-- 卡片右上角粉红装饰角标水印 -->
+          <view class="card-watermark"></view>
+          
+          <!-- 卡片核心内容 -->
+          <view class="card-body">
+            <!-- 顶部图标与错题数量徽标 -->
+            <view class="card-top-row">
+              <view class="subject-icon-box">
+                <image class="subject-icon" src="{{item.icon}}" mode="aspectFit" />
+              </view>
+              
+              <!-- 错误状态徽标 -->
+              <view wx:if="{{item.hasErrors}}" class="badge-error">
+                <image class="badge-icon" src="/assets/icons/error_red.svg" mode="aspectFit" />
+                <text class="badge-text">{{item.count}} 题</text>
+              </view>
+              
+              <!-- 清空/无错题状态徽标 -->
+              <view wx:else class="badge-empty">
+                <image class="badge-icon" src="/assets/icons/check_circle_gray.svg" mode="aspectFit" />
+                <text class="badge-text">0 题</text>
+              </view>
+            </view>
+
+            <!-- 科目名称与描述 -->
+            <view class="subject-title">{{item.name}}</view>
+            <view class="subject-desc" wx:if="{{!isSearching || !item.searchHighlightDesc}}">{{item.desc}}</view>
+            <view class="subject-highlight-desc" wx:else>{{item.searchHighlightDesc}}</view>
+
+            <!-- 搜索题干命中试题明细列表 -->
+            <view class="matching-questions-card" wx:if="{{isSearching && item.matchingQuestions && item.matchingQuestions.length > 0}}">
+              <view class="matching-header">
+                <text class="matching-label">命中错题题干 ({{item.matchingQuestions.length}}题)：</text>
+              </view>
+              <view class="matching-list">
+                <view 
+                  class="matching-item" 
+                  wx:for="{{item.matchingQuestions}}" 
+                  wx:for-item="mq" 
+                  wx:key="id"
+                  catchtap="onReviewSingleError"
+                  data-bankid="{{item.id}}"
+                  data-questionid="{{mq.id}}"
+                  data-name="{{item.name}}"
+                >
+                  <view class="matching-item-left">
+                    <text class="matching-bullet">•</text>
+                    <text class="matching-text">{{mq.title}}</text>
+                  </view>
+                  <text class="matching-arrow">›</text>
+                </view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 底部操作按钮组 (纵向排列：立即复习 + 导出为PDF) -->
+          <view class="card-actions">
+            <!-- 按钮1: 复习 / 无错题 -->
+            <view 
+              wx:if="{{item.hasErrors}}" 
+              class="btn-review" 
+              bindtap="onReviewSubject" 
+              data-id="{{item.id}}" 
+              data-name="{{item.name}}"
+            >
+              <image class="btn-action-icon" src="/assets/icons/play_lesson_white.svg" mode="aspectFit" />
+              <text>立即复习</text>
+            </view>
+
+            <view wx:else class="btn-disabled" bindtap="onNoErrorsTip" data-name="{{item.name}}">
+              <text>无错题</text>
+            </view>
+
+            <!-- 按钮2: 导出为PDF -->
+            <view 
+              wx:if="{{item.hasErrors}}" 
+              class="btn-export-pdf" 
+              bindtap="onExportPDF" 
+              data-id="{{item.id}}" 
+              data-name="{{item.name}}"
+              data-count="{{item.count}}"
+            >
+              <image class="btn-action-icon" src="/assets/icons/picture_as_pdf_primary.svg" mode="aspectFit" />
+              <text>导出为PDF</text>
+            </view>
+
+            <view wx:else class="btn-export-disabled">
+              <image class="btn-action-icon" src="/assets/icons/picture_as_pdf_gray.svg" mode="aspectFit" />
+              <text>导出为PDF</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 搜索无结果空状态 -->
+    <view class="empty-state" wx:if="{{filteredSubjects.length === 0}}">
+      <image class="empty-icon" src="/assets/icons/search_gray.svg" mode="aspectFit" />
+      <view class="empty-text">未搜索到题干包含“{{searchKeyword}}”的错题</view>
+      <view class="empty-subtext">可在刷题或模拟考试中做错试题后再次搜索</view>
+      <view class="btn-reset-search" bindtap="onClearSearch">清空搜索</view>
+    </view>
+  </view>
+
+  <!-- 3. 底部固定导航栏 (BottomNavBar) -->
+  <view class="bottom-navbar">
+    <!-- 题库 -->
+    <view class="tab-item" bindtap="onSwitchTab" data-tab="library">
+      <image class="tab-icon" src="/assets/icons/library_books_gray.svg" mode="aspectFit" />
+      <text class="tab-label">题库</text>
+    </view>
+
+    <!-- 错题集 (激活高亮) -->
+    <view class="tab-item tab-active" bindtap="onSwitchTab" data-tab="errors">
+      <image class="tab-icon" src="/assets/icons/error_outline_primary.svg" mode="aspectFit" />
+      <text class="tab-label">错题集</text>
+    </view>
+
+    <!-- 个人中心 -->
+    <view class="tab-item" bindtap="onSwitchTab" data-tab="profile">
+      <image class="tab-icon" src="/assets/icons/person_gray.svg" mode="aspectFit" />
+      <text class="tab-label">个人中心</text>
+    </view>
+  </view>
+</view>

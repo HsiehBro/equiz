@@ -1,0 +1,175 @@
+<!-- 模拟考试 - 进行中 (全中文界面) -->
+<view class="mock-run-page">
+
+  <!-- 1. 考场专属顶部导航栏 (Exam TopAppBar) -->
+  <view class="exam-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px; padding-right: {{capsuleRightPadding}}px;">
+      <!-- 左侧关闭/退出按钮 -->
+      <view class="nav-btn-close" bindtap="onTapClose" aria-label="退出考场">
+        <image class="nav-close-icon" src="/assets/icons/close_gray.svg" mode="aspectFit" />
+      </view>
+
+      <!-- 居中浮动倒计时胶囊气泡 (Timer Countdown Badge) -->
+      <view class="timer-badge {{isTimeLow ? 'timer-badge-low' : ''}}">
+        <image 
+          class="timer-icon" 
+          src="{{isTimeLow ? '/assets/icons/timer_error.svg' : '/assets/icons/timer_primary.svg'}}" 
+          mode="aspectFit" 
+        />
+        <text class="timer-text {{isTimeLow ? 'text-error' : ''}}">{{countdownText}}</text>
+      </view>
+
+      <!-- 右侧交卷按钮 (交卷 - 自动避让微信胶囊按钮) -->
+      <view class="btn-submit-nav" bindtap="onTapSubmit">
+        <text class="btn-submit-text">交卷</text>
+      </view>
+    </view>
+
+    <!-- 顶部微进度条 (Micro Progress Bar) -->
+    <view class="progress-track">
+      <view class="progress-bar-fill" style="width: {{progressPercent}}%;"></view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块 -->
+  <view style="height: {{statusBarHeight + navBarHeight + 4}}px;"></view>
+
+  <!-- 2. 主体作答内容区 (Main Content Canvas) -->
+  <scroll-view scroll-y class="exam-main-scroll" enable-back-to-top>
+    <view class="exam-canvas-container">
+      
+      <!-- 题头信息栏 (Question Header) -->
+      <view class="question-meta-row">
+        <text class="meta-question-count">第 {{currentIndex + 1}} / {{questions.length}} 题</text>
+        <text class="meta-type-badge {{questions[currentIndex].type === '多选题' ? 'badge-multi' : 'badge-single'}}">{{questions[currentIndex].type}}</text>
+      </view>
+
+      <!-- 试题主卡片 (Question Card) -->
+      <view class="question-card">
+        <!-- 试题标题 -->
+        <view class="question-title">
+          {{questions[currentIndex].title}}
+        </view>
+
+        <!-- 试题补充背景/情境描述 -->
+        <view class="question-context" wx:if="{{questions[currentIndex].context}}">
+          {{questions[currentIndex].context}}
+        </view>
+
+        <!-- 选项列表 (Options Stack) -->
+        <view class="options-container">
+          <block wx:for="{{questions[currentIndex].options}}" wx:key="label">
+            <view 
+              class="option-item {{currentSelectedMap[item.label] ? 'option-selected' : ''}}"
+              bindtap="onSelectOption"
+              data-label="{{item.label}}"
+            >
+              <!-- 单选指示圆圈 (单选题) -->
+              <view class="radio-circle {{currentSelectedMap[item.label] ? 'radio-circle-checked' : ''}}" wx:if="{{questions[currentIndex].type === '单选题'}}">
+                <view class="radio-inner {{currentSelectedMap[item.label] ? 'radio-inner-checked' : ''}}"></view>
+              </view>
+
+              <!-- 多选指示方框 (多选题) -->
+              <view class="checkbox-box {{currentSelectedMap[item.label] ? 'checkbox-checked' : ''}}" wx:else>
+                <image class="check-icon" src="/assets/icons/check_white.svg" mode="aspectFit" wx:if="{{currentSelectedMap[item.label]}}" />
+              </view>
+
+              <!-- 选项文本 -->
+              <view class="option-text-wrapper">
+                <text class="option-label-prefix">{{item.label}}. </text>
+                <text class="option-text">{{item.text}}</text>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <!-- 底部防遮挡占位 -->
+      <view class="bottom-guard-spacer"></view>
+    </view>
+  </scroll-view>
+
+  <!-- 3. 底部考场控制栏 (Exam Controls BottomBar) -->
+  <view class="exam-bottom-bar">
+    <view class="bottom-bar-inner">
+      <!-- 上一题 -->
+      <view 
+        class="ctrl-btn ctrl-prev {{currentIndex === 0 ? 'ctrl-disabled' : ''}}" 
+        bindtap="onPrevQuestion"
+      >
+        <image class="ctrl-icon" src="/assets/icons/chevron_left.svg" mode="aspectFit" />
+        <text class="ctrl-label">上一题</text>
+      </view>
+
+      <!-- 题目导航中心键 (答题卡) -->
+      <view class="ctrl-navigator-btn" bindtap="onToggleAnswerSheet" title="答题卡">
+        <image class="navigator-icon" src="/assets/icons/apps_primary.svg" mode="aspectFit" />
+        <view class="answered-badge" wx:if="{{answeredCount > 0}}">{{answeredCount}}</view>
+      </view>
+
+      <!-- 下一题 / 交卷 -->
+      <view 
+        class="ctrl-btn ctrl-next" 
+        bindtap="onNextQuestion"
+      >
+        <text class="ctrl-label">{{currentIndex === questions.length - 1 ? '交卷' : '下一题'}}</text>
+        <image class="ctrl-icon" src="/assets/icons/chevron_right.svg" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 4. 答题卡抽屉弹窗 (Answer Sheet Modal Drawer) -->
+  <view class="sheet-drawer-mask {{showAnswerSheet ? 'mask-visible' : ''}}" bindtap="onToggleAnswerSheet"></view>
+  
+  <view class="sheet-drawer-container {{showAnswerSheet ? 'drawer-visible' : ''}}">
+    <!-- 答题卡头部 -->
+    <view class="sheet-header">
+      <view class="sheet-title-box">
+        <text class="sheet-title">答题卡 · 试题总览</text>
+        <text class="sheet-subtitle">已答 {{answeredCount}} / {{questions.length}} 题</text>
+      </view>
+      <view class="btn-sheet-close" bindtap="onToggleAnswerSheet">
+        <image class="sheet-close-icon" src="/assets/icons/close_gray.svg" mode="aspectFit" />
+      </view>
+    </view>
+
+    <!-- 答题卡图例 -->
+    <view class="sheet-legend-row">
+      <view class="legend-item">
+        <view class="legend-dot dot-answered"></view>
+        <text class="legend-text">已作答</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot dot-unanswered"></view>
+        <text class="legend-text">未作答</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot dot-current"></view>
+        <text class="legend-text">当前题目</text>
+      </view>
+    </view>
+
+    <!-- 答题卡序号气泡矩阵 -->
+    <scroll-view scroll-y class="sheet-grid-scroll">
+      <view class="sheet-number-grid">
+        <block wx:for="{{questions}}" wx:key="id">
+          <view 
+            class="grid-num-item {{index === currentIndex ? 'num-item-current' : (userAnswers[item.id] && userAnswers[item.id].length > 0 ? 'num-item-answered' : 'num-item-unanswered')}}"
+            bindtap="onJumpToQuestion"
+            data-index="{{index}}"
+          >
+            {{index + 1}}
+          </view>
+        </block>
+      </view>
+    </scroll-view>
+
+    <!-- 答题卡底部操作区 -->
+    <view class="sheet-footer">
+      <button class="btn-sheet-submit" bindtap="onTapSubmit">
+        <text>交卷并查看成绩</text>
+      </button>
+    </view>
+  </view>
+
+</view>

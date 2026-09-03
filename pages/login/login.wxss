@@ -1,0 +1,508 @@
+/* ==========================================================================
+   Exam Prep - 登录页样式 (100% 像素级高保真还原 Stitch 原型)
+   ========================================================================== */
+
+.login-page {
+  min-height: 100vh;
+  background-color: var(--color-background, #f8f9fa);
+  color: var(--color-on-background, #191c1d);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Inter", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button::after {
+  border: none !important;
+}
+
+/* 1. 自定义顶部适配导航栏 (避让状态栏与胶囊按钮) */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: transparent;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.nav-btn:active {
+  transform: scale(0.92);
+  background: rgba(240, 240, 240, 0.9);
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #191c1d;
+}
+
+.nav-placeholder {
+  width: 36px;
+}
+
+/* 2. 主体居中容器 (w-full max-w-md flex flex-col items-center justify-center flex-1) */
+.login-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 auto;
+  max-width: 480px;
+}
+
+/* 3. 应用品牌 Logo 区域 (mb-xl: 32px flex flex-col items-center) */
+.logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+/* w-24 h-24 bg-surface-container-highest rounded-xl flex items-center justify-center mb-md shadow-sm */
+.logo-box {
+  width: 96px;
+  height: 96px;
+  background-color: #e1e3e4; /* surface-container-highest */
+  border-radius: 12px;       /* rounded-xl */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;      /* mb-md */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* shadow-sm */
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+}
+
+/* font-display text-display text-on-surface mb-xs: 30px / 38px / 700 / -0.5px */
+.app-title {
+  font-family: "Inter", -apple-system, sans-serif;
+  font-size: 30px;
+  line-height: 38px;
+  letter-spacing: -0.5px;
+  font-weight: 700;
+  color: #191c1d;            /* text-on-surface */
+  margin-bottom: 8px;        /* mb-xs */
+  text-align: center;
+}
+
+/* font-body-lg text-body-lg text-on-surface-variant text-center: 17px / 26px / 400 */
+.app-subtitle {
+  font-family: "Inter", -apple-system, sans-serif;
+  font-size: 17px;
+  line-height: 26px;
+  font-weight: 400;
+  color: #414755;            /* text-on-surface-variant */
+  text-align: center;
+}
+
+/* 4. 登录操作按钮区域 (w-full mt-xl flex flex-col gap-md px-md) */
+.actions-section {
+  width: 100%;
+  margin-top: 32px;          /* mt-xl */
+  padding: 0 16px;           /* px-md */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* 微信一键登录按钮 (w-full h-14 bg-[#07C160] hover:bg-[#06ad56] text-white rounded-full flex items-center justify-center gap-xs shadow-sm transition-all active:scale-95) */
+.btn-wechat {
+  width: 100% !important;
+  height: 56px !important;
+  line-height: 56px !important;
+  background-color: #07C160 !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important; /* rounded-full */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px;                         /* gap-xs */
+  box-shadow: 0 1px 3px rgba(7, 193, 96, 0.25);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.btn-wechat-active {
+  background-color: #06ad56 !important;
+  transform: scale(0.95);
+  box-shadow: 0 0 0 rgba(7, 193, 96, 0);
+}
+
+.btn-wechat-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* font-headline-md text-headline-md: 18px / 24px / 600 */
+.btn-wechat-text {
+  font-family: "Inter", -apple-system, sans-serif;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* 手机号登录按钮 (w-full h-14 bg-surface-container-lowest border border-outline-variant hover:bg-surface-container-low text-on-surface rounded-full flex items-center justify-center transition-all active:scale-95 mt-xs) */
+.btn-phone {
+  width: 100% !important;
+  height: 56px !important;
+  line-height: 56px !important;
+  background-color: #ffffff !important; /* bg-surface-container-lowest */
+  border: 1px solid #c1c6d7 !important; /* border-outline-variant */
+  color: #191c1d !important;            /* text-on-surface */
+  border-radius: 9999px !important;     /* rounded-full */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: 12px !important;          /* 间距 */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0 !important;
+}
+
+.btn-phone-active {
+  background-color: #f3f4f5 !important; /* surface-container-low */
+  transform: scale(0.95);
+}
+
+/* font-body-lg text-body-lg: 17px / 26px / 400 */
+.btn-phone-text {
+  font-family: "Inter", -apple-system, sans-serif;
+  font-size: 17px;
+  line-height: 26px;
+  font-weight: 400;
+  color: #191c1d;
+}
+
+/* 5. 协议与隐私政策授权区域 (mt-lg flex items-start gap-sm px-lg w-full) */
+.terms-section {
+  margin-top: 24px;          /* mt-lg */
+  padding: 0 24px;           /* px-lg */
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;                 /* gap-sm */
+  box-sizing: border-box;
+  transition: transform 0.3s ease;
+}
+
+.checkbox-container {
+  padding-top: 2px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.custom-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1.5px solid #c1c6d7; /* border-outline-variant */
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.custom-checkbox.checked {
+  background-color: #0058bc;   /* primary */
+  border-color: #0058bc;
+}
+
+.check-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* font-label-md text-label-md text-on-surface-variant cursor-pointer leading-relaxed: 13px / 18px / 500 */
+.terms-label {
+  font-family: "Inter", -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0.2px;
+  font-weight: 400;
+  color: #414755;            /* text-on-surface-variant */
+}
+
+.terms-link {
+  color: #0058bc;            /* primary */
+  font-weight: 500;
+  text-decoration: underline;
+  display: inline;
+}
+
+/* 未勾选协议时的抖动反馈动效 */
+.shake-anim {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+/* 6. 模态弹层公用遮罩与样式 (Modal Mask & Dialogs) */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-mask.modal-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 手机号登录弹窗 */
+.phone-modal {
+  width: 100%;
+  background-color: #ffffff;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  padding: 24px 20px 36px 20px;
+  box-sizing: border-box;
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.modal-visible .phone-modal {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #191c1d;
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #f3f4f5;
+}
+
+.close-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #414755;
+}
+
+.input-wrapper {
+  background-color: #f8f9fa;
+  border: 1px solid #c1c6d7;
+  border-radius: 12px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.phone-input, .code-input {
+  flex: 1;
+  height: 100%;
+  font-size: 15px;
+  color: #191c1d;
+}
+
+.input-placeholder {
+  color: #717786;
+  font-size: 14px;
+}
+
+.code-wrapper {
+  padding-right: 8px;
+}
+
+.btn-send-code {
+  min-width: 104px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  background-color: #e1e3e4 !important;
+  color: #0058bc !important;
+  border-radius: 8px !important;
+  padding: 0 10px !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+.btn-send-code.btn-disabled {
+  background-color: #f0f1f2 !important;
+  color: #717786 !important;
+}
+
+.btn-submit-phone {
+  width: 100% !important;
+  height: 50px !important;
+  line-height: 50px !important;
+  background-color: #0058bc !important;
+  color: #ffffff !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: 9999px !important;
+  margin-top: 12px !important;
+  border: none !important;
+}
+
+.btn-submit-phone-active {
+  background-color: #004493 !important;
+  transform: scale(0.98);
+}
+
+/* 7. 协议详情模态弹窗 (Agreement Modal) */
+.agreement-modal {
+  width: 100%;
+  max-height: 80vh;
+  background-color: #ffffff;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  padding: 20px 20px 28px 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.modal-visible .agreement-modal {
+  transform: translateY(0);
+}
+
+.agreement-scroll {
+  flex: 1;
+  max-height: 50vh;
+  margin-bottom: 20px;
+}
+
+.agreement-text-content {
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.agreement-paragraph {
+  font-size: 14px;
+  line-height: 22px;
+  color: #414755;
+}
+
+.agreement-points {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.agreement-point-item {
+  display: flex;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 20px;
+  color: #191c1d;
+}
+
+.point-num {
+  font-weight: 600;
+  color: #0058bc;
+  margin-right: 4px;
+}
+
+.point-text {
+  flex: 1;
+}
+
+.modal-footer {
+  width: 100%;
+}
+
+.btn-agree-modal {
+  width: 100% !important;
+  height: 48px !important;
+  line-height: 48px !important;
+  background-color: #0058bc !important;
+  color: #ffffff !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: 9999px !important;
+  border: none !important;
+}

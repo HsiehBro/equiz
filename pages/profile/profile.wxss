@@ -1,0 +1,516 @@
+/* ==========================================================================
+   个人中心页面专属样式 (基于 Stitch 原型与 Academic Focus 设计规范)
+   ========================================================================== */
+
+/* 1. 页面总容器 */
+.page-container {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+/* 2. 自定义顶部导航栏 */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50;
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background-color 0.15s;
+}
+
+.nav-btn:active {
+  background-color: #edeeef;
+}
+
+.nav-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.nav-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #0058bc;
+  letter-spacing: -0.4px;
+}
+
+.nav-btn-right {
+  margin-right: 90px; /* 避让微信小程序右侧胶囊按钮 */
+}
+
+/* 3. 主内容滚动区 */
+.main-content {
+  padding: 12px 16px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+/* 4. 个人信息卡片 (Glass Card) */
+.profile-header-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border-radius: 16px;
+  padding: 18px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.avatar-wrapper {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.avatar-image {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2.5px solid #adc6ff;
+  background-color: #edeeef;
+  display: block;
+}
+
+.vip-badge-corner {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  background-color: #0058bc;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 88, 188, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  line-height: 1;
+}
+
+.vip-star-icon {
+  width: 10px;
+  height: 10px;
+}
+
+.vip-badge-text {
+  letter-spacing: 0.2px;
+}
+
+.profile-info-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-nickname {
+  font-size: 20px;
+  font-weight: 700;
+  color: #191c1d;
+  line-height: 26px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-level-tag {
+  font-size: 14px;
+  font-weight: 400;
+  color: #414755;
+  line-height: 20px;
+}
+
+.btn-edit-profile {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #f3f4f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.btn-edit-profile:active {
+  background-color: #edeeef;
+  transform: scale(0.95);
+}
+
+.edit-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* 5. 学习数据看板 (Learning Stats 3-Grid) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.stat-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 14px 8px;
+  border: 1px solid #edeeef;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.stat-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #414755;
+  margin-bottom: 6px;
+  line-height: 18px;
+}
+
+.stat-value-box {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.stat-num {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-family: "PingFang SC", -apple-system, sans-serif;
+}
+
+.stat-unit {
+  font-size: 11px;
+  font-weight: 500;
+  color: #717786;
+  margin-left: 2px;
+}
+
+.text-primary {
+  color: #0058bc;
+}
+
+.text-secondary {
+  color: #006e28;
+}
+
+/* 6. VIP 会员金卡横幅 */
+.vip-banner-card {
+  background: linear-gradient(135deg, #ffe5a0 0%, #ffd25f 100%);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 229, 160, 0.6);
+  box-shadow: 0 4px 14px rgba(255, 210, 95, 0.3);
+  box-sizing: border-box;
+  transition: transform 0.15s;
+}
+
+.vip-banner-card:active {
+  transform: scale(0.99);
+}
+
+.vip-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.vip-banner-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vip-crown-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.vip-banner-text-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.vip-banner-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #5c3f00;
+  line-height: 22px;
+}
+
+.vip-banner-subtitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: #7d5700;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-unlock-all {
+  background-color: #5c3f00;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 15px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 6px rgba(92, 63, 0, 0.25);
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.btn-unlock-all:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+
+/* 7. 功能菜单列表 */
+.menu-section-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #edeeef;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 16px;
+  border-bottom: 1px solid #f3f4f5;
+  transition: background-color 0.15s;
+  box-sizing: border-box;
+}
+
+.menu-item:active {
+  background-color: #f8f9fa;
+}
+
+.menu-item-last {
+  border-bottom: none;
+}
+
+.menu-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-icon-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bg-primary-fixed {
+  background-color: #d8e2ff;
+}
+
+.bg-surface-container {
+  background-color: #edeeef;
+}
+
+.menu-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.menu-item-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #191c1d;
+  letter-spacing: -0.2px;
+}
+
+.menu-item-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.notes-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0058bc;
+  background-color: #d8e2ff;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  line-height: 16px;
+}
+
+.menu-chevron {
+  width: 16px;
+  height: 16px;
+}
+
+/* 8. 今日目标激励卡片 */
+.motivation-card {
+  background: linear-gradient(135deg, #d8e2ff 0%, #f8f9fa 100%);
+  border-radius: 16px;
+  padding: 20px 18px;
+  border: 1px solid #adc6ff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 88, 188, 0.05);
+  box-sizing: border-box;
+}
+
+.motivation-content {
+  position: relative;
+  z-index: 2;
+}
+
+.motivation-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0058bc;
+  line-height: 24px;
+  margin-bottom: 6px;
+}
+
+.motivation-desc {
+  font-size: 14px;
+  font-weight: 400;
+  color: #414755;
+  line-height: 20px;
+  margin-bottom: 16px;
+  max-width: 82%;
+}
+
+.btn-go-quiz {
+  display: inline-block;
+  background-color: #0058bc;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 24px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 88, 188, 0.25);
+  text-align: center;
+  transition: all 0.15s;
+}
+
+.btn-go-quiz:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+.motivation-watermark {
+  position: absolute;
+  right: -24px;
+  bottom: -24px;
+  width: 140px;
+  height: 140px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+/* 9. 底部固定导航栏 */
+.bottom-navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background-color: #ffffff;
+  border-top: 1px solid #edeeef;
+  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 50;
+  box-sizing: border-box;
+}
+
+.tab-item {
+  flex: 1;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #717786;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.tab-item:active {
+  transform: scale(0.92);
+}
+
+.tab-active {
+  color: #0058bc;
+  font-weight: 600;
+}
+
+.tab-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.tab-label {
+  line-height: 14px;
+}

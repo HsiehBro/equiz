@@ -1,0 +1,23 @@
+{
+    "name": "智能刷题助手",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "devDependencies": {
+        "@tailwindcss/container-queries": "^0.1.1",
+        "@tailwindcss/forms": "^0.5.11",
+        "gulp": "^5.0.1",
+        "gulp-postcss": "^10.0.0",
+        "gulp-rename": "^2.1.0",
+        "postcss": "^8.5.26",
+        "tailwindcss": "^4.3.3",
+        "weapp-tailwindcss": "^5.4.2"
+    }
+}

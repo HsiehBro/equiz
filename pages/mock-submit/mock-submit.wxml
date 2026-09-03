@@ -1,0 +1,155 @@
+<!-- 模拟考试 - 交卷确认与答题卡汇总 (全中文高保真界面) -->
+<view class="page-container">
+
+  <!-- 1. 自定义顶部导航栏 (Custom TopAppBar with Safe Area) -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <!-- 左侧返回按钮 -->
+      <view class="nav-btn" bindtap="onNavBack" aria-label="返回考场">
+        <image class="nav-icon" src="/assets/icons/arrow_back.svg" mode="aspectFit" />
+      </view>
+
+      <!-- 绝对水平居中标题 (Screen Absolute Center) -->
+      <view class="nav-title-box">
+        <text class="nav-title">交卷确认</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 顶部占位块 -->
+  <view style="height: {{statusBarHeight + navBarHeight}}px;"></view>
+
+  <!-- 2. 主体画布内容区 (Main Content Canvas) -->
+  <scroll-view scroll-y class="main-canvas" enable-back-to-top>
+    <view class="canvas-wrapper">
+
+      <!-- 2.1 题目概览卡片 (Question Grid Card) -->
+      <view class="card-section question-grid-card">
+        <!-- 头部标题与筛选切换标签 -->
+        <view class="grid-card-header">
+          <view class="section-title-wrap">
+            <text class="section-title">题目概览</text>
+          </view>
+          
+          <!-- 筛选切换胶囊组 (已答/未答/全部) -->
+          <view class="filter-tab-group">
+            <!-- 全部 -->
+            <view 
+              class="filter-pill {{activeFilter === 'all' ? 'pill-active' : ''}}"
+              bindtap="onSwitchFilter"
+              data-filter="all"
+            >
+              <text class="pill-text">全部 {{totalQuestions}}</text>
+            </view>
+
+            <!-- 已答 -->
+            <view 
+              class="filter-pill {{activeFilter === 'answered' ? 'pill-active pill-answered' : ''}}"
+              bindtap="onSwitchFilter"
+              data-filter="answered"
+            >
+              <view class="legend-circle dot-answered"></view>
+              <text class="pill-text">已答 {{answeredCount}}</text>
+            </view>
+
+            <!-- 未答 -->
+            <view 
+              class="filter-pill {{activeFilter === 'unanswered' ? 'pill-active pill-unanswered' : ''}}"
+              bindtap="onSwitchFilter"
+              data-filter="unanswered"
+            >
+              <view class="legend-circle dot-unanswered"></view>
+              <text class="pill-text">未答 {{unansweredCount}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 试题序号矩阵网格 (Grid Container) -->
+        <scroll-view scroll-y class="grid-scroll-box">
+          <view class="question-grid-container" wx:if="{{displayQuestionList.length > 0}}">
+            <block wx:for="{{displayQuestionList}}" wx:key="id">
+              <view 
+                class="grid-num-btn {{item.isCurrent ? 'btn-current' : (item.isAnswered ? 'btn-answered' : 'btn-unanswered')}}"
+                bindtap="onJumpToQuestion"
+                data-index="{{item.index}}"
+              >
+                {{item.number}}
+              </view>
+            </block>
+          </view>
+
+          <!-- 筛选无结果空状态 -->
+          <view class="grid-empty-box" wx:else>
+            <image class="empty-icon" src="/assets/icons/check_circle_primary.svg" mode="aspectFit" wx:if="{{activeFilter === 'unanswered'}}" />
+            <text class="empty-text">{{activeFilter === 'unanswered' ? '🎉 太棒了，所有试题均已作答完毕！' : '暂无相关题目'}}</text>
+          </view>
+        </scroll-view>
+      </view>
+
+      <!-- 2.2 交卷确认与状态汇总卡片 (Summary & Actions Card) -->
+      <view class="card-section summary-actions-card">
+        <!-- 径向点阵微光背景装饰 (Subtle decorative radial background) -->
+        <view class="radial-pattern-bg"></view>
+
+        <!-- 汇总卡片主标题 -->
+        <view class="summary-headline">准备好交卷了吗？</view>
+
+        <!-- 统计指标行容器 -->
+        <view class="summary-stats-list">
+          <!-- 行 1: 已作答题数 -->
+          <view class="stat-row border-bottom">
+            <view class="stat-label-group">
+              <image class="stat-icon icon-primary" src="/assets/icons/check_circle_primary.svg" mode="aspectFit" />
+              <text class="stat-label-text">已作答题数</text>
+            </view>
+            <view class="stat-value-group">
+              <text class="stat-value-primary">{{answeredCount}}</text>
+              <text class="stat-value-total"> / {{totalQuestions}}</text>
+            </view>
+          </view>
+
+          <!-- 行 2: 未作答题数 -->
+          <view class="stat-row border-bottom">
+            <view class="stat-label-group">
+              <image class="stat-icon icon-gray" src="/assets/icons/help_gray.svg" mode="aspectFit" />
+              <text class="stat-label-text">未作答题数</text>
+            </view>
+            <view class="stat-value-group">
+              <text class="stat-value-error">{{unansweredCount}}</text>
+            </view>
+          </view>
+
+          <!-- 行 3: 剩余时间 -->
+          <view class="stat-row">
+            <view class="stat-label-group">
+              <image class="stat-icon icon-gray" src="/assets/icons/timer_gray.svg" mode="aspectFit" />
+              <text class="stat-label-text">剩余时间</text>
+            </view>
+            <view class="stat-value-group">
+              <text class="stat-value-time">{{countdownText}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 底部主次操作按钮组 (Actions) -->
+        <view class="actions-group">
+          <!-- 确认交卷按钮 -->
+          <button class="btn-confirm-submit" bindtap="onConfirmSubmit" hover-class="btn-hover-primary">
+            <text class="btn-submit-label">确认并提交试卷</text>
+            <image class="btn-send-icon" src="/assets/icons/send_white.svg" mode="aspectFit" />
+          </button>
+
+          <!-- 返回作答按钮 -->
+          <button class="btn-return-exam" bindtap="onReturnToExam" hover-class="btn-hover-secondary">
+            <text class="btn-return-label">返回继续答题</text>
+          </button>
+        </view>
+
+      </view>
+
+      <!-- 底部安全留白 -->
+      <view class="bottom-safe-space"></view>
+    </view>
+  </scroll-view>
+
+</view>
