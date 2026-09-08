@@ -429,42 +429,48 @@ func seedNotesAndPlans(db *gorm.DB) {
 	}
 
 	// 3.1 为护士执业资格考试首题 (CPR) 填充独立急救专业考点评论
-	var nurseQ model.Question
-	if err := db.Where("bank_id = 2").Order("id ASC").First(&nurseQ).Error; err == nil {
-		var nQCount int64
-		db.Model(&model.UserNote{}).Where("question_id = ?", nurseQ.ID).Count(&nQCount)
-		if nQCount == 0 {
-			db.Create(&model.UserNote{
-				UserID:     devUser.ID,
-				BankID:     nurseQ.BankID,
-				QuestionID: nurseQ.ID,
-				Content:    "牢记按压与通气比例：单人或双人成人心肺复苏均为 30:2，按压频率 100~120次/分，深度 5~6cm。必背考点！",
-				Visibility: "public",
-				LikeCount:  15,
-				CreatedAt:  time.Now().Add(-1 * time.Hour),
-				UpdatedAt:  time.Now().Add(-1 * time.Hour),
-			})
-			log.Printf("成功填充护士题库试题 ID:%d 的专属急救评论\n", nurseQ.ID)
+	var nurseBank model.QuestionBank
+	if err := db.Where("title = ?", "2023年护士执业资格考试").First(&nurseBank).Error; err == nil {
+		var nurseQ model.Question
+		if err := db.Where("bank_id = ?", nurseBank.ID).Order("id ASC").First(&nurseQ).Error; err == nil {
+			var nQCount int64
+			db.Model(&model.UserNote{}).Where("question_id = ?", nurseQ.ID).Count(&nQCount)
+			if nQCount == 0 {
+				db.Create(&model.UserNote{
+					UserID:     devUser.ID,
+					BankID:     nurseQ.BankID,
+					QuestionID: nurseQ.ID,
+					Content:    "牢记按压与通气比例：单人或双人成人心肺复苏均为 30:2，按压频率 100~120次/分，深度 5~6cm。必背考点！",
+					Visibility: "public",
+					LikeCount:  15,
+					CreatedAt:  time.Now().Add(-1 * time.Hour),
+					UpdatedAt:  time.Now().Add(-1 * time.Hour),
+				})
+				log.Printf("成功填充护士题库试题 ID:%d 的专属急救评论\n", nurseQ.ID)
+			}
 		}
 	}
 
 	// 3.2 为初级会计首题填充独立会计学考点评论
-	var accQ model.Question
-	if err := db.Where("bank_id = 3").Order("id ASC").First(&accQ).Error; err == nil {
-		var aQCount int64
-		db.Model(&model.UserNote{}).Where("question_id = ?", accQ.ID).Count(&aQCount)
-		if aQCount == 0 {
-			db.Create(&model.UserNote{
-				UserID:     devUser.ID,
-				BankID:     accQ.BankID,
-				QuestionID: accQ.ID,
-				Content:    "核算与监督是会计的两项基本职能，核算是基础，监督是保障。预测前景和参与决策属于拓展职能，注意题干中的‘基本’二字！",
-				Visibility: "public",
-				LikeCount:  9,
-				CreatedAt:  time.Now().Add(-30 * time.Minute),
-				UpdatedAt:  time.Now().Add(-30 * time.Minute),
-			})
-			log.Printf("成功填充会计题库试题 ID:%d 的专属会计评论\n", accQ.ID)
+	var accBank model.QuestionBank
+	if err := db.Where("title = ?", "初级会计实务 - 核心考点").First(&accBank).Error; err == nil {
+		var accQ model.Question
+		if err := db.Where("bank_id = ?", accBank.ID).Order("id ASC").First(&accQ).Error; err == nil {
+			var aQCount int64
+			db.Model(&model.UserNote{}).Where("question_id = ?", accQ.ID).Count(&aQCount)
+			if aQCount == 0 {
+				db.Create(&model.UserNote{
+					UserID:     devUser.ID,
+					BankID:     accQ.BankID,
+					QuestionID: accQ.ID,
+					Content:    "核算与监督是会计的两项基本职能，核算是基础，监督是保障。预测前景和参与决策属于拓展职能，注意题干中的‘基本’二字！",
+					Visibility: "public",
+					LikeCount:  9,
+					CreatedAt:  time.Now().Add(-30 * time.Minute),
+					UpdatedAt:  time.Now().Add(-30 * time.Minute),
+				})
+				log.Printf("成功填充会计题库试题 ID:%d 的专属会计评论\n", accQ.ID)
+			}
 		}
 	}
 

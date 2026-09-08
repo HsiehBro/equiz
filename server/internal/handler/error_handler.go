@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"exam-server/internal/middleware"
@@ -66,3 +68,35 @@ func (h *ErrorHandler) MarkMastered(c *gin.Context) {
 
 	c.JSON(http.StatusOK, model.SuccessResponse("已移出错题集"))
 }
+
+func (h *ErrorHandler) ExportErrorsPDF(c *gin.Context) {
+	userID, err := middleware.GetCurrentUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, model.ErrorResponse(401, "请先登录"))
+		return
+	}
+
+	bankIDStr := c.Query("bank_id")
+	var bankID uint
+	if bankIDStr != "" {
+		if bid, err := strconv.ParseUint(bankIDStr, 10, 32); err == nil {
+			bankID = uint(bid)
+		}
+	}
+
+	pdfBytes, bankName, err := h.errorService.ExportErrorsPDF(userID, bankID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, model.ErrorResponse(400, err.Error()))
+		return
+	}
+
+	fileName := fmt.Sprintf("error_recite_%d.pdf", bankID)
+	if bankName != "" {
+		fileName = fmt.Sprintf("%s_错题背题集.pdf", bankName)
+	}
+
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"; filename*=UTF-8''%s", fileName, url.QueryEscape(fileName)))
+	c.Header("Content-Type", "application/pdf")
+	c.Data(http.StatusOK, "application/pdf", pdfBytes)
+}
+

@@ -399,6 +399,7 @@ type ConfirmImportRequest struct {
 	PreviewToken string `json:"preview_token" binding:"required"`
 	Title        string `json:"title" binding:"required"`
 	Category     string `json:"category"`
+	CategoryID   uint   `json:"category_id"`
 	Description  string `json:"description"`
 	Visibility   string `json:"visibility"` // 'public' (公开) | 'private' (私有)
 }
@@ -427,9 +428,30 @@ func (s *ImportService) ConfirmImport(userID uint, req *ConfirmImportRequest) (*
 		return nil, fmt.Errorf("题库名称「%s」已存在，题库名称须全局唯一，请修改题库名称后重新提交", bankTitle)
 	}
 
-	category := req.Category
-	if category == "" {
-		category = "综合"
+	categoryID := req.CategoryID
+	categoryName := strings.TrimSpace(req.Category)
+
+	// 若传了 category_id，校准 categoryName；若仅传了 categoryName，反查 category_id
+	if categoryID > 0 {
+		var cat model.Category
+		if err := s.db.First(&cat, categoryID).Error; err == nil {
+			categoryName = cat.Name
+		} else {
+			categoryID = 1
+			categoryName = "综合"
+		}
+	} else if categoryName != "" {
+		var cat model.Category
+		if err := s.db.Where("LOWER(TRIM(name)) = LOWER(TRIM(?))", categoryName).First(&cat).Error; err == nil {
+			categoryID = cat.ID
+			categoryName = cat.Name
+		} else {
+			categoryID = 1
+			categoryName = "综合"
+		}
+	} else {
+		categoryID = 1
+		categoryName = "综合"
 	}
 
 	visibility := strings.TrimSpace(req.Visibility)
@@ -437,23 +459,74 @@ func (s *ImportService) ConfirmImport(userID uint, req *ConfirmImportRequest) (*
 		visibility = "private"
 	}
 
+	// 查找用户信息以进行权限与配额校验
+	var user model.User
+	if userID > 0 {
+		_ = s.db.First(&user, userID).Error
+	}
+	if user.Nickname == "" {
+		user.Nickname = "备考学员"
+	}
+
+	reviewStatus := "approved"
+	if visibility == "private" {
+		// 1. 私有题库配额限制校验：普通用户最多2个，VIP用户最多20个，管理员无限制
+		var privateCount int64
+		if err := s.db.Model(&model.QuestionBank{}).Where("creator_id = ? AND visibility = 'private'", userID).Count(&privateCount).Error; err == nil {
+			if user.Role == "user" && privateCount >= 2 {
+				return nil, errors.New("普通用户最多拥有2个私有题库，升级VIP会员可拥有20个私有题库！")
+			} else if user.Role == "vip" && privateCount >= 20 {
+				return nil, errors.New("VIP用户最多拥有20个私有题库，已达上限！")
+			}
+		}
+	} else if visibility == "public" {
+		// 2. 公开题库单次上传限制校验：每次只能上传一个，由admin审批通过后才能再次上传
+		var pendingCount int64
+		if err := s.db.Model(&model.QuestionBank{}).Where("creator_id = ? AND visibility = 'public' AND review_status = 'pending'", userID).Count(&pendingCount).Error; err == nil {
+			if pendingCount > 0 {
+				return nil, errors.New("公开题库每次只能上传一个，您当前已有题库正在等待管理员审批，审批通过后方可再次上传公开题库！")
+			}
+		}
+		// 公开题库需管理员手动审批，初始状态为待审核 (pending)
+		reviewStatus = "pending"
+	}
+
 	var newBank model.QuestionBank
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		newBank = model.QuestionBank{
 			Title:           bankTitle,
-			Category:        category,
+			Category:        categoryName,
+			CategoryID:      categoryID,
 			Description:     req.Description,
 			TotalCount:      len(cached.Questions),
 			IsOfficial:      false,
 			Visibility:      visibility,
+			ReviewStatus:    reviewStatus,
 			CreatorID:       userID,
+			CreatorName:     user.Nickname,
 			SyllabusWeights: cached.SyllabusWeights, // 固化考纲配比，用户后期不可调整
 			CreatedAt:       time.Now(),
 			UpdatedAt:       time.Now(),
 		}
 		if err := tx.Create(&newBank).Error; err != nil {
 			return fmt.Errorf("创建题库记录失败: %w", err)
+		}
+
+		// 若为待审批公开题库，自动生成管理员微信服务通知提醒
+		if visibility == "public" && reviewStatus == "pending" {
+			adminNotice := model.SystemNotification{
+				UserID:    0, // 0 表示面向管理员系统通知
+				Type:      "admin_pending",
+				Title:     "【微信服务通知】有新的公开题库待审批",
+				Content:   fmt.Sprintf("用户「%s」提交了新的公开题库《%s》（共 %d 道题），请前往个人中心手动审批栏进行审核。", user.Nickname, bankTitle, len(cached.Questions)),
+				RelatedID: newBank.ID,
+				IsRead:    false,
+				CreatedAt: time.Now(),
+			}
+			if err := tx.Create(&adminNotice).Error; err != nil {
+				return fmt.Errorf("记录管理员审批通知失败: %w", err)
+			}
 		}
 
 		// 批量插入试题

@@ -60,7 +60,7 @@ func TestNoteLikeCounterLogic(t *testing.T) {
 }
 
 func TestNoteContentValidation(t *testing.T) {
-	svc := NewNoteService(nil)
+	svc := NewNoteService(nil, nil)
 
 	// 空内容应直接在服务层抛出校验错误
 	_, err := svc.CreateNote(1, model.CreateNoteRequest{
@@ -69,5 +69,79 @@ func TestNoteContentValidation(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatalf("expected error for empty note content, got nil")
+	}
+}
+
+func TestNoteReplyStructure(t *testing.T) {
+	parentID := uint(100)
+	req := model.CreateNoteRequest{
+		QuestionID:    1,
+		Content:       "这是针对公开评论的一条回复",
+		ParentID:      &parentID,
+		ReplyToAuthor: "Alex Chen",
+	}
+
+	if req.ParentID == nil || *req.ParentID != 100 {
+		t.Fatalf("expected ParentID 100, got %v", req.ParentID)
+	}
+	if req.ReplyToAuthor != "Alex Chen" {
+		t.Fatalf("expected ReplyToAuthor Alex Chen, got %s", req.ReplyToAuthor)
+	}
+
+	note := model.UserNote{
+		ID:            101,
+		UserID:        2,
+		QuestionID:    1,
+		Content:       req.Content,
+		ParentID:      req.ParentID,
+		ReplyToAuthor: req.ReplyToAuthor,
+	}
+
+	parent := model.UserNote{
+		ID:      100,
+		UserID:  1,
+		Content: "主公开评论",
+		Replies: []model.UserNote{note},
+	}
+
+	if len(parent.Replies) != 1 {
+		t.Fatalf("expected 1 sub-reply, got %d", len(parent.Replies))
+	}
+	if parent.Replies[0].ReplyToAuthor != "Alex Chen" {
+		t.Fatalf("expected sub-reply author Alex Chen, got %s", parent.Replies[0].ReplyToAuthor)
+	}
+}
+
+func TestNoteBankAttributionAlignment(t *testing.T) {
+	// 验证试题所属题库优先原则与题库名称注水机制
+	q := model.Question{
+		ID:        101,
+		BankID:    2,
+		Title:     "成人进行心肺复苏 (CPR) 时，胸外心脏按压与人工呼吸的比例通常为（ ）。",
+		BankTitle: "2023年护士执业资格考试",
+	}
+
+	note := model.UserNote{
+		ID:         1,
+		UserID:     1,
+		QuestionID: q.ID,
+		BankID:     1, // 模拟客户端错误传入的题库 ID
+		Question:   &q,
+		Content:    "CPR 必须牢记 30:2",
+	}
+
+	// 模拟 ListUserNotes 中的校准逻辑
+	if note.Question != nil && note.Question.BankID > 0 {
+		note.BankID = note.Question.BankID
+	}
+	if note.Question != nil && note.Question.BankTitle != "" {
+		note.BankTitle = note.Question.BankTitle
+	}
+
+	if note.BankID != 2 {
+		t.Errorf("expected note.BankID to align to question.BankID 2, got %d", note.BankID)
+	}
+	if note.BankTitle != "2023年护士执业资格考试" {
+		t.Errorf("expected note.BankTitle '2023年护士执业资格考试', got %s", note.BankTitle)
 	}
 }

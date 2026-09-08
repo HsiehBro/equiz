@@ -51,6 +51,10 @@ func (s *PlanService) SavePlan(userID uint, req model.SavePlanRequest) (*model.S
 			existing.AppReminder = req.AppReminder
 			existing.WechatReminder = req.WechatReminder
 			existing.IsActive = req.IsActive
+			if req.ResetCheckIn {
+				existing.CheckInDays = 0
+				existing.LastCheckInDate = ""
+			}
 			existing.UpdatedAt = time.Now()
 
 			if err := tx.Save(&existing).Error; err != nil {
@@ -70,14 +74,16 @@ func (s *PlanService) SavePlan(userID uint, req model.SavePlanRequest) (*model.S
 			}
 
 			newPlan := model.StudyPlan{
-				UserID:         userID,
-				BankID:         req.BankID,
-				DailyGoal:      req.DailyGoal,
-				AppReminder:    req.AppReminder,
-				WechatReminder: req.WechatReminder,
-				IsActive:       isActive,
-				CreatedAt:      time.Now(),
-				UpdatedAt:      time.Now(),
+				UserID:          userID,
+				BankID:          req.BankID,
+				DailyGoal:       req.DailyGoal,
+				AppReminder:     req.AppReminder,
+				WechatReminder:  req.WechatReminder,
+				IsActive:        isActive,
+				CheckInDays:     0,
+				LastCheckInDate: "",
+				CreatedAt:       time.Now(),
+				UpdatedAt:       time.Now(),
 			}
 			if err := tx.Create(&newPlan).Error; err != nil {
 				return err
@@ -164,14 +170,17 @@ func (s *PlanService) DeletePlan(userID uint, planID uint) error {
 func (s *PlanService) buildProgressResponse(userID uint, plan model.StudyPlan) *model.StudyPlanProgressResponse {
 	bankTitle := ""
 	totalQuestions := 0
+	isVIP := false
 	if plan.Bank != nil {
 		bankTitle = plan.Bank.Title
 		totalQuestions = plan.Bank.TotalCount
+		isVIP = plan.Bank.IsVIP
 	} else {
 		var bank model.QuestionBank
 		if err := s.db.First(&bank, plan.BankID).Error; err == nil {
 			bankTitle = bank.Title
 			totalQuestions = bank.TotalCount
+			isVIP = bank.IsVIP
 		}
 	}
 
@@ -218,10 +227,13 @@ func (s *PlanService) buildProgressResponse(userID uint, plan model.StudyPlan) *
 		UserID:              plan.UserID,
 		BankID:              plan.BankID,
 		BankTitle:           bankTitle,
+		IsVIP:               isVIP,
 		DailyGoal:           plan.DailyGoal,
 		AppReminder:         plan.AppReminder,
 		WechatReminder:      plan.WechatReminder,
 		IsActive:            plan.IsActive,
+		CheckInDays:         plan.CheckInDays,
+		LastCheckInDate:     plan.LastCheckInDate,
 		TotalQuestions:      totalQuestions,
 		FinishedQuestions:   int(finishedCount),
 		TodayCount:          int(todayCount),

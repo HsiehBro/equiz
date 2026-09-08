@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 
 	"exam-server/internal/model"
 
@@ -50,3 +51,35 @@ func (s *ErrorService) MarkMastered(userID uint, questionID uint) error {
 	}
 	return nil
 }
+
+// ExportErrorsPDF 导出指定科目错题集的 PDF（背题模式）
+func (s *ErrorService) ExportErrorsPDF(userID uint, bankID uint) ([]byte, string, error) {
+	var bank model.QuestionBank
+	bankName := "错题集"
+	if bankID > 0 {
+		if err := s.db.First(&bank, bankID).Error; err != nil {
+			return nil, "", fmt.Errorf("题库不存在: %w", err)
+		}
+		if bank.Title != "" {
+			bankName = bank.Title
+		}
+	}
+
+	// 查出该科目该用户未掌握的错题
+	errorsList, err := s.ListUserErrors(userID, bankID, false)
+	if err != nil {
+		return nil, "", fmt.Errorf("获取错题列表失败: %w", err)
+	}
+
+	if len(errorsList) == 0 {
+		return nil, "", errors.New("当前科目暂无未掌握的错题，无需导出")
+	}
+
+	pdfBytes, err := GenerateErrorsPDF(bankName, errorsList)
+	if err != nil {
+		return nil, "", fmt.Errorf("生成 PDF 失败: %w", err)
+	}
+
+	return pdfBytes, bankName, nil
+}
+

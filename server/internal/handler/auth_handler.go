@@ -84,3 +84,25 @@ func (h *AuthHandler) GetProfile(c *gin.Context) {
 
 	c.JSON(http.StatusOK, model.SuccessResponse(user))
 }
+
+func (h *AuthHandler) UpdateProfile(c *gin.Context) {
+	userID, err := middleware.GetCurrentUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, model.ErrorResponse(401, err.Error()))
+		return
+	}
+
+	var req service.UpdateProfileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.ErrorResponse(400, "参数格式错误"))
+		return
+	}
+
+	user, err := h.authService.UpdateProfile(userID, req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, model.ErrorResponse(400, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, model.SuccessResponse(user))
+}

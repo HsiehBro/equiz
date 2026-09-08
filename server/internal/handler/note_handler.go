@@ -35,7 +35,7 @@ func (h *NoteHandler) CreateNote(c *gin.Context) {
 
 	note, err := h.noteService.CreateNote(userID, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse(500, err.Error()))
+		c.JSON(http.StatusBadRequest, model.ErrorResponse(400, err.Error()))
 		return
 	}
 
@@ -65,7 +65,7 @@ func (h *NoteHandler) UpdateNote(c *gin.Context) {
 
 	note, err := h.noteService.UpdateNote(userID, uint(noteID), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse(500, err.Error()))
+		c.JSON(http.StatusBadRequest, model.ErrorResponse(400, err.Error()))
 		return
 	}
 

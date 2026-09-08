@@ -20,21 +20,27 @@ type CustomClaims struct {
 
 func JWTAuthMiddleware(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var tokenString string
 		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
+		if authHeader != "" {
+			parts := strings.SplitN(authHeader, " ", 2)
+			if len(parts) == 2 && parts[0] == "Bearer" {
+				tokenString = parts[1]
+			} else {
+				c.JSON(http.StatusUnauthorized, model.ErrorResponse(401, "Token 格式错误，需为 Bearer <token>"))
+				c.Abort()
+				return
+			}
+		} else if queryToken := c.Query("token"); queryToken != "" {
+			tokenString = queryToken
+		}
+
+		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, model.ErrorResponse(401, "未提供认证 Token，请先登录"))
 			c.Abort()
 			return
 		}
 
-		parts := strings.SplitN(authHeader, " ", 2)
-		if !(len(parts) == 2 && parts[0] == "Bearer") {
-			c.JSON(http.StatusUnauthorized, model.ErrorResponse(401, "Token 格式错误，需为 Bearer <token>"))
-			c.Abort()
-			return
-		}
-
-		tokenString := parts[1]
 		token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(secret), nil
 		})
@@ -77,15 +83,19 @@ func GetCurrentUserID(c *gin.Context) (uint, error) {
 // OptionalJWTAuthMiddleware 可选 JWT 认证中间件，若携带合法 Token 则注入上下文，若无则静默放行
 func OptionalJWTAuthMiddleware(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var tokenString string
 		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.Next()
-			return
+		if authHeader != "" {
+			parts := strings.SplitN(authHeader, " ", 2)
+			if len(parts) == 2 && parts[0] == "Bearer" {
+				tokenString = parts[1]
+			}
+		} else if queryToken := c.Query("token"); queryToken != "" {
+			tokenString = queryToken
 		}
 
-		parts := strings.SplitN(authHeader, " ", 2)
-		if len(parts) == 2 && parts[0] == "Bearer" {
-			token, err := jwt.ParseWithClaims(parts[1], &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if tokenString != "" {
+			token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 				return []byte(secret), nil
 			})
 			if err == nil && token.Valid {
@@ -100,3 +110,27 @@ func OptionalJWTAuthMiddleware(secret string) gin.HandlerFunc {
 	}
 }
 
+// GetCurrentUserRole 从 Gin 上下文中获取当前登录用户角色
+func GetCurrentUserRole(c *gin.Context) string {
+	val, exists := c.Get("role")
+	if !exists {
+		return ""
+	}
+	if role, ok := val.(string); ok {
+		return role
+	}
+	return ""
+}
+
+// AdminRequiredMiddleware 必须是管理员角色才能访问的权限中间件
+func AdminRequiredMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role := GetCurrentUserRole(c)
+		if role != "admin" {
+			c.JSON(http.StatusForbidden, model.ErrorResponse(403, "权限不足：该操作仅系统管理员可用"))
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}

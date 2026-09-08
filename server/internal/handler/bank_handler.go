@@ -25,8 +25,9 @@ func (h *BankHandler) ListBanks(c *gin.Context) {
 	if uid, err := middleware.GetCurrentUserID(c); err == nil {
 		userID = uid
 	}
+	role := middleware.GetCurrentUserRole(c)
 
-	banks, err := h.bankService.ListBanks(userID)
+	banks, err := h.bankService.ListBanks(userID, role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse(500, err.Error()))
 		return
@@ -58,6 +59,7 @@ func (h *BankHandler) DeleteBank(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, model.ErrorResponse(401, "请先登录"))
 		return
 	}
+	role := middleware.GetCurrentUserRole(c)
 
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -66,10 +68,38 @@ func (h *BankHandler) DeleteBank(c *gin.Context) {
 		return
 	}
 
-	if err := h.bankService.DeleteBank(uint(id), userID); err != nil {
+	if err := h.bankService.DeleteBank(uint(id), userID, role); err != nil {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse(400, err.Error()))
 		return
 	}
 
 	c.JSON(http.StatusOK, model.SuccessResponse("删除成功"))
+}
+
+func (h *BankHandler) ApplyPublic(c *gin.Context) {
+	userID, err := middleware.GetCurrentUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, model.ErrorResponse(401, "请先登录"))
+		return
+	}
+
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, model.ErrorResponse(400, "无效的题库ID"))
+		return
+	}
+
+	var req struct {
+		UserName string `json:"user_name"`
+	}
+	_ = c.ShouldBindJSON(&req)
+
+	bank, err := h.bankService.ApplyPublic(uint(id), userID, req.UserName)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, model.ErrorResponse(400, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, model.SuccessResponse(bank))
 }

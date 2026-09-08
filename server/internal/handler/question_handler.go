@@ -13,10 +13,14 @@ import (
 
 type QuestionHandler struct {
 	questionService *service.QuestionService
+	bankService     *service.BankService
 }
 
-func NewQuestionHandler(questionService *service.QuestionService) *QuestionHandler {
-	return &QuestionHandler{questionService: questionService}
+func NewQuestionHandler(questionService *service.QuestionService, bankService *service.BankService) *QuestionHandler {
+	return &QuestionHandler{
+		questionService: questionService,
+		bankService:     bankService,
+	}
 }
 
 func (h *QuestionHandler) GetQuestionsByBank(c *gin.Context) {
@@ -30,6 +34,14 @@ func (h *QuestionHandler) GetQuestionsByBank(c *gin.Context) {
 	var userID uint
 	if uid, err := middleware.GetCurrentUserID(c); err == nil {
 		userID = uid
+	}
+	role := middleware.GetCurrentUserRole(c)
+	isVIP := role == "vip" || role == "admin"
+
+	// 校验 VIP 专属题库权限
+	if err := h.bankService.CheckBankVIPAccess(uint(bankID), userID, role, isVIP); err != nil {
+		c.JSON(http.StatusForbidden, model.ErrorResponse(403, err.Error()))
+		return
 	}
 
 	questions, err := h.questionService.GetQuestionsByBankID(uint(bankID), userID)

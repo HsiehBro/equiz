@@ -61,3 +61,20 @@ func (h *PracticeHandler) SubmitExam(c *gin.Context) {
 
 	c.JSON(http.StatusOK, model.SuccessResponse(result))
 }
+
+func (h *PracticeHandler) GetUserStats(c *gin.Context) {
+	userID, err := middleware.GetCurrentUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, model.ErrorResponse(401, "请先登录"))
+		return
+	}
+
+	result, err := h.practiceService.GetUserStats(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse(500, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, model.SuccessResponse(result))
+}
+

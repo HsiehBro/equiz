@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"math"
 	"sort"
 	"strings"
 	"time"
@@ -66,11 +67,17 @@ func (s *PracticeService) SubmitSingleAnswer(userID uint, req *SubmitSingleReque
 
 	isCorrect := CompareAnswers(req.UserAnswer, q.Answer)
 
+	// 题目的题库归属严格以试题实际所属题库为准
+	bankID := q.BankID
+	if bankID == 0 {
+		bankID = req.BankID
+	}
+
 	// 事务内记录作答与错题集状态
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		record := model.UserRecord{
 			UserID:          userID,
-			BankID:          req.BankID,
+			BankID:          bankID,
 			QuestionID:      req.QuestionID,
 			UserAnswer:      req.UserAnswer,
 			IsCorrect:       isCorrect,
@@ -89,22 +96,43 @@ func (s *PracticeService) SubmitSingleAnswer(userID uint, req *SubmitSingleReque
 				if errors.Is(err, gorm.ErrRecordNotFound) {
 					userErr = model.UserError{
 						UserID:      userID,
-						BankID:      req.BankID,
+						BankID:      bankID,
 						QuestionID:  req.QuestionID,
 						WrongCount:  1,
 						IsMastered:  false,
 						LastWrongAt: time.Now(),
 					}
-					return tx.Create(&userErr).Error
+					if err := tx.Create(&userErr).Error; err != nil {
+						return err
+					}
+				} else {
+					return err
 				}
-				return err
+			} else {
+				// 如果已存在该错题，更新计数、校正所属题库并重置掌握状态
+				userErr.BankID = bankID
+				userErr.WrongCount += 1
+				userErr.IsMastered = false
+				userErr.LastWrongAt = time.Now()
+				if err := tx.Save(&userErr).Error; err != nil {
+					return err
+				}
 			}
+		}
 
-			// 如果已存在该错题，更新计数并重置掌握状态
-			userErr.WrongCount += 1
-			userErr.IsMastered = false
-			userErr.LastWrongAt = time.Now()
-			return tx.Save(&userErr).Error
+		// 检查并更新当前活跃学习规划的打卡状态
+		var activePlan model.StudyPlan
+		if err := tx.Where("user_id = ? AND bank_id = ? AND is_active = ?", userID, bankID, true).First(&activePlan).Error; err == nil {
+			now := time.Now()
+			todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+			var todayCount int64
+			tx.Model(&model.UserRecord{}).Where("user_id = ? AND bank_id = ? AND created_at >= ?", userID, bankID, todayStart).Count(&todayCount)
+			todayStr := now.Format("2006-01-02")
+			if int(todayCount) >= activePlan.DailyGoal && activePlan.LastCheckInDate != todayStr {
+				activePlan.LastCheckInDate = todayStr
+				activePlan.CheckInDays += 1
+				_ = tx.Save(&activePlan).Error
+			}
 		}
 
 		return nil
@@ -230,3 +258,50 @@ func max(a, b int) int {
 	}
 	return b
 }
+
+type UserStatsResult struct {
+	TotalQuestions   int `json:"total_questions"`
+	CorrectQuestions int `json:"correct_questions"`
+	AccuracyRate     int `json:"accuracy_rate"`
+	CheckInDays      int `json:"check_in_days"`
+}
+
+// GetUserStats 获取用户学习数据看板核心统计指标
+// 1. 累计打卡天数：由当前活跃计划提供
+// 2. 累计答题：统计 user_records 总量（模拟考试写入 mock_records，严格排他）
+// 3. 平均正确率：累计答对题数 / 累计答题题数 * 100，初始无记录时为 100
+func (s *PracticeService) GetUserStats(userID uint) (*UserStatsResult, error) {
+	var totalQuestions int64
+	if err := s.db.Model(&model.UserRecord{}).Where("user_id = ?", userID).Count(&totalQuestions).Error; err != nil {
+		return nil, err
+	}
+
+	var correctQuestions int64
+	if err := s.db.Model(&model.UserRecord{}).Where("user_id = ? AND is_correct = ?", userID, true).Count(&correctQuestions).Error; err != nil {
+		return nil, err
+	}
+
+	accuracyRate := 100
+	if totalQuestions > 0 {
+		accuracyRate = int(math.Round((float64(correctQuestions) / float64(totalQuestions)) * 100))
+	}
+
+	var activePlan model.StudyPlan
+	checkInDays := 0
+	if err := s.db.Where("user_id = ? AND is_active = ?", userID, true).First(&activePlan).Error; err == nil {
+		checkInDays = activePlan.CheckInDays
+	} else {
+		// 若无显式激活计划，查询最新一条规划
+		if err2 := s.db.Where("user_id = ?", userID).Order("updated_at DESC").First(&activePlan).Error; err2 == nil {
+			checkInDays = activePlan.CheckInDays
+		}
+	}
+
+	return &UserStatsResult{
+		TotalQuestions:   int(totalQuestions),
+		CorrectQuestions: int(correctQuestions),
+		AccuracyRate:     accuracyRate,
+		CheckInDays:      checkInDays,
+	}, nil
+}
+
