@@ -31,6 +31,13 @@
     "miniprogram": {
       "list": [
         {
+          "name": "首页 - 题库主页",
+          "pathName": "pages/index/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "登录页 - 微信授权",
           "pathName": "pages/login/login",
           "query": "",

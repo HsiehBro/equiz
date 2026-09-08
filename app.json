@@ -1,6 +1,8 @@
 {
+  "entryPagePath": "pages/index/index",
   "pages": [
     "pages/index/index",
+    "pages/login/login",
     "pages/import/import",
     "pages/quiz/quiz",
     "pages/messages/messages",
@@ -14,14 +16,16 @@
     "pages/mock-record/mock-record",
     "pages/vip/vip",
     "pages/vip-activity/vip-activity",
-    "pages/notes/notes",
-    "pages/login/login"
+    "pages/notes/notes"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#f8f9fa",
     "navigationBarTitleText": "Exam Prep",
     "navigationBarTextStyle": "black",
+    "backgroundColor": "#f8f9fa",
+    "backgroundColorTop": "#f8f9fa",
+    "backgroundColorBottom": "#f8f9fa",
     "navigationStyle": "custom"
   },
   "style": "v2",

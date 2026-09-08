@@ -91,4 +91,9 @@ const CONFIG = {
 | | `GET` | `/api/v1/plans/active` | 获取当前生效的主目标规划（用于首页与个人中心卡片） |
 | | `POST` | `/api/v1/plans` | 创建或保存题库学习规划与每日目标（可设置顶） |
 | | `DELETE`| `/api/v1/plans/:id` | 删除指定学习规划 |
+| **分类** | `GET` | `/api/v1/categories` | 获取可用题库分类列表（含动态题库数与VIP标识） |
+| | `POST` | `/api/v1/categories` | 新建题库分类（仅系统管理员） |
+| | `PUT` | `/api/v1/categories/:id` | 编辑题库分类名称/图标/排序（仅管理员） |
+| | `DELETE`| `/api/v1/categories/:id` | 删除题库分类（关联题库自动重定向归入「综合」） |
+| | `PUT` | `/api/v1/banks/:id/category` | 修改题库所属分类（创建者与管理员可用） |
 
