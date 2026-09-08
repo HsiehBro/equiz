@@ -696,6 +696,52 @@
   margin-top: 4px;
 }
 
+.selected-cat-badge {
+  font-size: 11px;
+  color: #0058bc;
+  background-color: #d8e2ff;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.category-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.category-chip {
+  padding: 7px 14px;
+  border-radius: 8px;
+  background-color: #f3f4f5;
+  border: 1px solid #e1e3e4;
+  font-size: 12px;
+  line-height: 16px;
+  color: #414755;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-chip:active {
+  transform: scale(0.97);
+}
+
+.category-chip-active {
+  background-color: #edf4ff !important;
+  border-color: #0058bc !important;
+  color: #0058bc !important;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 88, 188, 0.15);
+}
+
+.category-chip-text {
+  font-size: 12px;
+}
+
 .visibility-selector {
   display: flex;
   gap: 10px;

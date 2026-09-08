@@ -188,10 +188,13 @@ Page({
    */
   onNavBack() {
     const pages = getCurrentPages();
-    if (pages.length > 1) {
+    const indexIdx = pages.findIndex(p => p.route && p.route.includes('index/index'));
+    if (indexIdx !== -1) {
+      wx.navigateBack({ delta: pages.length - 1 - indexIdx });
+    } else if (pages.length > 1) {
       wx.navigateBack();
     } else {
-      wx.reLaunch({
+      wx.redirectTo({
         url: '/pages/index/index'
       });
     }
@@ -363,11 +366,17 @@ Page({
     }
 
     if (tab === 'study') {
-      wx.reLaunch({
-        url: '/pages/index/index'
-      });
+      const pages = getCurrentPages();
+      const indexIdx = pages.findIndex(p => p.route && p.route.includes('index/index'));
+      if (indexIdx !== -1) {
+        wx.navigateBack({ delta: pages.length - 1 - indexIdx });
+      } else {
+        wx.redirectTo({
+          url: '/pages/index/index'
+        });
+      }
     } else if (tab === 'profile') {
-      wx.reLaunch({
+      wx.redirectTo({
         url: '/pages/profile/profile'
       });
     }

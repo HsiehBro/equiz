@@ -11,9 +11,12 @@
       <!-- 居中标题 -->
       <view class="nav-title">Exam Prep</view>
       
-      <!-- 右侧主题切换按钮 (避让微信胶囊按钮) -->
-      <view class="nav-btn nav-btn-right" bindtap="onToggleTheme">
-        <image class="nav-icon" src="{{isDarkMode ? '/assets/icons/dark_mode_primary.svg' : '/assets/icons/light_mode_primary.svg'}}" mode="aspectFit" />
+      <!-- 右侧消息中心入口 (避让微信胶囊按钮) -->
+      <view class="nav-btn nav-btn-right" bindtap="onOpenNotifications">
+        <view class="notification-box">
+          <image class="nav-icon" src="/assets/icons/notifications_primary.svg" mode="aspectFit" />
+          <view class="unread-dot"></view>
+        </view>
       </view>
     </view>
   </view>
@@ -26,12 +29,14 @@
     
     <!-- 2. 个人信息卡片 (Profile Header & Glass Card) -->
     <view class="profile-header-card">
-      <view class="avatar-wrapper">
-        <image class="avatar-image" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
-        <!-- VIP / 管理员 徽标角标 -->
-        <view class="vip-badge-corner" wx:if="{{userInfo.isVip || userInfo.role === 'admin'}}">
-          <image class="vip-star-icon" src="/assets/icons/star_white.svg" mode="aspectFit" />
-          <text class="vip-badge-text">{{userInfo.role === 'admin' ? 'ADMIN' : 'VIP'}}</text>
+      <view class="avatar-column">
+        <view class="avatar-wrapper">
+          <image class="avatar-image {{userInfo.isVip || userInfo.role === 'admin' ? 'avatar-vip-gold-ring' : ''}}" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
+        </view>
+        <!-- 所有 VIP 用户头像下的身份和截至日期合在一起且显示为金标 -->
+        <view class="avatar-vip-gold-badge" wx:if="{{(userInfo.isVip || userInfo.role === 'admin') && userInfo.vipGoldBadgeText}}">
+          <image class="gold-badge-icon" src="/assets/icons/star_gold.svg" mode="aspectFit" />
+          <text class="gold-badge-text">{{userInfo.vipGoldBadgeText}}</text>
         </view>
       </view>
 
@@ -45,12 +50,21 @@
       </view>
     </view>
 
-    <!-- 3. 今日目标激励卡片 (Motivation Card - 已根据原型调整至头像信息卡片下方) -->
-    <view class="motivation-card">
+    <!-- 3. 今日目标激励卡片 (Motivation Card - 与学习规划题库和时间规划严格一致) -->
+    <view class="motivation-card" bindtap="onTapPlanCard">
       <view class="motivation-content">
-        <view class="motivation-title">{{motivationTitle || '今日目标未完成'}}</view>
-        <view class="motivation-desc">{{motivationDesc || '保持手感，坚持练习，考试必过！'}}</view>
-        <view class="btn-go-quiz" bindtap="onGoQuiz">
+        <view class="motivation-header-row">
+          <view class="motivation-title">{{motivationTitle || '今日目标进行中'}}</view>
+          <view class="motivation-bank-tag {{activePlan.isVip ? 'motivation-bank-tag-vip' : ''}}" wx:if="{{activePlan && activePlan.bankTitle}}">
+            <image class="bank-tag-icon" src="{{activePlan.isVip ? '/assets/icons/workspace_premium_gold.svg' : '/assets/icons/library_books_active.svg'}}" mode="aspectFit" />
+            <text class="bank-tag-name">{{activePlan.bankTitle}}</text>
+            <view class="bank-tag-vip-badge" wx:if="{{activePlan.isVip}}">
+              <text>VIP</text>
+            </view>
+          </view>
+        </view>
+        <view class="motivation-desc">{{motivationDesc || '今日目标 30 题，预计 2026-09-11 学完 (需 4 天)'}}</view>
+        <view class="btn-go-quiz" catchtap="onGoQuiz">
           去刷题
         </view>
       </view>
@@ -101,6 +115,133 @@
       </view>
       <view class="btn-unlock-all" catchtap="onOpenVip">
         {{userInfo.isVip || userInfo.role === 'admin' ? '查看特权' : '解锁全部'}}
+      </view>
+    </view>
+
+    <!-- 5.5 管理员手动审批栏 (Admin Manual Approval Section) -->
+    <view class="admin-approval-card" wx:if="{{userInfo.role === 'admin'}}">
+      <view class="admin-approval-header">
+        <view class="admin-header-left">
+          <view class="admin-icon-box">
+            <image class="admin-icon" src="/assets/icons/assignment_primary.svg" mode="aspectFit" />
+          </view>
+          <view class="admin-header-text">
+            <view class="admin-card-title">公开题库手动审批</view>
+            <view class="admin-card-subtitle">审核用户申请公开题库，通过后全员可见并推送提示</view>
+          </view>
+        </view>
+        <!-- 去掉红框的全部已审批，仅当存在待审批题库时展示角标 -->
+        <view class="pending-count-pill pill-active" wx:if="{{pendingBanks.length > 0}}">
+          {{pendingBanks.length}} 个待审批
+        </view>
+      </view>
+
+      <!-- 待审批列表 -->
+      <view class="approval-list" wx:if="{{pendingBanks.length > 0}}">
+        <block wx:for="{{pendingBanks}}" wx:key="id">
+          <view class="approval-item">
+            <view class="approval-item-top">
+              <view class="approval-title-row">
+                <text class="approval-bank-title">{{item.title}}</text>
+                <text class="approval-tag-pending">待审批</text>
+              </view>
+              <view class="approval-meta-row">
+                <text class="approval-meta-text">上传者: {{item.creator_name || item.creatorName || '备考学员'}}</text>
+                <text class="approval-meta-dot">·</text>
+                <text class="approval-meta-text">共 {{item.total_count || item.totalCount || 0}} 题</text>
+                <text class="approval-meta-dot">·</text>
+                <text class="approval-meta-text">分类: {{item.category || '综合'}}</text>
+              </view>
+            </view>
+            <view class="approval-actions-row">
+              <view class="btn-approval-reject" bindtap="onRejectBank" data-id="{{item.id}}" data-title="{{item.title}}" data-creatorid="{{item.creator_id || item.creatorId}}">
+                驳回并删除
+              </view>
+              <view class="btn-approval-pass" bindtap="onApproveBank" data-id="{{item.id}}" data-title="{{item.title}}" data-creatorid="{{item.creator_id || item.creatorId}}">
+                同意公开
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+      <view class="approval-empty" wx:else>
+        <image class="approval-empty-icon" src="/assets/icons/check_circle_green.svg" mode="aspectFit" />
+        <text class="approval-empty-text">当前无待审批的公开题库申请</text>
+      </view>
+    </view>
+
+    <!-- 5.6 管理员题库分类管理栏 (Admin Category Management Section) -->
+    <view class="admin-category-card" wx:if="{{userInfo.role === 'admin'}}">
+      <view class="admin-category-header" bindtap="onToggleCategoryCollapse">
+        <view class="admin-header-left">
+          <view class="admin-icon-box">
+            <image class="admin-icon" src="/assets/icons/apps_primary.svg" mode="aspectFit" />
+          </view>
+          <view class="admin-header-text">
+            <view class="admin-card-title-row">
+              <text class="admin-card-title">题库分类管理</text>
+              <text class="cat-count-badge" wx:if="{{adminCategories.length > 0}}">{{adminCategories.length}}个</text>
+            </view>
+            <view class="admin-card-subtitle">{{isCategorySectionCollapsed ? '已折叠 · 点击展开管理' : '维护题库分类、调序与下架'}}</view>
+          </view>
+        </view>
+        <view class="admin-header-right">
+          <view class="btn-add-category" catchtap="onOpenAddCategoryModal">
+            <image class="btn-add-icon" src="/assets/icons/add_white.svg" mode="aspectFit" />
+            <text>新增</text>
+          </view>
+          <view class="btn-collapse-toggle">
+            <text class="collapse-text">{{isCategorySectionCollapsed ? '展开' : '收起'}}</text>
+            <image class="collapse-chevron {{isCategorySectionCollapsed ? '' : 'chevron-expanded'}}" src="/assets/icons/expand_more_gray.svg" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+
+      <!-- 可折叠内容区 (Collapsible Body) -->
+      <view class="category-collapsible-body" wx:if="{{!isCategorySectionCollapsed}}">
+        <!-- 分类列表 -->
+        <view class="category-manage-list" wx:if="{{adminCategories.length > 0}}">
+          <block wx:for="{{adminCategories}}" wx:key="id">
+            <view class="category-manage-item">
+              <view class="category-item-main">
+                <view class="cat-item-icon-box {{item.bgClass || item.bg_class || 'bg-blue-light'}}">
+                  <image class="cat-item-icon" src="{{item.icon || '/assets/icons/menu_book_primary.svg'}}" mode="aspectFit" />
+                </view>
+                <view class="category-item-info">
+                  <view class="category-item-header">
+                    <text class="category-item-name">{{item.name}}</text>
+                    <view class="category-tag tag-default" wx:if="{{item.id === 1}}">系统默认</view>
+                    <view class="category-tag {{item.is_active !== false ? 'tag-active' : 'tag-inactive'}}">
+                      {{item.is_active !== false ? '展示中' : '已下架'}}
+                    </view>
+                  </view>
+                  <view class="category-item-meta">
+                    <text class="category-meta-text">排序: {{item.sort_order !== undefined ? item.sort_order : 0}}</text>
+                    <text class="category-meta-dot">·</text>
+                    <text class="category-meta-text">{{item.bank_count || 0}} 个题库</text>
+                    <block wx:if="{{item.description}}">
+                      <text class="category-meta-dot">·</text>
+                      <text class="category-meta-desc">{{item.description}}</text>
+                    </block>
+                  </view>
+                </view>
+              </view>
+              <view class="category-item-actions">
+                <view class="btn-cat-action btn-cat-edit" bindtap="onOpenEditCategoryModal" data-item="{{item}}">
+                  <image class="cat-action-icon" src="/assets/icons/edit_gray.svg" mode="aspectFit" />
+                  <text>编辑</text>
+                </view>
+                <view class="btn-cat-action btn-cat-del {{item.id === 1 ? 'btn-cat-disabled' : ''}}" bindtap="onDeleteCategory" data-id="{{item.id}}" data-name="{{item.name}}">
+                  <image class="cat-action-icon" src="/assets/icons/delete_gray.svg" mode="aspectFit" />
+                  <text>删除</text>
+                </view>
+              </view>
+            </view>
+          </block>
+        </view>
+        <view class="category-empty" wx:else>
+          <text class="category-empty-text">暂无分类数据，请点击右上角新增</text>
+        </view>
       </view>
     </view>
 
@@ -209,6 +350,112 @@
     <view class="tab-item tab-active" bindtap="onSwitchTab" data-tab="profile">
       <image class="tab-icon" src="/assets/icons/person_primary.svg" mode="aspectFit" />
       <text class="tab-label">个人中心</text>
+    </view>
+  </view>
+
+  <!-- 分类新增/编辑弹窗 (Modal) -->
+  <view class="modal-backdrop" wx:if="{{showCategoryModal}}" bindtap="onCloseCategoryModal">
+    <view class="category-modal-card" catchtap="preventDumbTap">
+      <view class="cat-modal-header">
+        <view class="cat-modal-title">{{isEditingCategory ? '编辑分类' : '新增题库分类'}}</view>
+        <view class="cat-modal-close" bindtap="onCloseCategoryModal">✕</view>
+      </view>
+      
+      <view class="cat-modal-body">
+        <!-- 分类名称 -->
+        <view class="cat-form-group">
+          <view class="cat-form-label">
+            <text>分类名称</text>
+            <text class="cat-form-required">*</text>
+            <text class="cat-form-tip" wx:if="{{isEditingCategory && editingCatId === 1}}">（系统默认分类不可改名）</text>
+          </view>
+          <input 
+            class="cat-form-input {{isEditingCategory && editingCatId === 1 ? 'input-disabled' : ''}}" 
+            placeholder="如：金融财务、考研专区" 
+            placeholder-class="placeholder-text"
+            maxlength="20"
+            value="{{catFormName}}"
+            disabled="{{isEditingCategory && editingCatId === 1}}"
+            bindinput="onInputCatName"
+          />
+        </view>
+
+        <!-- 分类图标选择器 -->
+        <view class="cat-form-group">
+          <view class="cat-form-label">
+            <text>分类图标</text>
+            <text class="cat-form-tip">（点击挑选专属图标）</text>
+          </view>
+          <view class="cat-icon-grid">
+            <block wx:for="{{categoryIconPresets}}" wx:key="id">
+              <view 
+                class="cat-icon-chip {{catFormIcon === item.icon ? 'chip-selected' : ''}}"
+                bindtap="onSelectCatIcon"
+                data-icon="{{item.icon}}"
+                data-bg="{{item.bgClass}}"
+              >
+                <view class="chip-icon-box {{item.bgClass}}">
+                  <image class="chip-icon" src="{{item.icon}}" mode="aspectFit" />
+                </view>
+                <text class="chip-name">{{item.name}}</text>
+                <view class="chip-check-dot" wx:if="{{catFormIcon === item.icon}}">✓</view>
+              </view>
+            </block>
+          </view>
+        </view>
+
+        <!-- 分类描述 -->
+        <view class="cat-form-group">
+          <view class="cat-form-label">
+            <text>分类简介/描述</text>
+          </view>
+          <input 
+            class="cat-form-input" 
+            placeholder="如：会计/证券/银行考试专项真题" 
+            placeholder-class="placeholder-text"
+            maxlength="40"
+            value="{{catFormDesc}}"
+            bindinput="onInputCatDesc"
+          />
+        </view>
+
+        <!-- 排序权重 -->
+        <view class="cat-form-group">
+          <view class="cat-form-label">
+            <text>排序权重 (数字越小越靠前)</text>
+          </view>
+          <input 
+            class="cat-form-input" 
+            type="number"
+            placeholder="如：10" 
+            placeholder-class="placeholder-text"
+            maxlength="4"
+            value="{{catFormSortOrder}}"
+            bindinput="onInputCatSortOrder"
+          />
+        </view>
+
+        <!-- 上架/下架开关 -->
+        <view class="cat-form-group form-group-switch" wx:if="{{isEditingCategory}}">
+          <view class="cat-switch-info">
+            <view class="cat-switch-title">前台启用展示</view>
+            <view class="cat-switch-desc">关闭后该分类在前台分类卡片与筛选抽屉中隐藏</view>
+          </view>
+          <switch 
+            color="#0058bc" 
+            checked="{{catFormIsActive}}" 
+            disabled="{{editingCatId === 1}}"
+            bindchange="onToggleCatActive" 
+          />
+        </view>
+      </view>
+
+      <view class="cat-modal-footer">
+        <button class="cat-btn-cancel" bindtap="onCloseCategoryModal">取消</button>
+        <button class="cat-btn-confirm" bindtap="onSubmitCategoryForm">
+          {{isEditingCategory ? '保存修改' : '确认新增'}}
+        </button>
+      </view>
     </view>
   </view>
 </view>

@@ -16,12 +16,16 @@ Page({
       singleChoiceCount: 40,
       multipleChoiceCount: 10,
       hasAnalysis: true
-    }
+    },
+    categories: [],
+    selectedCategoryId: 1,
+    selectedCategoryName: '综合'
   },
 
   onLoad() {
     this.initNavBar();
     this.loadExistingBanks();
+    this.loadCategories();
   },
 
   initNavBar() {
@@ -79,6 +83,58 @@ Page({
   },
 
   /**
+   * 加载系统可用分类列表供导入时选择
+   */
+  loadCategories() {
+    const defaultCategories = [
+      { id: 1, name: '综合', icon: '/assets/icons/grid_view_gray.svg' },
+      { id: 2, name: '医学类', icon: '/assets/icons/medical_services_primary.svg' },
+      { id: 3, name: '财经类', icon: '/assets/icons/account_balance_gray.svg' },
+      { id: 4, name: 'IT互联网', icon: '/assets/icons/terminal_gray.svg' }
+    ];
+
+    if (!CONFIG.USE_MOCK) {
+      request({ url: '/api/v1/categories', needAuth: false })
+        .then((cats) => {
+          if (Array.isArray(cats) && cats.length > 0) {
+            this.setData({
+              categories: cats,
+              selectedCategoryId: cats[0].id,
+              selectedCategoryName: cats[0].name
+            });
+            return;
+          }
+          this.setData({
+            categories: defaultCategories,
+            selectedCategoryId: defaultCategories[0].id,
+            selectedCategoryName: defaultCategories[0].name
+          });
+        })
+        .catch(() => {
+          this.setData({
+            categories: defaultCategories,
+            selectedCategoryId: defaultCategories[0].id,
+            selectedCategoryName: defaultCategories[0].name
+          });
+        });
+    } else {
+      this.setData({
+        categories: defaultCategories,
+        selectedCategoryId: defaultCategories[0].id,
+        selectedCategoryName: defaultCategories[0].name
+      });
+    }
+  },
+
+  onSelectImportCategory(e) {
+    const { id, name } = e.currentTarget.dataset;
+    this.setData({
+      selectedCategoryId: Number(id),
+      selectedCategoryName: name
+    });
+  },
+
+  /**
    * 检查题库名称是否与已有题库冲突 (全局唯一校验)
    */
   checkTitleConflict(name) {
@@ -90,10 +146,13 @@ Page({
 
   onNavBack() {
     const pages = getCurrentPages();
-    if (pages.length > 1) {
+    const indexIdx = pages.findIndex(p => p.route && p.route.includes('index/index'));
+    if (indexIdx !== -1) {
+      wx.navigateBack({ delta: pages.length - 1 - indexIdx });
+    } else if (pages.length > 1) {
       wx.navigateBack();
     } else {
-      wx.reLaunch({
+      wx.redirectTo({
         url: '/pages/index/index'
       });
     }
@@ -562,6 +621,65 @@ Page({
     const token = this.data.previewToken;
     const visibility = this.data.libraryVisibility || 'private';
 
+    const userInfo = wx.getStorageSync('user_info') || {};
+    const isVip = wx.getStorageSync('user_is_vip') || userInfo.role === 'vip' || userInfo.role === 'admin';
+    const role = userInfo.role || 'user';
+    const currentUserId = userInfo.id || userInfo.open_id || 'dev_user_001';
+
+    // 1. 私有题库配额限制校验：普通用户最多2个，VIP用户最多20个，管理员无限制
+    if (visibility === 'private' && role !== 'admin') {
+      const customLibs = wx.getStorageSync('custom_libraries') || [];
+      const userPrivateLibs = customLibs.filter(l => {
+        const isOwner = !l.creatorId || String(l.creatorId) === String(currentUserId);
+        return isOwner && l.visibility === 'private';
+      });
+      const maxAllowed = isVip ? 20 : 2;
+      if (userPrivateLibs.length >= maxAllowed) {
+        if (!isVip) {
+          wx.showModal({
+            title: '私有题库已达上限',
+            content: `普通用户最多可拥有 2 个私有题库（当前已有 ${userPrivateLibs.length} 个）。\n\n升级 VIP 会员即可解锁拥有多达 20 个私有题库！是否前往升级？`,
+            confirmText: '去开通',
+            cancelText: '取消',
+            confirmColor: '#0058bc',
+            success: (res) => {
+              if (res.confirm) {
+                wx.navigateTo({ url: '/pages/vip/vip' });
+              }
+            }
+          });
+        } else {
+          wx.showModal({
+            title: '私有题库已达上限',
+            content: `VIP 会员最多可拥有 20 个私有题库（当前已有 ${userPrivateLibs.length} 个）。\n如需导入新题库，请先删除不再需要的旧私有题库。`,
+            showCancel: false,
+            confirmText: '我知道了',
+            confirmColor: '#0058bc'
+          });
+        }
+        return;
+      }
+    }
+
+    // 2. 公开题库单次上传校验：每次只能上传一个，由admin审批通过后才能再次上传，累计上传次数不限
+    if (visibility === 'public') {
+      const customLibs = wx.getStorageSync('custom_libraries') || [];
+      const hasPendingPublic = customLibs.some(l => {
+        const isOwner = !l.creatorId || String(l.creatorId) === String(currentUserId);
+        return isOwner && l.visibility === 'public' && l.reviewStatus === 'pending';
+      });
+      if (hasPendingPublic) {
+        wx.showModal({
+          title: '上传限制提示',
+          content: '公开题库每次只能上传 1 个！\n您当前已有题库正在等待管理员审批，由 Admin 审批通过后方可再次上传（累计上传次数没有限制）。',
+          showCancel: false,
+          confirmText: '我知道了',
+          confirmColor: '#ba1a1a'
+        });
+        return;
+      }
+    }
+
     wx.showLoading({
       title: '正在导入入库...',
       mask: true
@@ -575,6 +693,8 @@ Page({
         data: {
           preview_token: token,
           title: name,
+          category_id: this.data.selectedCategoryId,
+          category: this.data.selectedCategoryName,
           visibility: visibility
         }
       })
@@ -586,26 +706,45 @@ Page({
             this.existingBankTitles.push(name);
           }
 
-          wx.showModal({
-            title: '导入成功',
-            content: `题库「${name}」已成功导入，共 ${createdBank.total_count || total} 道题目。是否立即开始刷题？`,
-            confirmText: '开始刷题',
-            cancelText: '返回首页',
-            confirmColor: '#0058bc',
-            success: (res) => {
-              if (res.confirm) {
-                wx.navigateTo({
-                  url: `/pages/quiz/quiz?bankId=${createdBank.id}&title=${encodeURIComponent(name)}`
-                });
-              } else {
-                wx.navigateBack({
-                  fail: () => {
-                    wx.reLaunch({ url: '/pages/index/index' });
-                  }
-                });
+          if (visibility === 'public') {
+            wx.showModal({
+              title: '公开申请已提交',
+              content: `题库「${name}」已提交并进入【待审核】状态（当前为您个人私有）。\n系统已向管理员发送微信提示，审批通过后将正式全员公开！`,
+              confirmText: '查看题库',
+              cancelText: '开始刷题',
+              confirmColor: '#0058bc',
+              success: (res) => {
+                if (res.confirm) {
+                  wx.redirectTo({ url: '/pages/index/index' });
+                } else {
+                  wx.navigateTo({
+                    url: `/pages/quiz/quiz?bankId=${createdBank.id}&title=${encodeURIComponent(name)}`
+                  });
+                }
               }
-            }
-          });
+            });
+          } else {
+            wx.showModal({
+              title: '导入成功',
+              content: `私有题库「${name}」已成功导入，共 ${createdBank.total_count || total} 道题目。是否立即开始刷题？`,
+              confirmText: '开始刷题',
+              cancelText: '返回首页',
+              confirmColor: '#0058bc',
+              success: (res) => {
+                if (res.confirm) {
+                  wx.navigateTo({
+                    url: `/pages/quiz/quiz?bankId=${createdBank.id}&title=${encodeURIComponent(name)}`
+                  });
+                } else {
+                  wx.navigateBack({
+                    fail: () => {
+                      wx.redirectTo({ url: '/pages/index/index' });
+                    }
+                  });
+                }
+              }
+            });
+          }
         })
         .catch((err) => {
           wx.hideLoading();
@@ -619,6 +758,14 @@ Page({
               content: msg,
               showCancel: false,
               confirmText: '去修改',
+              confirmColor: '#ba1a1a'
+            });
+          } else if (msg.includes('私有题库') || msg.includes('公开题库')) {
+            wx.showModal({
+              title: '权限限制提示',
+              content: msg,
+              showCancel: false,
+              confirmText: '我知道了',
               confirmColor: '#ba1a1a'
             });
           } else {
@@ -636,17 +783,20 @@ Page({
         nameConflictError: ''
       });
 
-      const userInfo = wx.getStorageSync('user_info') || {};
-      const currentUserId = userInfo.id || userInfo.open_id || 'dev_user_001';
-
+      const isPublic = visibility === 'public';
       const newLib = {
         id: 'lib_' + Date.now(),
         title: name,
+        category: this.data.selectedCategoryName || '综合',
+        categoryId: this.data.selectedCategoryId || 1,
         totalCount: total,
         progress: 0,
         lastPractice: '刚刚',
         visibility: visibility,
+        reviewStatus: isPublic ? 'pending' : 'approved',
         creatorId: currentUserId,
+        creatorName: userInfo.nickname || '备考学员',
+        isVIP: false,
         isPrimary: true
       };
 
@@ -657,30 +807,63 @@ Page({
         if (!this.existingBankTitles.includes(name)) {
           this.existingBankTitles.push(name);
         }
+
+        // 若为公开题库，向管理员微信服务通知池写入提醒
+        if (isPublic) {
+          const adminNotices = wx.getStorageSync('admin_system_notifications') || [];
+          adminNotices.unshift({
+            id: 'admin_notice_' + Date.now(),
+            type: 'admin_pending',
+            title: '【微信服务通知】有新的公开题库待审批',
+            content: `用户「${userInfo.nickname || '备考学员'}」提交了新的公开题库《${name}》（共 ${total} 题），请前往个人中心手动审批栏进行审核。`,
+            time: '刚刚',
+            isRead: false
+          });
+          wx.setStorageSync('admin_system_notifications', adminNotices);
+        }
       } catch (e) {
         console.log('保存题库缓存异常', e);
       }
 
-      wx.showModal({
-        title: '导入成功',
-        content: `题库「${name}」已成功导入，共 ${total} 道题目。是否立即开始刷题？`,
-        confirmText: '开始刷题',
-        cancelText: '返回首页',
-        confirmColor: '#0058bc',
-        success: (res) => {
-          if (res.confirm) {
-            wx.navigateTo({
-              url: '/pages/quiz/quiz'
-            });
-          } else {
-            wx.navigateBack({
-              fail: () => {
-                wx.reLaunch({ url: '/pages/index/index' });
-              }
-            });
+      if (isPublic) {
+        wx.showModal({
+          title: '公开申请已提交',
+          content: `题库「${name}」已提交并进入【待审核】状态（当前为您个人私有）。\n系统已向管理员发送微信提示，审批通过后将正式全员公开！`,
+          confirmText: '查看题库',
+          cancelText: '开始刷题',
+          confirmColor: '#0058bc',
+          success: (res) => {
+            if (res.confirm) {
+              wx.redirectTo({ url: '/pages/index/index' });
+            } else {
+              wx.navigateTo({
+                url: '/pages/quiz/quiz'
+              });
+            }
           }
-        }
-      });
+        });
+      } else {
+        wx.showModal({
+          title: '导入成功',
+          content: `私有题库「${name}」已成功导入，共 ${total} 道题目。是否立即开始刷题？`,
+          confirmText: '开始刷题',
+          cancelText: '返回首页',
+          confirmColor: '#0058bc',
+          success: (res) => {
+            if (res.confirm) {
+              wx.navigateTo({
+                url: '/pages/quiz/quiz'
+              });
+            } else {
+              wx.navigateBack({
+                fail: () => {
+                  wx.redirectTo({ url: '/pages/index/index' });
+                }
+              });
+            }
+          }
+        });
+      }
     }, 600);
   },
 

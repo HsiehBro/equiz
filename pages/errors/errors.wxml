@@ -11,8 +11,13 @@
       <!-- 居中标题 -->
       <view class="nav-title">Exam Prep</view>
       
-      <!-- 右侧空白占位 (避让微信胶囊按钮) -->
-      <view class="nav-btn nav-btn-right"></view>
+      <!-- 右侧消息中心入口 (避让微信胶囊按钮) -->
+      <view class="nav-btn nav-btn-right" bindtap="onOpenNotifications">
+        <view class="notification-box">
+          <image class="nav-icon" src="/assets/icons/notifications_primary.svg" mode="aspectFit" />
+          <view class="unread-dot"></view>
+        </view>
+      </view>
     </view>
   </view>
 
@@ -80,7 +85,13 @@
             </view>
 
             <!-- 科目名称与描述 -->
-            <view class="subject-title">{{item.name}}</view>
+            <view class="subject-title-row">
+              <view class="subject-title">{{item.name}}</view>
+              <view class="vip-badge-sm" wx:if="{{item.isVip}}">
+                <image class="vip-badge-icon" src="/assets/icons/workspace_premium_gold.svg" mode="aspectFit" />
+                <text>VIP</text>
+              </view>
+            </view>
             <view class="subject-desc" wx:if="{{!isSearching || !item.searchHighlightDesc}}">{{item.desc}}</view>
             <view class="subject-highlight-desc" wx:else>{{item.searchHighlightDesc}}</view>
 

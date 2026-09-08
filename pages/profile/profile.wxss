@@ -62,6 +62,24 @@
   margin-right: 90px; /* 避让微信小程序右侧胶囊按钮 */
 }
 
+.notification-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.unread-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #ba1a1a;
+  border: 1.5px solid #f8f9fa;
+}
+
 /* 3. 主内容滚动区 */
 .main-content {
   padding: 12px 16px 24px 16px;
@@ -83,6 +101,8 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  min-height: 96px;
+  flex-shrink: 0;
   box-sizing: border-box;
 }
 
@@ -100,33 +120,12 @@
   border: 2.5px solid #adc6ff;
   background-color: #edeeef;
   display: block;
+  box-sizing: border-box;
 }
 
-.vip-badge-corner {
-  position: absolute;
-  bottom: -2px;
-  right: -4px;
-  background-color: #0058bc;
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 9999px;
-  border: 2px solid #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 88, 188, 0.25);
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  line-height: 1;
-}
-
-.vip-star-icon {
-  width: 10px;
-  height: 10px;
-}
-
-.vip-badge-text {
-  letter-spacing: 0.2px;
+.avatar-vip-gold-ring {
+  border: 2.5px solid #f59e0b !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.28);
 }
 
 .profile-info-box {
@@ -420,12 +419,68 @@
   z-index: 2;
 }
 
+.motivation-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
 .motivation-title {
   font-size: 18px;
   font-weight: 700;
   color: #0058bc;
   line-height: 24px;
-  margin-bottom: 6px;
+}
+
+.motivation-bank-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: rgba(0, 88, 188, 0.08);
+  border: 1px solid rgba(0, 88, 188, 0.2);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #0058bc;
+  max-width: 195px;
+}
+
+.motivation-bank-tag-vip {
+  background: linear-gradient(135deg, #fff9e6 0%, #fff0c2 100%);
+  border: 1px solid rgba(229, 166, 35, 0.45);
+  color: #8c6000;
+  box-shadow: 0 1px 3px rgba(212, 136, 6, 0.08);
+}
+
+.bank-tag-vip-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5a623 0%, #d48806 100%);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 4px;
+  margin-left: 2px;
+  letter-spacing: 0.5px;
+  line-height: 12px;
+}
+
+.bank-tag-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.bank-tag-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .motivation-desc {
@@ -434,7 +489,7 @@
   color: #414755;
   line-height: 20px;
   margin-bottom: 16px;
-  max-width: 82%;
+  max-width: 86%;
 }
 
 .btn-go-quiz {
@@ -514,3 +569,839 @@
 .tab-label {
   line-height: 14px;
 }
+
+/* ==========================================================================
+   VIP 截止日期与管理员手动审批栏专属样式
+   ========================================================================== */
+
+/* 头像与下方截止日期容器 */
+.avatar-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+/* VIP 用户头像下方统一身份与截止日期金标 */
+.avatar-vip-gold-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: linear-gradient(135deg, #fff7d6 0%, #ffd768 50%, #e09600 100%);
+  border: 1.5px solid #ffffff;
+  border-radius: 9999px;
+  padding: 2px 9px;
+  box-shadow: 0 2px 8px rgba(224, 150, 0, 0.35);
+  box-sizing: border-box;
+}
+
+.gold-badge-icon {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+.gold-badge-text {
+  font-size: 10px;
+  font-weight: 800;
+  color: #633f00;
+  white-space: nowrap;
+  letter-spacing: 0.1px;
+  line-height: 1.2;
+}
+
+/* 管理员手动审批卡片 */
+.admin-approval-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1.5px solid rgba(0, 88, 188, 0.16);
+  box-shadow: 0 4px 16px rgba(0, 88, 188, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.admin-approval-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background-color: #d8e2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.admin-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.admin-card-subtitle {
+  font-size: 11px;
+  color: #717786;
+}
+
+.pending-count-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background-color: #edeeef;
+  color: #717786;
+}
+
+.pending-count-pill.pill-active {
+  background-color: #ffdad6;
+  color: #ba1a1a;
+}
+
+/* 待审批列表与项目 */
+.approval-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.approval-item {
+  background-color: #f8f9fa;
+  border: 1px solid #e1e3e4;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.approval-item-top {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.approval-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.approval-bank-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #191c1d;
+  flex: 1;
+}
+
+.approval-tag-pending {
+  font-size: 10px;
+  font-weight: 600;
+  color: #ba1a1a;
+  background-color: #ffdad6;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.approval-meta-row {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  color: #717786;
+  gap: 6px;
+}
+
+.approval-meta-dot {
+  color: #c1c6d7;
+}
+
+.approval-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 6px;
+  border-top: 1px dashed #e1e3e4;
+}
+
+.btn-approval-reject {
+  font-size: 12px;
+  color: #ba1a1a;
+  background-color: #fff8f7;
+  border: 1px solid rgba(186, 26, 26, 0.35);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-approval-reject:active {
+  background-color: #ffdad6;
+  opacity: 0.8;
+  transform: scale(0.97);
+}
+
+.btn-approval-pass {
+  font-size: 12px;
+  color: #ffffff;
+  background-color: #0058bc;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 88, 188, 0.2);
+  transition: opacity 0.15s;
+}
+
+.btn-approval-pass:active {
+  opacity: 0.85;
+}
+
+.approval-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 0;
+}
+
+.approval-empty-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.approval-empty-text {
+  font-size: 12px;
+  color: #006e28;
+}
+
+/* 11. 管理员题库分类管理卡片 */
+.admin-category-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1.5px solid rgba(0, 88, 188, 0.16);
+  box-shadow: 0 4px 16px rgba(0, 88, 188, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.admin-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.admin-category-header .admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-category-header .admin-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background-color: #d8e2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-category-header .admin-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.admin-card-title-row .admin-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #191c1d;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: -0.2px;
+}
+
+.cat-count-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0058bc;
+  background-color: #d8e2ff;
+  padding: 0 6px;
+  height: 18px;
+  line-height: 18px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.admin-category-header .admin-card-subtitle {
+  font-size: 11px;
+  color: #717786;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 15px;
+}
+
+.admin-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-add-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background-color: #0058bc;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 6px rgba(0, 88, 188, 0.2);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-add-category:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+.btn-add-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.btn-collapse-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.btn-collapse-toggle:active {
+  opacity: 0.7;
+}
+
+.collapse-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #717786;
+  white-space: nowrap;
+}
+
+.collapse-chevron {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapse-chevron.chevron-expanded {
+  transform: rotate(180deg);
+}
+
+.category-collapsible-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeInSlide 0.2s ease-out;
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 分类管理列表 */
+.category-manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.category-manage-item {
+  background-color: #f8f9fa;
+  border: 1px solid #e1e3e4;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.category-item-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.cat-item-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cat-item-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.category-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.category-item-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.category-item-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.category-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  line-height: 16px;
+}
+
+.tag-default {
+  background-color: #e8def8;
+  color: #4a4458;
+}
+
+.tag-active {
+  background-color: #d1f2d9;
+  color: #0b6b29;
+}
+
+.tag-inactive {
+  background-color: #ffdad6;
+  color: #ba1a1a;
+}
+
+.category-item-meta {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  color: #717786;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-meta-dot {
+  color: #c1c6d7;
+}
+
+.category-meta-desc {
+  color: #8e9199;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.category-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-cat-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-cat-edit {
+  color: #0058bc;
+  background-color: #d8e2ff;
+}
+
+.btn-cat-edit:active {
+  background-color: #adc6ff;
+  transform: scale(0.96);
+}
+
+.btn-cat-del {
+  color: #ba1a1a;
+  background-color: #fff8f7;
+  border: 1px solid rgba(186, 26, 26, 0.25);
+}
+
+.btn-cat-del:active {
+  background-color: #ffdad6;
+  transform: scale(0.96);
+}
+
+.btn-cat-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.cat-action-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.category-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.category-empty-text {
+  font-size: 13px;
+  color: #717786;
+}
+
+/* 12. 分类编辑/新增弹窗 Modal */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  backdrop-filter: blur(2px);
+}
+
+.category-modal-card {
+  width: 100%;
+  max-width: 360px;
+  max-height: 88vh;
+  overflow-y: auto;
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 22px 20px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+  animation: modalPopIn 0.2s ease-out;
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.cat-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cat-modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.cat-modal-close {
+  font-size: 18px;
+  color: #717786;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.cat-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cat-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cat-form-label {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #43474e;
+}
+
+.cat-form-required {
+  color: #ba1a1a;
+  margin-left: 2px;
+}
+
+.cat-form-tip {
+  font-size: 11px;
+  color: #717786;
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+.cat-form-input {
+  height: 42px;
+  background-color: #f1f3f4;
+  border: 1px solid #e1e3e4;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #191c1d;
+  box-sizing: border-box;
+}
+
+.cat-form-input.input-disabled {
+  background-color: #e9ecef;
+  color: #8e9199;
+}
+
+/* 图标选择器网格 */
+.cat-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 2px 0 4px 0;
+}
+
+.cat-icon-chip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 4px 6px 4px;
+  background-color: #f8f9fa;
+  border: 1.5px solid #e1e3e4;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.cat-icon-chip.chip-selected {
+  border-color: #0058bc;
+  background-color: #edf3fc;
+  box-shadow: 0 2px 8px rgba(0, 88, 188, 0.15);
+}
+
+.chip-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chip-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.chip-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: #43474e;
+  line-height: 14px;
+}
+
+.cat-icon-chip.chip-selected .chip-name {
+  color: #0058bc;
+  font-weight: 600;
+}
+
+.chip-check-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: #0058bc;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.bg-gold-light {
+  background-color: #fff8e1;
+}
+
+.form-group-switch {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 4px;
+}
+
+.cat-switch-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cat-switch-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #191c1d;
+}
+
+.cat-switch-desc {
+  font-size: 11px;
+  color: #717786;
+}
+
+.cat-modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.cat-btn-cancel, .cat-btn-confirm {
+  flex: 1;
+  height: 42px;
+  line-height: 42px;
+  text-align: center;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.cat-btn-cancel::after, .cat-btn-confirm::after {
+  border: none;
+}
+
+.cat-btn-cancel {
+  background-color: #f1f3f4;
+  color: #43474e;
+}
+
+.cat-btn-cancel:active {
+  background-color: #e2e4e5;
+}
+
+.cat-btn-confirm {
+  background-color: #0058bc;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 88, 188, 0.25);
+}
+
+.cat-btn-confirm:active {
+  opacity: 0.9;
+}
+

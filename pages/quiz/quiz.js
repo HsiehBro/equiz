@@ -1,4 +1,5 @@
 const { request, CONFIG } = require('../../utils/request.js');
+const studyStats = require('../../utils/studyStats.js');
 
 Page({
   data: {
@@ -6,10 +7,17 @@ Page({
     navBarHeight: 44,
     bankId: '',
     examTitle: '项目管理基础考试',
+    isVipBank: true,
     durationSeconds: 0, // 从 00:00 开始计时
     timerText: '00:00',
     timerInterval: null,
     totalCount: 100,
+
+    // 学习规划打卡完成弹窗状态 (3秒自动消失进度条)
+    showCheckInModal: false,
+    checkInDays: 0,
+    checkInDailyGoal: 30,
+    checkInBarActive: false,
     
     // 模式: 'practice' (答题模式) | 'recite' (背题模式)
     mode: 'practice',
@@ -47,7 +55,14 @@ Page({
     // 题目评论列表（每道题独享独立评论列表）
     commentList: [],
     newCommentText: '',
-    newCommentVisibility: 'public'
+    newCommentVisibility: 'public',
+    replyTarget: null,
+    isInputFocused: false,
+
+    // 评论抽屉高度拖拽与展开状态
+    commentsDrawerHeight: 0,
+    isDraggingDrawer: false,
+    isDrawerExpanded: false
   },
 
   onLoad(options) {
@@ -59,12 +74,53 @@ Page({
     }
     const isFavoriteMode = Boolean(options && (options.type === 'favorite' || options.mode === 'favorite'));
     const isError = Boolean(options && (options.type === 'error' || options.mode === 'error' || (options.title && decodeURIComponent(options.title).includes('错题'))));
-    const openComments = Boolean(options && (options.openComments === 'true' || options.openComments === '1'));
+    const openComments = Boolean(options && (options.openComments === 'true' || options.openComments === '1' || options.replyToCommentId));
+    const replyToId = options && options.replyToCommentId;
+    const replyToAuthor = options && options.replyToAuthor ? decodeURIComponent(options.replyToAuthor) : '';
     let targetTitle = this.data.examTitle;
     if (options && options.title) {
       targetTitle = decodeURIComponent(options.title);
     }
     const targetBankId = (options && (options.bankId || options.id)) || '';
+
+    // 防卫校准：若传入的 targetTitle 明显是题干或通用占位符，自动纠正为规范题库名称
+    if (String(targetBankId) === '2') {
+      if (!targetTitle || targetTitle.length > 25 || targetTitle.includes('心肺复苏') || targetTitle.includes('项目管理')) {
+        targetTitle = '2023年护士执业资格考试';
+      }
+    } else if (String(targetBankId) === '1') {
+      if (!targetTitle || targetTitle.length > 25 || targetTitle.includes('生命周期')) {
+        targetTitle = '项目管理基础考试';
+      }
+    } else if (String(targetBankId) === '3') {
+      if (!targetTitle || targetTitle.length > 25) {
+        targetTitle = '初级会计实务 - 核心考点';
+      }
+    }
+
+    this.targetQuestionId = (options && options.questionId) ? parseInt(options.questionId, 10) : null;
+
+    // VIP 专属题库权限校验拦截：普通用户若访问 VIP 专属题库，拦截并直接跳转至会员解锁页
+    const isVipBank = this.checkIsVipBank(targetBankId, targetTitle);
+    this.setData({ isVipBank: Boolean(isVipBank) });
+    const userInfo = wx.getStorageSync('user_info') || {};
+    const userRole = userInfo.role || 'user';
+    const rawVip = wx.getStorageSync('user_is_vip');
+    const isUserVip = userRole === 'admin' || userRole === 'vip' || (userRole !== 'user' && rawVip === true);
+
+    if (isVipBank && !isUserVip) {
+      wx.showToast({
+        title: '该题库为VIP专属，请先开通会员',
+        icon: 'none',
+        duration: 2000
+      });
+      setTimeout(() => {
+        wx.redirectTo({
+          url: '/pages/vip/vip'
+        });
+      }, 300);
+      return;
+    }
 
     // 专属「我的收藏」强化刷题模式：仅加载该题库已收藏题目，严禁拉取全量题库
     if (isFavoriteMode) {
@@ -168,6 +224,14 @@ Page({
 
     if (openComments) {
       this.loadCommentsForCurrentQuestion(startIndex);
+    }
+
+    if (replyToId) {
+      this.setData({
+        replyTarget: { id: replyToId, author: replyToAuthor || '学员' },
+        newCommentVisibility: 'public',
+        isInputFocused: true
+      });
     }
 
     if (!CONFIG.USE_MOCK && targetBankId && !isNaN(Number(targetBankId))) {
@@ -303,14 +367,24 @@ Page({
               bookmarkMap[q.id] = true;
             }
           });
+          let safeIndex = startIndex < questions.length ? startIndex : 0;
+          if (this.targetQuestionId) {
+            const foundIdx = questions.findIndex(q => q.id === this.targetQuestionId);
+            if (foundIdx !== -1) {
+              safeIndex = foundIdx;
+            }
+          }
           this.setData({
             questions: questions,
             totalCount: questions.length,
+            currentIndex: safeIndex,
             userAnswers: userAnswers,
             bookmarkMap: bookmarkMap
           });
-          const safeIndex = startIndex < questions.length ? startIndex : 0;
           this.updateCurrentQuestionState(safeIndex);
+          if (this.data.showCommentsDrawer) {
+            this.loadCommentsForCurrentQuestion(safeIndex);
+          }
         }
       })
       .catch((err) => {
@@ -320,6 +394,10 @@ Page({
 
   onUnload() {
     this.clearTimer();
+    if (this.checkInTimeout) {
+      clearTimeout(this.checkInTimeout);
+      this.checkInTimeout = null;
+    }
     try {
       wx.removeStorageSync('practice_custom_questions');
     } catch (e) {}
@@ -329,6 +407,7 @@ Page({
     try {
       const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
       const statusBarHeight = windowInfo.statusBarHeight || 20;
+      const windowHeight = windowInfo.windowHeight || 667;
       let navBarHeight = 44;
       if (wx.getMenuButtonBoundingClientRect) {
         const menu = wx.getMenuButtonBoundingClientRect();
@@ -336,9 +415,16 @@ Page({
           navBarHeight = (menu.top - statusBarHeight) * 2 + menu.height;
         }
       }
+
+      this.windowHeight = windowHeight;
+      this.statusBarHeight = statusBarHeight;
+      this.standardDrawerHeight = Math.round(windowHeight * 0.62);
+      this.expandedDrawerHeight = Math.min(Math.round(windowHeight * 0.90), windowHeight - statusBarHeight - 8);
+
       this.setData({
         statusBarHeight,
-        navBarHeight: Math.max(navBarHeight, 44)
+        navBarHeight: Math.max(navBarHeight, 44),
+        commentsDrawerHeight: this.data.commentsDrawerHeight || this.standardDrawerHeight
       });
     } catch (e) {
       console.log('获取导航栏信息异常', e);
@@ -627,6 +713,13 @@ Page({
   // 点击确定按钮 (提交/确认当前题目答案并判定对错)
   onConfirmAnswer() {
     const currentQ = this.data.questions[this.data.currentIndex];
+    if (!currentQ) return;
+
+    // 防止用户重复点击已确认的题目导致累计答题重复计算
+    if (this.data.confirmedMap && this.data.confirmedMap[currentQ.id]) {
+      return;
+    }
+
     const userChoices = this.data.userAnswers[currentQ.id] || [];
     
     if (userChoices.length === 0) {
@@ -649,6 +742,12 @@ Page({
     const confirmedMap = { ...this.data.confirmedMap };
     confirmedMap[currentQ.id] = true;
     this.setData({ confirmedMap });
+
+    // 核心数据看板统计：无论刷哪个题库，累计答题+1；答对+1；更新正确率；达标触发打卡
+    const statsResult = studyStats.recordAnswer(this.data.bankId, isCorrect);
+    if (statsResult && statsResult.justCheckedIn) {
+      this.triggerCheckInModal(statsResult.checkInDays, statsResult.dailyGoal);
+    }
 
     if (isCorrect) {
       wx.showToast({ title: '回答正确！', icon: 'success' });
@@ -688,6 +787,45 @@ Page({
         console.log('[Quiz] 作答记录上报异常:', err);
       });
     }
+  },
+
+  // 触发学习规划达成打卡弹窗（带逐渐消失的进度条，3秒后自动关闭）
+  triggerCheckInModal(checkInDays, dailyGoal) {
+    if (this.checkInTimeout) {
+      clearTimeout(this.checkInTimeout);
+      this.checkInTimeout = null;
+    }
+
+    this.setData({
+      showCheckInModal: true,
+      checkInDays: checkInDays || 1,
+      checkInDailyGoal: dailyGoal || 30,
+      checkInBarActive: false
+    });
+
+    // 开启进度条逐渐消失动画
+    setTimeout(() => {
+      this.setData({
+        checkInBarActive: true
+      });
+    }, 50);
+
+    // 3秒后自动消失
+    this.checkInTimeout = setTimeout(() => {
+      this.closeCheckInModal();
+    }, 3000);
+  },
+
+  // 关闭打卡弹窗
+  closeCheckInModal() {
+    if (this.checkInTimeout) {
+      clearTimeout(this.checkInTimeout);
+      this.checkInTimeout = null;
+    }
+    this.setData({
+      showCheckInModal: false,
+      checkInBarActive: false
+    });
   },
 
   // 上一题
@@ -828,11 +966,125 @@ Page({
   // 打开/关闭评论抽屉
   onToggleCommentsDrawer() {
     const show = !this.data.showCommentsDrawer;
+    const standardHeight = this.standardDrawerHeight || Math.round((this.windowHeight || 667) * 0.62);
     this.setData({
-      showCommentsDrawer: show
+      showCommentsDrawer: show,
+      commentsDrawerHeight: this.data.isDrawerExpanded ? (this.expandedDrawerHeight || Math.round((this.windowHeight || 667) * 0.90)) : (this.data.commentsDrawerHeight || standardHeight),
+      replyTarget: null,
+      isInputFocused: false,
+      isDraggingDrawer: false
     });
     if (show) {
       this.loadCommentsForCurrentQuestion();
+    }
+  },
+
+  // 拖拽顶部手柄扩大/缩小评论区 - Touch Start
+  onDrawerTouchStart(e) {
+    if (!e.touches || e.touches.length === 0) return;
+    this.drawerTouchStartY = e.touches[0].clientY;
+    this.drawerTouchStartX = e.touches[0].clientX;
+    const standardHeight = this.standardDrawerHeight || Math.round((this.windowHeight || 667) * 0.62);
+    this.drawerStartHeight = this.data.commentsDrawerHeight || standardHeight;
+    this.drawerStartTime = Date.now();
+    this.setData({ isDraggingDrawer: true });
+  },
+
+  // 拖拽顶部手柄扩大/缩小评论区 - Touch Move
+  onDrawerTouchMove(e) {
+    if (!e.touches || e.touches.length === 0 || typeof this.drawerTouchStartY !== 'number') return;
+    const touch = e.touches[0];
+    const deltaY = touch.clientY - this.drawerTouchStartY;
+    
+    // 向上滑动 (deltaY < 0) 增加高度，向下滑动 (deltaY > 0) 减小高度
+    const prospectiveHeight = this.drawerStartHeight - deltaY;
+
+    const winH = this.windowHeight || 667;
+    const minH = Math.round(winH * 0.38);
+    const maxH = Math.min(Math.round(winH * 0.94), winH - (this.statusBarHeight || 20) - 8);
+
+    let clampedHeight = prospectiveHeight;
+    if (clampedHeight > maxH) {
+      clampedHeight = maxH + (clampedHeight - maxH) * 0.2;
+    } else if (clampedHeight < minH) {
+      clampedHeight = minH - (minH - clampedHeight) * 0.2;
+    }
+
+    this.setData({
+      commentsDrawerHeight: Math.round(clampedHeight)
+    });
+  },
+
+  // 拖拽顶部手柄扩大/缩小评论区 - Touch End
+  onDrawerTouchEnd(e) {
+    this.setData({ isDraggingDrawer: false });
+    const winH = this.windowHeight || 667;
+    const standardH = this.standardDrawerHeight || Math.round(winH * 0.62);
+    const expandedH = this.expandedDrawerHeight || Math.min(Math.round(winH * 0.90), winH - (this.statusBarHeight || 20) - 8);
+    const currentH = this.data.commentsDrawerHeight || standardH;
+
+    const timeDiff = Date.now() - (this.drawerStartTime || Date.now());
+    const totalDeltaY = (e.changedTouches && e.changedTouches[0]) ? (e.changedTouches[0].clientY - this.drawerTouchStartY) : 0;
+
+    // 快速轻扫手势快捷判定
+    if (timeDiff < 250 && Math.abs(totalDeltaY) > 25) {
+      if (totalDeltaY < 0) {
+        // 快速上滑 -> 一键扩大到最大展示区
+        this.setData({
+          commentsDrawerHeight: expandedH,
+          isDrawerExpanded: true
+        });
+        return;
+      } else {
+        // 快速下滑
+        if (currentH > standardH + 40) {
+          this.setData({
+            commentsDrawerHeight: standardH,
+            isDrawerExpanded: false
+          });
+        } else {
+          this.onToggleCommentsDrawer();
+        }
+        return;
+      }
+    }
+
+    // 根据最终高度自动吸附分档
+    const midpoint = (standardH + expandedH) / 2;
+    if (currentH >= midpoint) {
+      // 达到或超过中间线，自动平滑扩大展示全屏评论区
+      this.setData({
+        commentsDrawerHeight: expandedH,
+        isDrawerExpanded: true
+      });
+    } else if (currentH < standardH - 80) {
+      // 下拉过多直接收起关闭
+      this.onToggleCommentsDrawer();
+    } else {
+      // 吸附恢复为标准高度
+      this.setData({
+        commentsDrawerHeight: standardH,
+        isDrawerExpanded: false
+      });
+    }
+  },
+
+  // 点击顶部手柄快速切换：在「标准展示」与「扩大展示」之间一键切换
+  onTapDrawerHandle() {
+    const winH = this.windowHeight || 667;
+    const standardH = this.standardDrawerHeight || Math.round(winH * 0.62);
+    const expandedH = this.expandedDrawerHeight || Math.min(Math.round(winH * 0.90), winH - (this.statusBarHeight || 20) - 8);
+
+    if (this.data.isDrawerExpanded) {
+      this.setData({
+        commentsDrawerHeight: standardH,
+        isDrawerExpanded: false
+      });
+    } else {
+      this.setData({
+        commentsDrawerHeight: expandedH,
+        isDrawerExpanded: true
+      });
     }
   },
 
@@ -858,6 +1110,7 @@ Page({
         const list = res && res.list ? res.list : (Array.isArray(res) ? res : []);
         const userInfo = wx.getStorageSync('user_info') || {};
         const currentUid = userInfo.id;
+        const repliesStore = wx.getStorageSync('user_comment_replies') || {};
 
         const backendMapped = list.map((item) => {
           const author = item.author_name || (item.user && item.user.nickname) || '备考学员';
@@ -875,9 +1128,28 @@ Page({
             } catch (e) {}
           }
 
+          // 组装并映射后端真实子回复
+          const backendReplies = (item.replies || []).map(r => {
+            const replyAuthor = r.author_name || (r.user && r.user.nickname) || '考友';
+            const isReplyMine = Boolean(currentUid && r.user_id === currentUid);
+            return {
+              id: r.id,
+              userId: r.user_id,
+              author: replyAuthor,
+              avatarText: replyAuthor.slice(0, 2),
+              avatarUrl: (r.user && r.user.avatar_url) || r.author_avatar || '',
+              time: r.created_at ? '刚刚' : '刚刚',
+              content: r.content,
+              replyToAuthor: r.reply_to_author || author,
+              replyToUserId: r.reply_to_user_id,
+              isMine: isReplyMine
+            };
+          });
+
           return {
             id: item.id,
-            author: isMine ? '我' : author,
+            userId: item.user_id,
+            author: author,
             avatarText: author.slice(0, 2),
             avatarUrl: item.author_avatar || '',
             time: timeText,
@@ -885,19 +1157,12 @@ Page({
             likes: item.like_count || 0,
             isLiked: Boolean(item.is_liked),
             isMine: isMine,
-            visibility: item.visibility || 'public'
+            visibility: item.visibility || 'public',
+            replies: backendReplies
           };
         });
 
-        // 仅合并该题目下用户本地未同步的笔记
-        const merged = [...backendMapped];
-        localNotes.forEach(loc => {
-          if (!merged.some(m => String(m.id) === String(loc.id) || m.content === loc.content)) {
-            merged.push(loc);
-          }
-        });
-
-        this.setData({ commentList: merged });
+        this.setData({ commentList: backendMapped });
       }).catch((err) => {
         console.log('[Quiz] 获取题目评论异常，使用本地独立缓存:', err);
         this.setData({ commentList: localNotes });
@@ -911,20 +1176,27 @@ Page({
   getLocalCommentsForQuestion(qId) {
     if (!qId) return [];
     try {
+      const userInfo = wx.getStorageSync('user_info') || {};
+      const myName = userInfo.nickname || '备考学员';
       const stored = wx.getStorageSync('user_study_notes_list') || [];
+      const repliesStore = wx.getStorageSync('user_comment_replies') || {};
       // 严格按 questionId 单题匹配，不同题目拥有不同评论！
       const matched = stored.filter(item => String(item.questionId) === String(qId));
-      return matched.map(n => ({
-        id: n.id,
-        author: '我',
-        avatarText: '我',
-        time: n.date || '刚刚',
-        content: n.content,
-        likes: n.likes || 0,
-        isLiked: false,
-        isMine: true,
-        visibility: n.visibility || 'public'
-      }));
+      return matched.map(n => {
+        const subReplies = repliesStore[String(n.id)] || n.replies || [];
+        return {
+          id: n.id,
+          author: n.author || myName,
+          avatarText: (n.author || myName).slice(0, 2),
+          time: n.date || '刚刚',
+          content: n.content,
+          likes: n.likes || 0,
+          isLiked: false,
+          isMine: true,
+          visibility: n.visibility || 'public',
+          replies: subReplies
+        };
+      });
     } catch (e) {
       return [];
     }
@@ -968,10 +1240,50 @@ Page({
   // 切换已有个人评论的可见性 (公开 / 仅自己可见)
   onToggleItemVisibility(e) {
     const id = e.currentTarget.dataset.id;
-    let targetVis = 'public';
+    const currentItem = this.data.commentList.find(item => item.id === id && item.isMine);
+    if (!currentItem) return;
+
+    const targetVis = currentItem.visibility === 'private' ? 'public' : 'private';
+
+    // 真实后端模式：提交后端进行合规校验与可见性变更
+    if (!CONFIG.USE_MOCK && typeof id === 'number') {
+      wx.showLoading({ title: '正在切换...' });
+      request({
+        url: `/api/v1/notes/${id}`,
+        method: 'PUT',
+        data: { visibility: targetVis }
+      }).then(() => {
+        wx.hideLoading();
+        const commentList = this.data.commentList.map(item => {
+          if (item.id === id && item.isMine) {
+            return {
+              ...item,
+              visibility: targetVis
+            };
+          }
+          return item;
+        });
+        this.setData({ commentList });
+        const tip = targetVis === 'private' ? '已转为仅自己可见' : '已转为公开可见';
+        wx.showToast({ title: tip, icon: 'none' });
+      }).catch((err) => {
+        wx.hideLoading();
+        console.log('[Quiz] 切换可见性异常:', err);
+        const errMsg = (err && (err.message || err.msg)) || '切换可见性失败';
+        wx.showModal({
+          title: '操作失败',
+          content: errMsg,
+          showCancel: false,
+          confirmText: '我知道了',
+          confirmColor: '#ba1a1a'
+        });
+      });
+      return;
+    }
+
+    // 离线/Mock模式
     const commentList = this.data.commentList.map(item => {
       if (item.id === id && item.isMine) {
-        targetVis = item.visibility === 'private' ? 'public' : 'private';
         return {
           ...item,
           visibility: targetVis
@@ -979,20 +1291,7 @@ Page({
       }
       return item;
     });
-    
     this.setData({ commentList });
-
-    // 真实后端模式：同步可见性
-    if (!CONFIG.USE_MOCK && typeof id === 'number') {
-      request({
-        url: `/api/v1/notes/${id}`,
-        method: 'PUT',
-        data: { visibility: targetVis }
-      }).catch((err) => {
-        console.log('[Quiz] 切换可见性异常:', err);
-      });
-    }
-
     const tip = targetVis === 'private' ? '已转为仅自己可见' : '已转为公开可见';
     wx.showToast({ title: tip, icon: 'none' });
   },
@@ -1002,39 +1301,220 @@ Page({
     this.setData({ newCommentText: e.detail.value });
   },
 
-  // 发布评论
+  // 开始对某条公开评论进行回复
+  onStartReply(e) {
+    const { id, author, userId } = e.currentTarget.dataset;
+    if (!id || !author) return;
+
+    this.setData({
+      replyTarget: {
+        id: id,
+        author: author,
+        userId: userId ? Number(userId) : undefined
+      },
+      newCommentVisibility: 'public',
+      isInputFocused: true
+    });
+  },
+
+  // 取消当前回复状态
+  onCancelReply() {
+    this.setData({
+      replyTarget: null,
+      isInputFocused: false
+    });
+  },
+
+  // 删除某条子回复
+  onDeleteSubReply(e) {
+    const { parentId, id } = e.currentTarget.dataset;
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除这条回复吗？',
+      confirmColor: '#ba1a1a',
+      confirmText: '删除',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          const commentList = this.data.commentList.map(item => {
+            if (String(item.id) === String(parentId)) {
+              return {
+                ...item,
+                replies: (item.replies || []).filter(r => String(r.id) !== String(id))
+              };
+            }
+            return item;
+          });
+          this.setData({ commentList });
+
+          // 同步到本地子回复存储
+          try {
+            const repliesStore = wx.getStorageSync('user_comment_replies') || {};
+            if (repliesStore[String(parentId)]) {
+              repliesStore[String(parentId)] = repliesStore[String(parentId)].filter(r => String(r.id) !== String(id));
+              wx.setStorageSync('user_comment_replies', repliesStore);
+            }
+          } catch (err) {}
+
+          // 真实后端模式同步删除
+          if (!CONFIG.USE_MOCK && typeof id === 'number') {
+            request({
+              url: `/api/v1/notes/${id}`,
+              method: 'DELETE'
+            }).catch(() => {});
+          }
+
+          wx.showToast({ title: '已删除回复', icon: 'success' });
+        }
+      }
+    });
+  },
+
+  // 发布评论或回复
   onSubmitComment() {
     const text = this.data.newCommentText.trim();
     if (!text) {
-      wx.showToast({ title: '请输入评论内容', icon: 'none' });
+      wx.showToast({ title: '请输入内容', icon: 'none' });
       return;
     }
     
+    const currentQ = this.data.questions[this.data.currentIndex] || {};
+    const replyTarget = this.data.replyTarget;
+    const userInfo = wx.getStorageSync('user_info') || {};
+    const myName = userInfo.nickname || '备考学员';
+    const myAvatarUrl = userInfo.avatarUrl || userInfo.avatar_url || '';
+    const myAvatarText = myName.slice(0, 2);
+
+    // A. 处于对某条评论的“回复”模式
+    if (replyTarget) {
+      const parentIdNum = parseInt(replyTarget.id, 10);
+      const bankIdNum = parseInt(currentQ.bank_id || this.data.bankId || this.data.subjectId, 10) || 1;
+
+      // 真实后端模式：直接由后端服务执行合规校验（含全量敏感词拦截）与持久化
+      if (!CONFIG.USE_MOCK && typeof currentQ.id === 'number') {
+        wx.showLoading({ title: '正在发布回复...' });
+        request({
+          url: '/api/v1/notes',
+          method: 'POST',
+          data: {
+            bank_id: bankIdNum,
+            question_id: currentQ.id,
+            content: text,
+            visibility: 'public',
+            parent_id: parentIdNum > 0 ? parentIdNum : undefined,
+            reply_to_author: replyTarget.author,
+            reply_to_user_id: replyTarget.userId
+          }
+        }).then((savedNote) => {
+          wx.hideLoading();
+          const newSubReply = {
+            id: (savedNote && savedNote.id) ? savedNote.id : Date.now(),
+            userId: userInfo.id,
+            author: myName,
+            avatarText: myAvatarText,
+            avatarUrl: myAvatarUrl,
+            time: '刚刚',
+            content: text,
+            replyToAuthor: replyTarget.author,
+            replyToUserId: replyTarget.userId,
+            isMine: true
+          };
+
+          const updated = this.data.commentList.map(c => {
+            if (String(c.id) === String(replyTarget.id)) {
+              return {
+                ...c,
+                replies: [...(c.replies || []), newSubReply]
+              };
+            }
+            return c;
+          });
+
+          this.setData({
+            commentList: updated,
+            newCommentText: '',
+            replyTarget: null,
+            isInputFocused: false
+          });
+
+          // 同步到本地子回复存储
+          try {
+            const repliesStore = wx.getStorageSync('user_comment_replies') || {};
+            const key = String(replyTarget.id);
+            repliesStore[key] = [...(repliesStore[key] || []), newSubReply];
+            wx.setStorageSync('user_comment_replies', repliesStore);
+          } catch (e) {}
+
+          wx.showToast({ title: '回复已成功发布', icon: 'success' });
+        }).catch((err) => {
+          wx.hideLoading();
+          console.log('[Quiz] 提交回复失败:', err);
+          const errMsg = (err && (err.message || err.msg)) || '提交回复失败';
+          wx.showModal({
+            title: '发布失败',
+            content: errMsg,
+            showCancel: false,
+            confirmText: '我知道了',
+            confirmColor: '#ba1a1a'
+          });
+        });
+        return;
+      }
+
+      // 离线/Mock模式
+      const newSubReply = {
+        id: Date.now(),
+        userId: userInfo.id,
+        author: myName,
+        avatarText: myAvatarText,
+        avatarUrl: myAvatarUrl,
+        time: '刚刚',
+        content: text,
+        replyToAuthor: replyTarget.author,
+        replyToUserId: replyTarget.userId,
+        isMine: true
+      };
+
+      const updated = this.data.commentList.map(c => {
+        if (String(c.id) === String(replyTarget.id)) {
+          return {
+            ...c,
+            replies: [...(c.replies || []), newSubReply]
+          };
+        }
+        return c;
+      });
+
+      this.setData({
+        commentList: updated,
+        newCommentText: '',
+        replyTarget: null,
+        isInputFocused: false
+      });
+      wx.showToast({ title: '回复已成功发布', icon: 'success' });
+      return;
+    }
+
+    // B. 发布全新的主评论/学习笔记
     const visibility = this.data.newCommentVisibility || 'public';
+    const bankIdNum = parseInt(currentQ.bank_id || this.data.bankId || this.data.subjectId, 10) || 1;
     const now = new Date();
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const currentQ = this.data.questions[this.data.currentIndex] || {};
-    
-    const newComment = {
-      id: Date.now(),
-      author: '我',
-      avatarText: '我',
-      time: '刚刚',
-      content: text,
-      likes: 0,
-      isLiked: false,
-      isMine: true,
-      visibility: visibility
-    };
-    
-    this.setData({
-      commentList: [newComment, ...this.data.commentList],
-      newCommentText: ''
-    });
 
-    // 真实后端模式：持久化提交笔记/评论
+    // 智能解析题目标准题库名称
+    let currentBankTitle = this.data.examTitle;
+    const qTitle = currentQ.title || '';
+    if (qTitle.includes('心肺复苏') || qTitle.includes('CPR') || qTitle.includes('水银体温计') || qTitle.includes('青霉素过敏') || bankIdNum === 2) {
+      currentBankTitle = '2023年护士执业资格考试';
+    } else if (qTitle.includes('会计') || qTitle.includes('核算与监督') || bankIdNum === 3) {
+      currentBankTitle = '初级会计实务 - 核心考点';
+    } else if (!currentBankTitle || currentBankTitle.includes('错题') || currentBankTitle.includes('收藏') || currentBankTitle.includes('全真模拟') || bankIdNum === 1) {
+      currentBankTitle = '项目管理基础考试';
+    }
+
+    // 真实后端模式：直接由后端服务执行合规校验（含全量敏感词拦截）与持久化
     if (!CONFIG.USE_MOCK && typeof currentQ.id === 'number') {
-      const bankIdNum = parseInt(this.data.bankId || this.data.subjectId, 10) || currentQ.bank_id || 1;
+      wx.showLoading({ title: '正在发布评论...' });
       request({
         url: '/api/v1/notes',
         method: 'POST',
@@ -1045,27 +1525,90 @@ Page({
           visibility: visibility
         }
       }).then((savedNote) => {
-        if (savedNote && savedNote.id) {
-          const updated = this.data.commentList.map(c => {
-            if (c.id === newComment.id) {
-              return { ...c, id: savedNote.id };
-            }
-            return c;
-          });
-          this.setData({ commentList: updated });
+        wx.hideLoading();
+        const newComment = {
+          id: (savedNote && savedNote.id) ? savedNote.id : Date.now(),
+          userId: userInfo.id,
+          author: myName,
+          avatarText: myAvatarText,
+          avatarUrl: myAvatarUrl,
+          time: '刚刚',
+          content: text,
+          likes: 0,
+          isLiked: false,
+          isMine: true,
+          visibility: visibility,
+          replies: []
+        };
+
+        this.setData({
+          commentList: [newComment, ...this.data.commentList],
+          newCommentText: ''
+        });
+
+        // 同步到学习笔记/评论存储
+        try {
+          const stored = wx.getStorageSync('user_study_notes_list') || [];
+          const noteItem = {
+            id: 'cmt_' + newComment.id,
+            bankId: bankIdNum,
+            bankTitle: currentBankTitle,
+            questionId: currentQ.id || (this.data.currentIndex + 1),
+            questionIndex: this.data.currentIndex,
+            questionTitle: currentQ.title || '题目评论',
+            content: text,
+            visibility: visibility,
+            date: dateStr,
+            time: `${dateStr} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+          };
+          wx.setStorageSync('user_study_notes_list', [noteItem, ...stored]);
+        } catch (e) {
+          console.log('同步评论到学习笔记异常', e);
         }
+
+        const successTip = visibility === 'private' ? '已发布（仅自己可见）' : '公开评论已发布';
+        wx.showToast({ title: successTip, icon: 'success' });
       }).catch((err) => {
+        wx.hideLoading();
         console.log('[Quiz] 提交笔记失败:', err);
+        const errMsg = (err && (err.message || err.msg)) || '提交评论失败';
+        wx.showModal({
+          title: '发布失败',
+          content: errMsg,
+          showCancel: false,
+          confirmText: '我知道了',
+          confirmColor: '#ba1a1a'
+        });
       });
+      return;
     }
 
-    // 同步到学习笔记/评论存储
+    // 离线/Mock模式
+    const newComment = {
+      id: Date.now(),
+      userId: userInfo.id,
+      author: myName,
+      avatarText: myAvatarText,
+      avatarUrl: myAvatarUrl,
+      time: '刚刚',
+      content: text,
+      likes: 0,
+      isLiked: false,
+      isMine: true,
+      visibility: visibility,
+      replies: []
+    };
+    this.setData({
+      commentList: [newComment, ...this.data.commentList],
+      newCommentText: ''
+    });
+
     try {
       const stored = wx.getStorageSync('user_study_notes_list') || [];
       const noteItem = {
         id: 'cmt_' + newComment.id,
-        bankId: this.data.bankId || this.data.subjectId || '1',
-        bankTitle: this.data.examTitle || '项目管理基础考试',
+        bankId: bankIdNum,
+        bankTitle: currentBankTitle,
         questionId: currentQ.id || (this.data.currentIndex + 1),
         questionIndex: this.data.currentIndex,
         questionTitle: currentQ.title || '题目评论',
@@ -1075,11 +1618,9 @@ Page({
         time: `${dateStr} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
       };
       wx.setStorageSync('user_study_notes_list', [noteItem, ...stored]);
-    } catch (e) {
-      console.log('同步评论到学习笔记异常', e);
-    }
-    
-    const successTip = visibility === 'private' ? '已发布（仅自己可见）' : '评论已公开发布';
+    } catch (e) {}
+
+    const successTip = visibility === 'private' ? '已发布（仅自己可见）' : '公开评论已发布';
     wx.showToast({ title: successTip, icon: 'success' });
   },
 
@@ -1157,5 +1698,21 @@ Page({
         }
       }
     });
+  },
+
+  checkIsVipBank(bankId, title) {
+    if (!bankId && !title) return false;
+    try {
+      const customLibs = wx.getStorageSync('custom_libraries') || [];
+      const foundInCustom = customLibs.find(l => String(l.id) === String(bankId) || l.title === title);
+      if (foundInCustom) {
+        return Boolean(foundInCustom.isVip || foundInCustom.is_vip);
+      }
+    } catch (e) {}
+
+    // 预设官方题库中的 VIP 题库：项目管理基础考试 (IT互联网) 和 初级会计实务 - 核心考点 (财经类)
+    if (String(bankId) === '1' || String(bankId) === '3') return true;
+    if (title && (title.includes('项目管理') || title.includes('会计') || title.includes('VIP'))) return true;
+    return false;
   }
 });

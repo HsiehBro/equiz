@@ -10,7 +10,13 @@
 
       <!-- 居中标题与考试进度信息 -->
       <view class="nav-title-group">
-        <text class="nav-title">{{examTitle}}</text>
+        <view class="nav-title-row">
+          <text class="nav-title">{{examTitle}}</text>
+          <view class="quiz-vip-badge" wx:if="{{isVipBank}}">
+            <image class="quiz-vip-icon" src="/assets/icons/workspace_premium_gold.svg" mode="aspectFit" />
+            <text>VIP</text>
+          </view>
+        </view>
         <text class="nav-subtitle">{{currentIndex + 1}}/{{questions.length}} • {{timerText}}</text>
       </view>
 
@@ -422,9 +428,22 @@
 
   <!-- 4.3 评论互动抽屉 (Comments Drawer) -->
   <view class="drawer-mask {{showCommentsDrawer ? 'mask-visible' : ''}}" bindtap="onToggleCommentsDrawer" catchtouchmove="true">
-    <view class="drawer-container comments-drawer-container {{showCommentsDrawer ? 'drawer-open' : ''}}" catchtap="true">
+    <view 
+      class="drawer-container comments-drawer-container {{showCommentsDrawer ? 'drawer-open' : ''}} {{isDrawerExpanded ? 'drawer-expanded' : ''}}" 
+      style="{{commentsDrawerHeight ? ('height:' + commentsDrawerHeight + 'px; max-height:' + commentsDrawerHeight + 'px;') : ''}} {{isDraggingDrawer ? 'transition: none;' : ''}}"
+      catchtap="true"
+    >
       <view class="drawer-header">
-        <view class="drawer-handle-bar"></view>
+        <!-- 顶部拖拽手柄区域 (拖住红框部分可自由扩大/缩小评论区) -->
+        <view 
+          class="drawer-handle-touch-area"
+          bindtouchstart="onDrawerTouchStart"
+          catchtouchmove="onDrawerTouchMove"
+          bindtouchend="onDrawerTouchEnd"
+          bindtap="onTapDrawerHandle"
+        >
+          <view class="drawer-handle-bar {{isDrawerExpanded ? 'handle-bar-expanded' : ''}}"></view>
+        </view>
         <view class="drawer-header-row">
           <view class="drawer-title">精选讨论 ({{commentList.length}})</view>
           <view class="drawer-close-btn" bindtap="onToggleCommentsDrawer">
@@ -449,7 +468,7 @@
               <view class="comment-content-main">
                 <view class="comment-author-row">
                   <view class="comment-author-left">
-                    <text class="comment-author-name">{{item.author}}</text>
+                    <text class="comment-author-name">{{item.author}}<text wx:if="{{item.isMine}}" class="author-mine-suffix">(我)</text></text>
                     <!-- 仅自己可见 / 公开 徽章 -->
                     <view wx:if="{{item.visibility === 'private'}}" class="comment-vis-badge badge-private">
                       <image class="badge-icon" src="/assets/icons/lock_gray.svg" mode="aspectFit" />
@@ -486,6 +505,19 @@
                     <text>删除</text>
                   </view>
 
+                  <!-- 公开评论专属回复按钮 (所有的公开评论都应该有个回复按钮，用来让其他用户回复) -->
+                  <view 
+                    wx:if="{{item.visibility === 'public'}}" 
+                    class="comment-reply-btn" 
+                    catchtap="onStartReply" 
+                    data-id="{{item.id}}" 
+                    data-author="{{item.author}}"
+                    data-user-id="{{item.userId || item.user_id}}"
+                  >
+                    <image class="comment-action-icon" src="/assets/icons/reply.svg" mode="aspectFit" />
+                    <text>回复</text>
+                  </view>
+
                   <!-- 点赞按钮 -->
                   <view class="comment-like-btn" bindtap="onLikeComment" data-id="{{item.id}}">
                     <image 
@@ -496,6 +528,44 @@
                     <text class="like-count {{item.isLiked ? 'text-primary font-bold' : ''}}">{{item.likes}}</text>
                   </view>
                 </view>
+
+                <!-- 子回复盖楼列表 (Sub Replies List) -->
+                <view class="sub-replies-list" wx:if="{{item.replies && item.replies.length > 0}}">
+                  <block wx:for="{{item.replies}}" wx:for-item="subReply" wx:key="id">
+                    <view class="sub-reply-item">
+                      <view class="sub-reply-header">
+                        <view class="sub-reply-user-line">
+                          <text class="sub-reply-author">{{subReply.author}}<text wx:if="{{subReply.isMine}}" class="sub-mine-suffix">(我)</text></text>
+                          <text class="sub-reply-to" wx:if="{{subReply.replyToAuthor}}">回复 @{{subReply.replyToAuthor}}</text>
+                        </view>
+                        <text class="sub-reply-time">{{subReply.time}}</text>
+                      </view>
+                      <view class="sub-reply-body">{{subReply.content}}</view>
+                      <view class="sub-reply-footer">
+                        <view 
+                          class="sub-action-btn" 
+                          catchtap="onStartReply" 
+                          data-id="{{item.id}}" 
+                          data-author="{{subReply.author}}"
+                          data-user-id="{{subReply.userId || subReply.user_id}}"
+                        >
+                          <image class="sub-action-icon" src="/assets/icons/reply.svg" mode="aspectFit" />
+                          <text>回复</text>
+                        </view>
+                        <view 
+                          wx:if="{{subReply.isMine}}" 
+                          class="sub-action-btn sub-delete-btn" 
+                          catchtap="onDeleteSubReply" 
+                          data-parent-id="{{item.id}}" 
+                          data-id="{{subReply.id}}"
+                        >
+                          <image class="sub-action-icon" src="/assets/icons/delete.svg" mode="aspectFit" />
+                          <text>删除</text>
+                        </view>
+                      </view>
+                    </view>
+                  </block>
+                </view>
               </view>
             </view>
           </block>
@@ -504,8 +574,20 @@
 
       <!-- 底部发送评论区域 -->
       <view class="comment-bottom-container">
-        <!-- 可见性选择条 (Visibility Selector) -->
-        <view class="comment-visibility-bar">
+        <!-- 正在回复指示条 (Reply Indicator Bar) -->
+        <view class="reply-target-bar" wx:if="{{replyTarget}}">
+          <view class="reply-target-info">
+            <image class="reply-target-icon" src="/assets/icons/reply.svg" mode="aspectFit" />
+            <text class="reply-target-text">正在回复 <text class="reply-target-name">@{{replyTarget.author}}</text></text>
+          </view>
+          <view class="reply-target-cancel" catchtap="onCancelReply">
+            <image class="reply-cancel-icon" src="/assets/icons/cancel_gray.svg" mode="aspectFit" />
+            <text class="cancel-text">取消</text>
+          </view>
+        </view>
+
+        <!-- 可见性选择条 (Visibility Selector - 回复模式下自动提示公开) -->
+        <view class="comment-visibility-bar" wx:if="{{!replyTarget}}">
           <text class="vis-bar-label">发布可见范围：</text>
           <view class="vis-bar-options">
             <view 
@@ -531,17 +613,52 @@
         <view class="comment-input-bar">
           <input 
             class="comment-input" 
-            placeholder="{{newCommentVisibility === 'private' ? '写下仅自己可见的备考笔记与心得...' : '写下你的解题思路或疑问...'}}" 
+            placeholder="{{replyTarget ? ('回复 @' + replyTarget.author + '...') : (newCommentVisibility === 'private' ? '写下仅自己可见的备考笔记与心得...' : '写下你的解题思路或疑问...')}}" 
             placeholder-class="comment-placeholder"
             value="{{newCommentText}}"
+            focus="{{isInputFocused}}"
             bindinput="onCommentInput"
             confirm-type="send"
             bindconfirm="onSubmitComment"
           />
           <view class="btn-send-comment" bindtap="onSubmitComment">
-            <text>发送</text>
+            <text>{{replyTarget ? '回复' : '发送'}}</text>
           </view>
         </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 学习规划打卡完成弹窗 (带逐渐消失的进度条，3秒后自动消失) -->
+  <view class="checkin-modal-mask" wx:if="{{showCheckInModal}}" catchtouchmove="true">
+    <view class="checkin-modal-backdrop" bindtap="closeCheckInModal"></view>
+    <view class="checkin-modal-card">
+      <view class="checkin-icon-halo">
+        <image class="checkin-trophy-icon" src="/assets/icons/auto_awesome_primary.svg" mode="aspectFit" />
+      </view>
+      <view class="checkin-modal-title">今日打卡成功 🎉</view>
+      <view class="checkin-modal-desc">恭喜完成今日学习目标 ({{checkInDailyGoal}}题)</view>
+      
+      <view class="checkin-stat-badge">
+        <text class="checkin-stat-label">当前题库累计打卡</text>
+        <view class="checkin-stat-num-box">
+          <text class="checkin-stat-num">{{checkInDays}}</text>
+          <text class="checkin-stat-unit">天</text>
+        </view>
+      </view>
+
+      <!-- 逐渐消失的进度条 (3秒从100%缩减至0%消失) -->
+      <view class="checkin-progress-wrapper">
+        <view class="checkin-progress-track">
+          <view class="checkin-progress-bar {{checkInBarActive ? 'checkin-bar-shrinking' : ''}}"></view>
+        </view>
+        <view class="checkin-countdown-hint">
+          <text>3秒后自动关闭</text>
+        </view>
+      </view>
+
+      <view class="btn-checkin-know" bindtap="closeCheckInModal">
+        <text>我知道了</text>
       </view>
     </view>
   </view>

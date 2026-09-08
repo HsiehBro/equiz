@@ -10,6 +10,8 @@ const DEV_MOCK_USERS = [
     dev_user_id: 'dev_admin_001',
     nickname: '系统管理员',
     isVip: true,
+    isLifetimeVip: true,
+    vipExpire: '永久 VIP',
     level: 'Lv.99',
     title: '系统主控',
     avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC6tZtmFH8sHcTBIJgE4CXv_uiZxRYuuUfO2XvYCKniiNOodibUyu7oV26hBTXqGRYGR7d_Dm0DjRcgI2DwaZb5VkZ2TEyLSXwKPzOsFN8rU_j48rtfj6CAFPx086ngO8lssh8-H8oFnt6obxKUU6QdVaANQRm-wl2cQWfsnumh2bYLfcV82PAJXC1JxZ6M0YN3smvep5qbnGCmh_D2UA3l2h_uSD_Dvn80lVoRNLchLImuDh1ffWZr',
@@ -21,6 +23,8 @@ const DEV_MOCK_USERS = [
     dev_user_id: 'dev_vip_002',
     nickname: 'VIP尊享学员',
     isVip: true,
+    isLifetimeVip: false,
+    vipExpire: '2027-12-31',
     level: 'Lv.8',
     title: '终身研习',
     avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC6tZtmFH8sHcTBIJgE4CXv_uiZxRYuuUfO2XvYCKniiNOodibUyu7oV26hBTXqGRYGR7d_Dm0DjRcgI2DwaZb5VkZ2TEyLSXwKPzOsFN8rU_j48rtfj6CAFPx086ngO8lssh8-H8oFnt6obxKUU6QdVaANQRm-wl2cQWfsnumh2bYLfcV82PAJXC1JxZ6M0YN3smvep5qbnGCmh_D2UA3l2h_uSD_Dvn80lVoRNLchLImuDh1ffWZr',
@@ -32,6 +36,8 @@ const DEV_MOCK_USERS = [
     dev_user_id: 'dev_user_003',
     nickname: '备考新手',
     isVip: false,
+    isLifetimeVip: false,
+    vipExpire: '',
     level: 'Lv.1',
     title: '初级备考',
     avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC6tZtmFH8sHcTBIJgE4CXv_uiZxRYuuUfO2XvYCKniiNOodibUyu7oV26hBTXqGRYGR7d_Dm0DjRcgI2DwaZb5VkZ2TEyLSXwKPzOsFN8rU_j48rtfj6CAFPx086ngO8lssh8-H8oFnt6obxKUU6QdVaANQRm-wl2cQWfsnumh2bYLfcV82PAJXC1JxZ6M0YN3smvep5qbnGCmh_D2UA3l2h_uSD_Dvn80lVoRNLchLImuDh1ffWZr',
@@ -114,7 +120,7 @@ Page({
     if (pages.length > 1) {
       wx.navigateBack();
     } else {
-      wx.reLaunch({
+      wx.redirectTo({
         url: '/pages/index/index'
       });
     }
@@ -277,10 +283,12 @@ Page({
   pureLocalLogin(customPhone, customMockProfile) {
     const fakeToken = 'mock_token_' + Date.now();
     const mock = customMockProfile || DEV_MOCK_USERS[1]; // 默认 VIP 用户
+    const randomSuffix = Math.random().toString(36).substring(2, 10);
+    const defaultRandomNickname = `用户_${randomSuffix}`;
     const fakeUser = {
       id: mock.dev_user_id || 1,
       openid: `mock_${mock.dev_user_id || Date.now()}`,
-      nickname: customPhone ? `用户_${customPhone.slice(-4)}` : mock.nickname,
+      nickname: customPhone ? `用户_${customPhone.slice(-4)}` : (mock.nickname || defaultRandomNickname),
       avatarUrl: mock.avatarUrl,
       phone: customPhone || mock.phone,
       level: mock.level,
@@ -293,11 +301,19 @@ Page({
 
   // 统一登录成功后置处理
   handleLoginSuccess(token, user) {
+    const isLifetime = Boolean(user.isLifetimeVip || user.role === 'admin');
     wx.setStorageSync('auth_token', token);
-    wx.setStorageSync('user_info', user);
-    wx.setStorageSync('user_is_vip', Boolean(user.isVip));
-    if (user.isVip) {
-      wx.setStorageSync('vip_expire_date', '2027-12-31');
+    wx.setStorageSync('user_info', {
+      ...user,
+      isLifetimeVip: isLifetime,
+      vipExpire: isLifetime ? '永久' : (user.vipExpire || '2027-12-31')
+    });
+    wx.setStorageSync('user_is_vip', Boolean(user.isVip || user.role === 'admin'));
+    wx.setStorageSync('user_is_lifetime_vip', isLifetime);
+    if (isLifetime) {
+      wx.setStorageSync('vip_expire_date', '永久');
+    } else if (user.isVip) {
+      wx.setStorageSync('vip_expire_date', user.vipExpire || '2027-12-31');
     } else {
       wx.removeStorageSync('vip_expire_date');
     }
@@ -316,15 +332,18 @@ Page({
         wx.redirectTo({
           url: this.data.redirectUrl,
           fail: () => {
-            wx.reLaunch({ url: '/pages/index/index' });
+            wx.redirectTo({ url: '/pages/index/index' });
           }
         });
       } else {
         const pages = getCurrentPages();
-        if (pages.length > 1) {
+        const prevPage = pages.length > 1 ? pages[pages.length - 2] : null;
+        if (prevPage && prevPage.route && prevPage.route.includes('profile')) {
+          wx.navigateBack();
+        } else if (pages.length > 1) {
           wx.navigateBack();
         } else {
-          wx.reLaunch({ url: '/pages/index/index' });
+          wx.redirectTo({ url: '/pages/index/index' });
         }
       }
     }, 1500);

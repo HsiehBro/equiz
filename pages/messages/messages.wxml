@@ -60,7 +60,58 @@
       </view>
     </view>
 
-    <!-- 2.2 分割线 (Divider) -->
+    <!-- 2.2 系统与审批通知 (System & Approval Notifications) -->
+    <view class="system-notices-section" wx:if="{{systemNotices.length > 0}}">
+      <view class="notices-header-row">
+        <view class="section-subtitle">系统与审核提醒</view>
+        <view class="notices-header-right">
+          <view class="notices-count-badge">{{systemNotices.length}} 条通知</view>
+          <view class="replies-hint-badge">
+            <text class="hint-text">左滑删除</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="system-notices-list">
+        <block wx:for="{{systemNotices}}" wx:key="id">
+          <!-- 单条可左滑系统通知容器 (Swipe Item Container) -->
+          <view class="swipe-item-container {{item.isRemoving ? 'item-removing' : ''}}">
+            <!-- 水平滑动轨道 (Horizontal Track) -->
+            <view 
+              class="swipe-track"
+              style="transform: translateX({{item.swipeOffset || 0}}px); transition: {{item.isSwiping ? 'none' : 'transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1)'}};"
+              data-id="{{item.id}}"
+              data-type="notice"
+              bindtouchstart="onTouchStart"
+              bindtouchmove="onTouchMove"
+              bindtouchend="onTouchEnd"
+            >
+              <!-- 主体卡片 (Main Card Content) -->
+              <view class="swipe-main-card system-notice-card {{item.type === 'admin_pending' ? 'card-wechat-notice' : ''}}">
+                <view class="notice-icon-box {{item.type === 'approval_pass' ? 'bg-pass' : (item.type === 'approval_reject' ? 'bg-reject' : 'bg-wechat')}}">
+                  <image class="notice-icon" src="{{item.type === 'approval_pass' ? '/assets/icons/check_circle_green.svg' : (item.type === 'approval_reject' ? '/assets/icons/error_outline_gray.svg' : '/assets/icons/campaign_primary.svg')}}" mode="aspectFit" />
+                </view>
+                <view class="notice-body">
+                  <view class="notice-title-line">
+                    <text class="notice-title-text">{{item.title}}</text>
+                    <text class="notice-time-text">{{item.time}}</text>
+                  </view>
+                  <text class="notice-content-text">{{item.content}}</text>
+                </view>
+              </view>
+
+              <!-- 右侧吸附删除按钮 (Side Delete Button) -->
+              <view class="swipe-action-btn" catchtap="onDeleteSystemNotice" data-id="{{item.id}}">
+                <image class="swipe-action-icon" src="/assets/icons/cancel_red.svg" mode="aspectFit" />
+                <text class="swipe-action-text">删除</text>
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <!-- 2.3 分割线 (Divider) -->
     <view class="section-divider"></view>
 
     <!-- 2.3 回复消息列表 (Replies List) -->
@@ -81,6 +132,7 @@
               class="swipe-track"
               style="transform: translateX({{item.swipeOffset || 0}}px); transition: {{item.isSwiping ? 'none' : 'transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1)'}};"
               data-id="{{item.id}}"
+              data-type="reply"
               bindtouchstart="onTouchStart"
               bindtouchmove="onTouchMove"
               bindtouchend="onTouchEnd"

@@ -136,16 +136,49 @@
   border-color: var(--color-primary, #0058bc);
 }
 
+.select-left-row {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  overflow: hidden;
+  margin-right: 8px;
+}
+
 .select-text {
   font-size: 15px;
   line-height: 22px;
   font-weight: 400;
   color: var(--color-on-surface, #191c1d);
-  flex: 1;
-  padding-right: 8px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* VIP 金标 */
+.vip-gold-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #fff3d1, #ffd25f);
+  color: #7d5700;
+  border: 0.5px solid rgba(125, 87, 0, 0.25);
+  border-radius: 9999px;
+  padding: 2px 8px;
+  margin-left: 8px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(125, 87, 0, 0.12);
+}
+
+.vip-gold-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.vip-gold-text {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 14px;
+  letter-spacing: 0.2px;
 }
 
 .select-icon-box {

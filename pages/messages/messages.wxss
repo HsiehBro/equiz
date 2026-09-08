@@ -607,3 +607,111 @@
   background-color: rgba(0, 112, 235, 0.08);
   opacity: 0.8;
 }
+
+/* 系统与审核通知模块 */
+.system-notices-section {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.notices-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.notices-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notices-count-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0058bc;
+  background-color: #d8e2ff;
+  padding: 3px 8px;
+  border-radius: 9999px;
+}
+
+.system-notices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.system-notice-card {
+  background-color: #ffffff;
+  border: 1px solid #e1e3e4;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.card-wechat-notice {
+  border-left: 3.5px solid #07C160;
+  background: linear-gradient(135deg, #ffffff, #f6fffa);
+}
+
+.notice-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bg-pass {
+  background-color: #e8f8ed;
+}
+
+.bg-reject {
+  background-color: #ffdad6;
+}
+
+.bg-wechat {
+  background-color: #e8f9ed;
+}
+
+.notice-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.notice-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notice-title-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.notice-title-text {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.notice-time-text {
+  font-size: 11px;
+  color: #717786;
+}
+
+.notice-content-text {
+  font-size: 12.5px;
+  color: #414755;
+  line-height: 18px;
+}
+

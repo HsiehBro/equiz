@@ -53,7 +53,7 @@
   color: #0058bc;
   letter-spacing: -0.5px;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
-  text-align: center;
+  text-align: left;
 }
 
 .nav-btn-right {
@@ -412,6 +412,51 @@
   color: #535f70;
 }
 
+.badge-pending {
+  background-color: #ffdad6;
+  color: #ba1a1a;
+}
+
+.badge-vip {
+  background: linear-gradient(135deg, #fff3d1, #ffd25f);
+  color: #7d5700;
+  border: 0.5px solid rgba(125, 87, 0, 0.2);
+  font-weight: 700;
+}
+
+.btn-apply-public {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0058bc;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 88, 188, 0.35);
+  padding: 5px 10px;
+  border-radius: 6px;
+  margin-right: 8px;
+  transition: all 0.15s;
+}
+
+.btn-apply-public:active {
+  background-color: #d8e2ff;
+  opacity: 0.85;
+}
+
+.btn-admin-vip {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0058bc;
+  background-color: #d8e2ff;
+  padding: 5px 10px;
+  border-radius: 6px;
+  margin-right: 8px;
+  transition: opacity 0.15s;
+}
+
+.btn-admin-vip.btn-vip-active {
+  color: #7d5700;
+  background-color: #ffe5a0;
+}
+
 .card-meta {
   font-size: 12px;
   color: #717786;
@@ -678,4 +723,293 @@
 .btn-empty-import:active {
   opacity: 0.8;
 }
+
+/* 10. 当前筛选分类指示条 */
+.active-category-banner {
+  background-color: #edf4ff;
+  border: 1px solid #adc6ff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: fadeIn 0.2s ease;
+}
+
+.active-category-content {
+  display: flex;
+  align-items: center;
+}
+
+.active-cat-label {
+  font-size: 13px;
+  color: #414755;
+}
+
+.active-cat-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0058bc;
+}
+
+.clear-cat-filter {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0058bc;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 88, 188, 0.1);
+}
+
+.clear-cat-filter:active {
+  background-color: #f3f4f5;
+}
+
+.clear-cat-icon {
+  width: 12px;
+  height: 12px;
+}
+
+/* 11. 全部分类抽屉弹层 (BottomSheet Drawer) */
+.drawer-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(25, 28, 29, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.2s ease;
+}
+
+.drawer-container {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 20px 20px 0 0;
+  padding: 10px 20px;
+  padding-bottom: max(env(safe-area-inset-bottom), 24px);
+  box-sizing: border-box;
+  min-height: 40vh;
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12);
+  transition: height 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawer-container.drawer-dragging {
+  transition: none !important;
+}
+
+.drawer-header {
+  margin-bottom: 8px;
+}
+
+.drawer-handle-zone {
+  width: 100%;
+  padding: 8px 0 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+}
+
+.drawer-handle {
+  width: 44px;
+  height: 5px;
+  border-radius: 3px;
+  background-color: #c9cdd4;
+  transition: all 0.2s ease;
+}
+
+.drawer-handle-zone:active .drawer-handle,
+.drawer-dragging .drawer-handle {
+  background-color: #0058bc !important;
+  width: 52px !important;
+  transform: scaleY(1.2);
+}
+
+.drawer-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.drawer-title-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.drawer-subtitle {
+  font-size: 12px;
+  color: #717786;
+  margin-top: 2px;
+}
+
+.drawer-expand-tip {
+  color: #0058bc;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.drawer-close-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  background-color: #f3f4f5;
+  font-size: 18px;
+  color: #414755;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.drawer-close-btn:active {
+  background-color: #e1e3e4;
+}
+
+.drawer-scroll {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  margin-top: 8px;
+}
+
+.drawer-cat-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background-color: #f8f9fa;
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.drawer-cat-card:active {
+  transform: scale(0.98);
+  background-color: #f3f4f5;
+}
+
+.drawer-cat-card-active {
+  border-color: #0058bc !important;
+  background-color: #edf4ff !important;
+  box-shadow: 0 2px 8px rgba(0, 88, 188, 0.12);
+}
+
+.drawer-cat-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.drawer-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.drawer-cat-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.drawer-cat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.drawer-cat-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.drawer-cat-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #191c1d;
+}
+
+.vip-badge-mini {
+  background: linear-gradient(135deg, #d4a017 0%, #b8860b 100%);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.vip-text-mini {
+  font-size: 9px;
+  line-height: 12px;
+}
+
+.drawer-cat-desc {
+  font-size: 12px;
+  color: #717786;
+}
+
+.drawer-cat-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drawer-bank-count {
+  font-size: 11px;
+  color: #0058bc;
+  background-color: #d8e2ff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.drawer-check-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  border: 1.5px solid #c1c6d7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.drawer-check-active {
+  background-color: #0058bc !important;
+  border-color: #0058bc !important;
+}
+
+.drawer-check-mark {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: bold;
+}
+
 

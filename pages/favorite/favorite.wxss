@@ -163,11 +163,42 @@
   border-bottom: 1rpx solid #e1e3e4;
 }
 
+.section-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
 .section-title-text {
   font-size: 18px;
   line-height: 24px;
   font-weight: 600;
   color: #0058bc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vip-gold-badge-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: linear-gradient(135deg, #fff3d1, #ffd25f);
+  color: #7d5700;
+  border: 0.5px solid rgba(125, 87, 0, 0.25);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  line-height: 14px;
+  flex-shrink: 0;
+}
+
+.vip-badge-icon {
+  width: 11px;
+  height: 11px;
 }
 
 .btn-group-practice {

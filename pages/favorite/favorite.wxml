@@ -48,7 +48,13 @@
         <view class="subject-section">
           <!-- 科目分组标题与一键练习栏 -->
           <view class="section-header-row">
-            <view class="section-title-text">{{group.subjectName}}</view>
+            <view class="section-title-wrapper">
+              <view class="section-title-text">{{group.subjectName}}</view>
+              <view class="vip-gold-badge-mini" wx:if="{{group.isVip}}">
+                <image class="vip-badge-icon" src="/assets/icons/workspace_premium_gold.svg" mode="aspectFit" />
+                <text>VIP</text>
+              </view>
+            </view>
             <view class="btn-group-practice" bindtap="onPracticeSubject" data-subject="{{group.subjectName}}">
               <image class="group-practice-icon" src="/assets/icons/play_arrow_primary.svg" mode="aspectFit" />
               <text class="group-practice-text">练习本题库 ({{group.questions.length}}题)</text>

@@ -416,6 +416,27 @@
   background-color: #ffdad6;
 }
 
+.action-btn-reply {
+  width: auto;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  background-color: #edf4fe;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-btn-reply:active {
+  background-color: #d8e6fd;
+}
+
+.reply-action-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-primary, #0058bc);
+}
+
 .action-icon {
   width: 18px;
   height: 18px;

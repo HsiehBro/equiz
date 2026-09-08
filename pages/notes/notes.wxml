@@ -107,6 +107,18 @@
                 <image class="jump-icon" src="/assets/icons/chevron_right_primary.svg" mode="aspectFit" />
               </view>
 
+              <!-- 公开笔记回复讨论按钮 (所有的公开评论都应该有个回复按钮) -->
+              <view 
+                wx:if="{{item.visibility === 'public'}}" 
+                class="action-btn action-btn-reply" 
+                catchtap="onReplyNote" 
+                data-item="{{item}}" 
+                aria-label="Reply to comment"
+              >
+                <image class="action-icon" src="/assets/icons/reply.svg" mode="aspectFit" />
+                <text class="reply-action-text">回复</text>
+              </view>
+
               <!-- 删除按钮 (无需编辑按钮，不可编辑) -->
               <view class="action-btn action-btn-delete" catchtap="onDeleteComment" data-id="{{item.id}}" aria-label="Delete comment">
                 <image class="action-icon" src="/assets/icons/delete_error.svg" mode="aspectFit" />

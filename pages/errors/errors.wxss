@@ -50,6 +50,24 @@
   margin-right: 90px; /* 避让微信小程序胶囊按钮 */
 }
 
+.notification-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.unread-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #ba1a1a;
+  border: 1.5px solid #f8f9fa;
+}
+
 .nav-icon {
   width: 24px;
   height: 24px;
@@ -244,12 +262,41 @@
 }
 
 /* 科目标题与描述 */
+.subject-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
 .subject-title {
   font-size: 18px;
   font-weight: 600;
   line-height: 24px;
   color: #191c1d;
-  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vip-badge-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: linear-gradient(135deg, #fff3d1, #ffd25f);
+  color: #7d5700;
+  border: 0.5px solid rgba(125, 87, 0, 0.25);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  line-height: 14px;
+  flex-shrink: 0;
+}
+
+.vip-badge-icon {
+  width: 11px;
+  height: 11px;
 }
 
 .subject-desc {

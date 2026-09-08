@@ -38,10 +38,11 @@ Page({
         request({ url: '/api/v1/favorites' }).catch(() => null)
       ]).then(([banksRes, favList]) => {
         const banks = banksRes && banksRes.list ? banksRes.list : (Array.isArray(banksRes) ? banksRes : []);
-        this.allKnownBanks = banks;
         const bankMap = {};
+        const bankVipMap = {};
         banks.forEach(b => {
           bankMap[String(b.id)] = b.title;
+          bankVipMap[String(b.id)] = Boolean(b.is_vip || b.isVip);
         });
 
         const list = Array.isArray(favList) ? favList : (favList && favList.list ? favList.list : []);
@@ -52,11 +53,20 @@ Page({
             const q = item.question || {};
             const bId = String(item.bank_id || q.bank_id || '1');
             const bTitle = (item.bank && item.bank.title) || bankMap[bId] || (q.bank && q.bank.title) || '项目管理基础考试';
+            const isVip = Boolean(
+              bankVipMap[bId] ||
+              (item.bank && (item.bank.is_vip || item.bank.isVip)) ||
+              bId === '1' ||
+              bId === '3' ||
+              bTitle.includes('项目管理') ||
+              bTitle.includes('会计')
+            );
 
             if (!groupsDict[bId]) {
               groupsDict[bId] = {
                 subjectId: bId,
                 subjectName: bTitle,
+                isVip: isVip,
                 questions: [],
                 rawQuestions: []
               };
@@ -247,9 +257,9 @@ Page({
   onNavBack() {
     const pages = getCurrentPages();
     if (pages.length > 1) {
-      wx.navigateBack();
+      wx.navigateBack({ delta: 1 });
     } else {
-      wx.reLaunch({
+      wx.redirectTo({
         url: '/pages/index/index'
       });
     }

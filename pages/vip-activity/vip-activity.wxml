@@ -29,6 +29,7 @@
         <view class="btn-my-rewards" bindtap="onTapMyRewards">
           <image class="reward-icon" src="/assets/icons/redeem_gold.svg" mode="aspectFit" />
           <text class="reward-text">我的奖励</text>
+          <text class="reward-badge-pill" wx:if="{{totalRewardDays > 0}}">+{{totalRewardDays}}天</text>
           <image class="reward-chevron" src="/assets/icons/chevron_right_gray.svg" mode="aspectFit" />
         </view>
       </view>
@@ -133,5 +134,93 @@
 
     </view>
   </scroll-view>
+
+  <!-- 3. 我的奖励明细抽屉弹窗 (BottomSheet Modal) -->
+  <view class="modal-backdrop {{showRewardsModal ? 'show' : ''}}" bindtap="onCloseRewardsModal" catchtouchmove="preventProp">
+    <view class="rewards-modal-content {{showRewardsModal ? 'show' : ''}}" catchtap="preventProp">
+      
+      <!-- 弹窗顶部栏 -->
+      <view class="modal-header-row">
+        <view class="modal-header-left">
+          <image class="modal-gift-icon" src="/assets/icons/redeem_gold.svg" mode="aspectFit" />
+          <text class="modal-title">我的活动奖励</text>
+        </view>
+        <view class="modal-close-btn" bindtap="onCloseRewardsModal">
+          <text class="close-symbol">✕</text>
+        </view>
+      </view>
+
+      <!-- 核心统计概览卡片 -->
+      <view class="modal-stats-card">
+        <view class="stat-box">
+          <view class="stat-number-box">
+            <text class="stat-num text-gold">{{totalRewardDays}}</text>
+            <text class="stat-unit">天</text>
+          </view>
+          <text class="stat-label">累计获赠时长</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-box">
+          <view class="stat-number-box">
+            <text class="stat-num text-primary">{{totalInviteCount}}</text>
+            <text class="stat-unit">人</text>
+          </view>
+          <text class="stat-label">成功邀请好友</text>
+        </view>
+      </view>
+
+      <!-- 奖励说明提示 -->
+      <view class="modal-reward-tip">
+        <image class="tip-icon" src="/assets/icons/auto_awesome_primary.svg" mode="aspectFit" />
+        <text class="tip-text">好友首单开通会员后，双方获赠同等时长已自动实时顺延！</text>
+      </view>
+
+      <!-- 好友明细列表 -->
+      <view class="modal-list-title-bar">
+        <text class="list-title">成功邀请记录</text>
+        <text class="list-count" wx:if="{{referralList.length > 0}}">共 {{referralList.length}} 条</text>
+      </view>
+
+      <scroll-view scroll-y class="modal-records-scroll">
+        <!-- 有记录列表 -->
+        <block wx:if="{{referralList.length > 0}}">
+          <view class="record-item" wx:for="{{referralList}}" wx:key="invitee_id">
+            <view class="record-user-info">
+              <image class="record-avatar" src="{{item.invitee_avatar || '/assets/icons/account_circle_gray.svg'}}" mode="aspectFill" />
+              <view class="record-name-col">
+                <text class="record-nickname">{{item.invitee_nickname || '备考学员'}}</text>
+                <view class="record-tag-row">
+                  <text class="record-plan-tag" wx:if="{{item.plan_name}}">{{item.plan_name}}</text>
+                  <text class="record-status-tag tag-success" wx:if="{{item.status === 'rewarded'}}">已到账</text>
+                  <text class="record-status-tag tag-pending" wx:else>待开通</text>
+                </view>
+              </view>
+            </view>
+            <view class="record-reward-col">
+              <text class="record-reward-days" wx:if="{{item.status === 'rewarded'}}">+{{item.reward_days}}天</text>
+              <text class="record-reward-days text-muted" wx:else>待生效</text>
+              <text class="record-time">{{item.status === 'rewarded' ? '已自动顺延' : '关系已锁定'}}</text>
+            </view>
+          </view>
+        </block>
+
+        <!-- 空状态 -->
+        <view class="empty-records-box" wx:else>
+          <image class="empty-icon" src="/assets/icons/diversity_3_gold.svg" mode="aspectFit" />
+          <text class="empty-title">暂无成功邀请好友</text>
+          <text class="empty-subtitle">快点击下方按钮分享专属卡片，好友首次开通双方同享等额会员时长！</text>
+        </view>
+      </scroll-view>
+
+      <!-- 弹窗底部操作按钮 -->
+      <view class="modal-footer-action">
+        <button class="modal-btn-invite" open-type="share">
+          <image class="modal-share-icon" src="/assets/icons/share_white.svg" mode="aspectFit" />
+          <text>立即分享专属卡片</text>
+        </button>
+      </view>
+
+    </view>
+  </view>
 
 </view>

@@ -75,6 +75,30 @@ const DEFAULT_COMMENTS = [
     visibility: 'private',
     date: '2026-09-01',
     time: '2026-09-01 09:15'
+  },
+  {
+    id: 'cmt_nurse_1',
+    bankId: '2',
+    bankTitle: '2023年护士执业资格考试',
+    questionId: 101,
+    questionIndex: 0,
+    questionTitle: '成人进行心肺复苏 (CPR) 时，胸外心脏按压与人工呼吸的比例通常为（ ）。',
+    content: '牢记按压与通气比例：单人或双人成人心肺复苏均为 30:2，按压频率 100~120次/分，深度 5~6cm。必背考点！',
+    visibility: 'public',
+    date: '2026-09-04',
+    time: '2026-09-04 15:30'
+  },
+  {
+    id: 'cmt_acc_1',
+    bankId: '3',
+    bankTitle: '初级会计实务 - 核心考点',
+    questionId: 151,
+    questionIndex: 0,
+    questionTitle: '会计的两项基本职能是（ ）。',
+    content: '核算与监督是会计的两项基本职能，核算是基础，监督是保障。预测前景和参与决策属于拓展职能，注意题干中的‘基本’二字！',
+    visibility: 'public',
+    date: '2026-09-03',
+    time: '2026-09-03 10:15'
   }
 ];
 
@@ -116,6 +140,91 @@ Page({
   },
 
   /**
+   * 智能校准与解析试题所属题库信息，保障题库归属 100% 准确
+   */
+  resolveBankInfo(item) {
+    if (!item) return { bankId: '1', bankTitle: '项目管理基础考试' };
+
+    let bankId = String((item.question && item.question.bank_id) || item.bank_id || item.bankId || '');
+    let bankTitle = (item.bank_title || (item.bank && item.bank.title) || (item.question && item.question.bank_title) || item.bankTitle || '').trim();
+    const qTitle = (item.question_title || (item.question && item.question.title) || item.questionTitle || item.title || '').trim();
+
+    // 1. 特征智能校准：医学急救/心肺复苏等典型考题修正归属 (彻底自愈历史遗留的错误默认值)
+    if (qTitle.includes('心肺复苏') || qTitle.includes('CPR') || qTitle.includes('水银体温计') || qTitle.includes('青霉素过敏') || qTitle.includes('少尿') || qTitle.includes('生命体征')) {
+      bankId = '2';
+      bankTitle = '2023年护士执业资格考试';
+    } else if (qTitle.includes('会计') || qTitle.includes('核算与监督') || qTitle.includes('借贷记账法')) {
+      bankId = '3';
+      bankTitle = '初级会计实务 - 核心考点';
+    }
+
+    // 2. 从真实已知题库列表中精准反查
+    if (this.allKnownBanks && Array.isArray(this.allKnownBanks) && this.allKnownBanks.length > 0) {
+      if (bankId) {
+        const found = this.allKnownBanks.find(b => String(b.id) === bankId);
+        if (found) {
+          bankTitle = (found.title || found.name || '').trim();
+        }
+      }
+      if (!bankId && bankTitle) {
+        const found = this.allKnownBanks.find(b => (b.title || b.name || '').trim() === bankTitle);
+        if (found) {
+          bankId = String(found.id);
+        }
+      }
+    }
+
+    // 3. 常见系统标准题库 ID 映射（离线或后端未返回时兜底，严禁跨题库盲目兜底）
+    if (!bankTitle || bankTitle === '通用题库' || (bankId === '2' && bankTitle !== '2023年护士执业资格考试') || (bankId === '3' && bankTitle !== '初级会计实务 - 核心考点')) {
+      if (bankId === '2' || bankId === 'nurse') {
+        bankId = '2';
+        bankTitle = '2023年护士执业资格考试';
+      } else if (bankId === '3' || bankId === 'accounting') {
+        bankId = '3';
+        bankTitle = '初级会计实务 - 核心考点';
+      } else if (bankId === '1' || bankId === 'pmp') {
+        bankId = '1';
+        bankTitle = '项目管理基础考试';
+      } else if (bankId) {
+        bankTitle = `题库 ${bankId}`;
+      } else {
+        bankId = '1';
+        bankTitle = '项目管理基础考试';
+      }
+    }
+
+    return { bankId, bankTitle };
+  },
+
+  /**
+   * 当后端真实题库列表返回后，为现有笔记对齐真实的题库名称与归属
+   */
+  enrichCommentsBankTitles() {
+    const list = this.data.commentsList;
+    if (!list || list.length === 0) return;
+    let hasChange = false;
+    const updated = list.map(item => {
+      const { bankId, bankTitle } = this.resolveBankInfo(item);
+      if (String(item.bankId) !== bankId || item.bankTitle !== bankTitle) {
+        hasChange = true;
+        return {
+          ...item,
+          bankId,
+          bankTitle
+        };
+      }
+      return item;
+    });
+
+    if (hasChange) {
+      this.setData({ commentsList: updated }, () => {
+        this.saveCommentsToStorage(updated);
+        this.updateDynamicBankCategories(updated);
+      });
+    }
+  },
+
+  /**
    * 根据真实存在的题库（后端返回题库 + 笔记实际所属题库）动态汇聚分类页签
    */
   updateDynamicBankCategories(sourceList) {
@@ -137,8 +246,9 @@ Page({
 
     // 2. 补充扫描当前笔记列表中实际出现的题库名称（避免离线或特殊题库漏掉）
     list.forEach(item => {
-      const title = (item.bankTitle || '').trim();
-      const id = String(item.bankId || title);
+      const { bankId, bankTitle } = this.resolveBankInfo(item);
+      const title = bankTitle.trim();
+      const id = bankId || title;
       if (title && !seenNames.has(title)) {
         seenNames.add(title);
         categories.push({ id, name: title });
@@ -171,6 +281,7 @@ Page({
           if (banks.length > 0) {
             this.allKnownBanks = banks;
             this.updateDynamicBankCategories();
+            this.enrichCommentsBankTitles();
           }
         })
         .catch(() => {
@@ -194,10 +305,11 @@ Page({
               const d = item.created_at ? new Date(item.created_at) : new Date();
               const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
               const timeStr = `${dateStr} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+              const { bankId, bankTitle } = this.resolveBankInfo(item);
               return {
                 id: item.id,
-                bankId: String(item.bank_id),
-                bankTitle: item.bank_title || (item.question && item.question.bank_title) || '项目管理基础考试',
+                bankId: bankId,
+                bankTitle: bankTitle,
                 questionId: item.question_id,
                 questionIndex: item.question && item.question.sort_order ? item.question.sort_order - 1 : idx,
                 questionTitle: item.question_title || (item.question && item.question.title) || '题目笔记',
@@ -231,7 +343,7 @@ Page({
     try {
       let stored = wx.getStorageSync(STORAGE_KEY);
       if (stored && Array.isArray(stored) && stored.length > 0) {
-        // 补充可能缺失的预置公开笔记（如教育心理学、高等数学、英语六级）
+        // 补充可能缺失的预置公开笔记（如教育心理学、高等数学、英语六级、护士执业资格、初级会计实务）
         const existingIds = new Set(stored.map(s => String(s.id)));
         DEFAULT_COMMENTS.forEach(def => {
           if (!existingIds.has(String(def.id))) {
@@ -239,38 +351,38 @@ Page({
           }
         });
 
-        // 规整本地历史遗留测试数据中的题库名称（将通用题库规整为真实科目名称）
-        stored = stored.map((item, idx) => {
-          let bTitle = (item.bankTitle || '').trim();
-          let bId = String(item.bankId || '');
-          if (!bTitle || bTitle === '通用题库') {
-            if (bId === '1' || bId === 'pmp') bTitle = '项目管理基础考试';
-            else if (bId === '2' || bId === 'nurse') bTitle = '2023年护士执业资格考试';
-            else if (bId === '3' || bId === 'accounting') bTitle = '初级会计实务 - 核心考点';
-            else if (idx === 0) bTitle = '项目管理基础考试';
-            else if (idx === 1) bTitle = '项目管理基础考试';
-            else bTitle = '项目管理基础考试';
-          }
+        // 规整本地历史遗留测试数据中的题库名称与归属（解决历史脏数据归属错乱）
+        stored = stored.map(item => {
+          const { bankId, bankTitle } = this.resolveBankInfo(item);
           return {
             ...item,
-            bankId: bId || '1',
-            bankTitle: bTitle
+            bankId: bankId || '1',
+            bankTitle: bankTitle
           };
         });
         this.setData({ commentsList: stored }, () => {
+          this.saveCommentsToStorage(stored);
           this.updateDynamicBankCategories(stored);
           this.checkAndHighlightTargetNote();
         });
       } else {
-        this.setData({ commentsList: DEFAULT_COMMENTS }, () => {
-          this.saveCommentsToStorage(DEFAULT_COMMENTS);
-          this.updateDynamicBankCategories(DEFAULT_COMMENTS);
+        const initialList = DEFAULT_COMMENTS.map(item => {
+          const { bankId, bankTitle } = this.resolveBankInfo(item);
+          return { ...item, bankId, bankTitle };
+        });
+        this.setData({ commentsList: initialList }, () => {
+          this.saveCommentsToStorage(initialList);
+          this.updateDynamicBankCategories(initialList);
           this.checkAndHighlightTargetNote();
         });
       }
     } catch (e) {
-      this.setData({ commentsList: DEFAULT_COMMENTS }, () => {
-        this.updateDynamicBankCategories(DEFAULT_COMMENTS);
+      const fallbackList = DEFAULT_COMMENTS.map(item => {
+        const { bankId, bankTitle } = this.resolveBankInfo(item);
+        return { ...item, bankId, bankTitle };
+      });
+      this.setData({ commentsList: fallbackList }, () => {
+        this.updateDynamicBankCategories(fallbackList);
         this.checkAndHighlightTargetNote();
       });
     }
@@ -325,13 +437,22 @@ Page({
     const { commentsList, selectedBank, searchKeyword } = this.data;
     const keyword = (searchKeyword || '').trim().toLowerCase();
 
+    let selectedBankName = '';
+    if (selectedBank !== 'all') {
+      const matchedCat = (this.data.bankCategories || []).find(c => String(c.id) === String(selectedBank));
+      if (matchedCat) {
+        selectedBankName = (matchedCat.name || '').trim();
+      }
+    }
+
     const filtered = commentsList.filter(item => {
       // 1. 题库分类过滤
       if (selectedBank !== 'all') {
         const bId = String(item.bankId || '');
         const bTitle = (item.bankTitle || '').trim();
         const sel = String(selectedBank);
-        const isMatch = (bId && bId === sel) || (bTitle && (bTitle === sel || bTitle.includes(sel)));
+        const isMatch = (bId && bId === sel) || 
+                        (bTitle && (bTitle === sel || (selectedBankName && bTitle === selectedBankName)));
         if (!isMatch) {
           return false;
         }
@@ -478,12 +599,28 @@ Page({
     const item = e.currentTarget.dataset.item;
     if (!item) return;
 
+    const { bankId, bankTitle } = this.resolveBankInfo(item);
     const qId = item.questionId || 1;
     const qIndex = typeof item.questionIndex === 'number' ? item.questionIndex : (qId > 0 ? qId - 1 : 0);
-    const title = item.bankTitle || '项目管理基础考试';
 
     wx.navigateTo({
-      url: `/pages/quiz/quiz?bankId=${item.bankId || '1'}&questionId=${qId}&index=${qIndex}&title=${encodeURIComponent(title)}&openComments=true`
+      url: `/pages/quiz/quiz?bankId=${bankId || '1'}&questionId=${qId}&index=${qIndex}&title=${encodeURIComponent(bankTitle)}&openComments=true`
+    });
+  },
+
+  /**
+   * 点击公开笔记的回复按钮，直接跳转至题目并打开评论抽屉且激活回复模式
+   */
+  onReplyNote(e) {
+    const item = e.currentTarget.dataset.item;
+    if (!item) return;
+
+    const { bankId, bankTitle } = this.resolveBankInfo(item);
+    const qId = item.questionId || 1;
+    const qIndex = typeof item.questionIndex === 'number' ? item.questionIndex : (qId > 0 ? qId - 1 : 0);
+
+    wx.navigateTo({
+      url: `/pages/quiz/quiz?bankId=${bankId || '1'}&questionId=${qId}&index=${qIndex}&title=${encodeURIComponent(bankTitle)}&openComments=true&replyToCommentId=${item.id}&replyToAuthor=${encodeURIComponent(item.authorName || '我')}`
     });
   },
 
@@ -521,7 +658,7 @@ Page({
     if (pages.length > 1) {
       wx.navigateBack();
     } else {
-      wx.reLaunch({
+      wx.redirectTo({
         url: '/pages/profile/profile'
       });
     }

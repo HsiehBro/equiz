@@ -3,12 +3,7 @@
   <!-- 自定义适配导航栏 (防止被胶囊和状态栏遮挡) -->
   <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px; height: {{statusBarHeight + navBarHeight}}px;">
     <view class="navbar-content" style="height: {{navBarHeight}}px;">
-      <!-- 左侧返回按钮 -->
-      <view class="nav-btn" bindtap="onNavBack">
-        <image class="nav-icon" src="/assets/icons/arrow_back_primary.svg" mode="aspectFit" />
-      </view>
-      
-      <!-- 居中标题 -->
+      <!-- 品牌标题 (首页无返回箭头) -->
       <view class="nav-title">Exam Prep</view>
       
       <!-- 右侧通知按钮 (预留避让胶囊按钮) -->
@@ -67,60 +62,30 @@
     </view>
 
     <!-- 3. 分类题库 (Bento Grid) -->
+    <!-- 3. 分类题库 (Bento Grid - 动态同步分类 VIP 状态) -->
     <view class="section-container">
       <view class="section-title">分类题库</view>
       <view class="bento-grid">
-        <!-- 医学类 -->
-        <view class="bento-item {{selectedCategory === '医学类' ? 'bento-item-active' : ''}}" bindtap="onSelectCategory" data-category="医学类">
-          <view class="bento-icon-box bg-blue-light">
-            <image class="bento-icon" src="/assets/icons/medical_services_primary.svg" mode="aspectFit" />
+        <block wx:for="{{categoryList}}" wx:key="name">
+          <view 
+            class="bento-item {{selectedCategory === item.name || (!selectedCategory && item.name === '全部分类') ? 'bento-item-active' : ''}}" 
+            bindtap="onSelectCategory" 
+            data-category="{{item.name}}"
+          >
+            <!-- 分类 VIP 金标 (与该分类下的题库 VIP 状态严格实时联动同步) -->
+            <view class="vip-badge" wx:if="{{item.isVip}}">
+              <image class="vip-lock-icon" src="/assets/icons/lock_gold.svg" mode="aspectFit" />
+              <text class="vip-text">VIP</text>
+            </view>
+            <view class="bento-icon-box {{item.bgClass}}">
+              <image class="bento-icon" src="{{item.icon}}" mode="aspectFit" />
+            </view>
+            <view class="bento-info">
+              <view class="bento-name">{{item.name}}</view>
+              <view class="bento-desc">{{item.desc}}</view>
+            </view>
           </view>
-          <view class="bento-info">
-            <view class="bento-name">医学类</view>
-            <view class="bento-desc">执业医师 / 药师</view>
-          </view>
-        </view>
-
-        <!-- 财经类 (VIP) -->
-        <view class="bento-item {{selectedCategory === '财经类' ? 'bento-item-active' : ''}}" bindtap="onSelectCategory" data-category="财经类">
-          <view class="vip-badge">
-            <image class="vip-lock-icon" src="/assets/icons/lock_gold.svg" mode="aspectFit" />
-            <text class="vip-text">VIP</text>
-          </view>
-          <view class="bento-icon-box bg-gray-light">
-            <image class="bento-icon" src="/assets/icons/account_balance_gray.svg" mode="aspectFit" />
-          </view>
-          <view class="bento-info">
-            <view class="bento-name">财经类</view>
-            <view class="bento-desc">CPA / 会计初级</view>
-          </view>
-        </view>
-
-        <!-- IT互联网 (VIP) -->
-        <view class="bento-item {{selectedCategory === 'IT互联网' ? 'bento-item-active' : ''}}" bindtap="onSelectCategory" data-category="IT互联网">
-          <view class="vip-badge">
-            <image class="vip-lock-icon" src="/assets/icons/lock_gold.svg" mode="aspectFit" />
-            <text class="vip-text">VIP</text>
-          </view>
-          <view class="bento-icon-box bg-gray-light">
-            <image class="bento-icon" src="/assets/icons/terminal_gray.svg" mode="aspectFit" />
-          </view>
-          <view class="bento-info">
-            <view class="bento-name">IT互联网</view>
-            <view class="bento-desc">软考 / PMP</view>
-          </view>
-        </view>
-
-        <!-- 全部分类 -->
-        <view class="bento-item {{(!selectedCategory || selectedCategory === '全部分类') ? 'bento-item-active' : ''}}" bindtap="onSelectCategory" data-category="全部分类">
-          <view class="bento-icon-box bg-gray-light">
-            <image class="bento-icon" src="/assets/icons/grid_view_gray.svg" mode="aspectFit" />
-          </view>
-          <view class="bento-info">
-            <view class="bento-name">全部分类</view>
-            <view class="bento-desc">查看全部题库</view>
-          </view>
-        </view>
+        </block>
       </view>
     </view>
 
@@ -142,6 +107,18 @@
         </view>
       </view>
 
+      <!-- 当前分类筛选指示与快捷清除 -->
+      <view class="active-category-banner" wx:if="{{selectedCategory}}">
+        <view class="active-category-content">
+          <text class="active-cat-label">当前筛选：</text>
+          <text class="active-cat-name">{{selectedCategory}}</text>
+        </view>
+        <view class="clear-cat-filter" bindtap="onClearCategoryFilter">
+          <text>清除筛选</text>
+          <image class="clear-cat-icon" src="/assets/icons/close_gray.svg" mode="aspectFit" />
+        </view>
+      </view>
+
       <!-- 题库卡片列表 -->
       <view class="library-list">
         <block wx:if="{{libraries.length > 0}}">
@@ -150,20 +127,30 @@
               <!-- 左侧主题色指示条 -->
               <view class="card-accent-bar {{item.isPrimary ? 'bg-primary' : 'bg-subtle'}}"></view>
               
-              <!-- 卡片主体内容 -->
-              <view class="card-main">
+              <!-- 卡片主体内容 (点击卡片整体或点击继续刷题均触发作答/拦截) -->
+              <view class="card-main" bindtap="onContinuePractice" data-id="{{item.id}}">
                 <!-- 标题与题量 -->
                 <view class="card-title-row">
                   <view class="card-title-wrap">
                     <view class="card-title">{{item.title}}</view>
-                    <!-- 公开 / 私有 权限徽标 -->
-                    <view class="lib-vis-badge badge-public" wx:if="{{item.visibility === 'public' || item.isOfficial}}">
+                    <!-- 公开 / 私有 / 审核中 权限徽标 -->
+                    <view class="lib-vis-badge badge-pending" wx:if="{{item.reviewStatus === 'pending'}}">
+                      <image class="lib-badge-icon" src="/assets/icons/schedule_gray.svg" mode="aspectFit" />
+                      <text>待审批(私有)</text>
+                    </view>
+                    <view class="lib-vis-badge badge-public" wx:elif="{{item.visibility === 'public' || item.isOfficial}}">
                       <image class="lib-badge-icon" src="/assets/icons/public_green.svg" mode="aspectFit" />
                       <text>公开</text>
                     </view>
                     <view class="lib-vis-badge badge-private" wx:else>
                       <image class="lib-badge-icon" src="/assets/icons/lock_gray.svg" mode="aspectFit" />
                       <text>私有</text>
+                    </view>
+
+                    <!-- VIP 题库徽标 (所有用户可见) -->
+                    <view class="lib-vis-badge badge-vip" wx:if="{{item.isVip || item.is_vip}}">
+                      <image class="lib-badge-icon" src="/assets/icons/workspace_premium_gold.svg" mode="aspectFit" />
+                      <text>VIP</text>
                     </view>
                   </view>
                   <view class="card-meta">共 {{item.totalCount}} 题 · 已完成 {{item.progress}}%</view>
@@ -181,20 +168,45 @@
                     <text>上次练习: {{item.lastPractice}}</text>
                   </view>
                   
-                  <view 
-                    class="btn-continue {{item.isPrimary ? 'btn-continue-primary' : 'btn-continue-outline'}}" 
-                    bindtap="onContinuePractice" 
-                    data-id="{{item.id}}"
-                  >
-                    继续刷题
+                  <view style="display: flex; align-items: center;">
+                    <!-- 本人创建的私有题库：支持首页快捷提交公开申请 -->
+                    <view 
+                      class="btn-apply-public" 
+                      wx:if="{{item.isOwner && item.visibility === 'private' && item.reviewStatus !== 'pending' && !item.isOfficial}}"
+                      catchtap="onApplyPublic"
+                      data-id="{{item.id}}"
+                      data-title="{{item.title}}"
+                    >
+                      申请公开
+                    </view>
+
+                    <!-- Admin 一键设置/取消 VIP 题库 -->
+                    <view 
+                      class="btn-admin-vip {{(item.isVip || item.is_vip) ? 'btn-vip-active' : ''}}" 
+                      wx:if="{{currentUserRole === 'admin' && (item.visibility === 'public' || item.isOfficial)}}"
+                      catchtap="onToggleVipBank"
+                      data-id="{{item.id}}"
+                      data-title="{{item.title}}"
+                      data-isvip="{{item.isVip || item.is_vip}}"
+                    >
+                      {{(item.isVip || item.is_vip) ? '★ 取消VIP' : '☆ 设为VIP'}}
+                    </view>
+
+                    <view 
+                      class="btn-continue {{item.isPrimary ? 'btn-continue-primary' : 'btn-continue-outline'}}" 
+                      catchtap="onContinuePractice" 
+                      data-id="{{item.id}}"
+                    >
+                      继续刷题
+                    </view>
                   </view>
                 </view>
               </view>
 
-              <!-- 右上角删除按钮 (公开题库不可删除，仅私有题库显示删除按钮) -->
+              <!-- 右上角删除按钮 (管理员可以删除任何公开/私有题库，普通用户仅能删除自己创建的私有题库) -->
               <view 
                 class="card-delete-btn" 
-                wx:if="{{item.visibility === 'private' && !item.isOfficial}}" 
+                wx:if="{{currentUserRole === 'admin' || (item.visibility === 'private' && !item.isOfficial)}}" 
                 catchtap="onDeleteLibrary" 
                 data-id="{{item.id}}"
               >
@@ -212,7 +224,7 @@
           <view class="empty-search-title">未找到匹配题库</view>
           <view class="empty-search-desc">未找到包含“{{searchKeyword || selectedCategory}}”的题库，可尝试更换搜索词或导入自建题库</view>
           <view class="empty-action-row">
-            <view class="btn-empty-reset" bindtap="onViewAllLibraries">查看全部题库</view>
+            <view class="btn-empty-reset" bindtap="onResetEmptySearch">查看全部题库</view>
             <view class="btn-empty-import" bindtap="onImportLibrary">立即导入</view>
           </view>
         </view>
@@ -238,6 +250,93 @@
     <view class="tab-item {{currentTab === 'profile' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="profile">
       <image class="tab-icon" src="/assets/icons/person_gray.svg" mode="aspectFit" />
       <text class="tab-label">个人中心</text>
+    </view>
+  </view>
+
+  <!-- 6. 全部分类抽屉弹层 (BottomSheet Drawer) -->
+  <view class="drawer-backdrop" wx:if="{{showCategoryDrawer}}" bindtap="onCloseCategoryDrawer">
+    <view 
+      class="drawer-container {{isDrawerExpanded ? 'drawer-container-expanded' : ''}} {{isDraggingDrawer ? 'drawer-dragging' : ''}}" 
+      style="{{drawerHeightStyle}}"
+      catchtap="preventDumbTap"
+    >
+      <!-- 抽屉顶部把手与标题栏 (支持手势触摸拖动与轻点把手切换展开状态) -->
+      <view class="drawer-header">
+        <!-- 触控拖拽把手感应区 (扩大触控热区，向上拖动扩大) -->
+        <view 
+          class="drawer-handle-zone"
+          bindtouchstart="onDrawerTouchStart"
+          catchtouchmove="onDrawerTouchMove"
+          bindtouchend="onDrawerTouchEnd"
+        >
+          <view class="drawer-handle"></view>
+        </view>
+        <view class="drawer-title-row">
+          <view class="drawer-title-box">
+            <view class="drawer-title">全部分类</view>
+            <view class="drawer-subtitle">
+              <text>选择分类快速检索试题 (共 {{allCategories.length}} 个有效分类)</text>
+              <text class="drawer-expand-tip" catchtap="toggleDrawerExpand"> · {{isDrawerExpanded ? '点击收起' : '上拖或点击扩大'}}</text>
+            </view>
+          </view>
+          <view class="drawer-close-btn" bindtap="onCloseCategoryDrawer">×</view>
+        </view>
+      </view>
+
+      <!-- 分类列表滚动区 -->
+      <scroll-view class="drawer-scroll" scroll-y>
+        <!-- 全部题库快捷选项 -->
+        <view 
+          class="drawer-cat-card {{!selectedCategory ? 'drawer-cat-card-active' : ''}}"
+          bindtap="onSelectDrawerCategory"
+          data-category=""
+        >
+          <view class="drawer-cat-left">
+            <view class="drawer-icon-box bg-blue-light">
+              <image class="drawer-cat-icon" src="/assets/icons/grid_view_gray.svg" mode="aspectFit" />
+            </view>
+            <view class="drawer-cat-info">
+              <view class="drawer-cat-name">全部题库</view>
+              <view class="drawer-cat-desc">展示全部分类下的所有试题资源</view>
+            </view>
+          </view>
+          <view class="drawer-cat-right">
+            <view class="drawer-check-circle {{!selectedCategory ? 'drawer-check-active' : ''}}">
+              <text wx:if="{{!selectedCategory}}" class="drawer-check-mark">✓</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 各分类卡片列表 -->
+        <block wx:for="{{allCategories}}" wx:key="id">
+          <view 
+            class="drawer-cat-card {{selectedCategory === item.name ? 'drawer-cat-card-active' : ''}}"
+            bindtap="onSelectDrawerCategory"
+            data-category="{{item.name}}"
+          >
+            <view class="drawer-cat-left">
+              <view class="drawer-icon-box {{item.bgClass || 'bg-gray-light'}}">
+                <image class="drawer-cat-icon" src="{{item.icon || '/assets/icons/menu_book_primary.svg'}}" mode="aspectFit" />
+              </view>
+              <view class="drawer-cat-info">
+                <view class="drawer-cat-name-row">
+                  <text class="drawer-cat-name">{{item.name}}</text>
+                  <view class="vip-badge-mini" wx:if="{{item.isVip}}">
+                    <text class="vip-text-mini">VIP</text>
+                  </view>
+                </view>
+                <view class="drawer-cat-desc">{{item.desc || '专业试题'}}</view>
+              </view>
+            </view>
+            <view class="drawer-cat-right">
+              <view class="drawer-bank-count" wx:if="{{item.bankCount > 0}}">{{item.bankCount}} 个题库</view>
+              <view class="drawer-check-circle {{selectedCategory === item.name ? 'drawer-check-active' : ''}}">
+                <text wx:if="{{selectedCategory === item.name}}" class="drawer-check-mark">✓</text>
+              </view>
+            </view>
+          </view>
+        </block>
+      </scroll-view>
     </view>
   </view>
 </view>

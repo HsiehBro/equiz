@@ -30,9 +30,16 @@
       <view class="section-block">
         <view class="section-title">目标题库</view>
         <view class="card select-card">
-          <picker bindchange="onBankChange" value="{{selectedBankIndex}}" range="{{banks}}" range-key="title">
+          <picker bindchange="onBankChange" value="{{selectedBankIndex}}" range="{{banks}}" range-key="displayTitle">
             <view class="select-box">
-              <view class="select-text">{{banks[selectedBankIndex].title}}</view>
+              <view class="select-left-row">
+                <view class="select-text">{{banks[selectedBankIndex].title}}</view>
+                <!-- VIP 专属题库金标 -->
+                <view class="vip-gold-badge" wx:if="{{banks[selectedBankIndex].isVip}}">
+                  <image class="vip-gold-icon" src="/assets/icons/workspace_premium_gold.svg" mode="aspectFit" />
+                  <text class="vip-gold-text">VIP专属</text>
+                </view>
+              </view>
               <view class="select-icon-box">
                 <image class="select-icon" src="/assets/icons/expand_more_gray.svg" mode="aspectFit" />
               </view>

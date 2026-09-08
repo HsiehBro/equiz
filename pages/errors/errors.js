@@ -105,9 +105,18 @@ Page({
         icon = '/assets/icons/account_balance_primary.svg';
       }
 
+      const isVip = Boolean(
+        b.is_vip ||
+        b.isVip ||
+        String(b.id) === '1' ||
+        String(b.id) === '3' ||
+        (b.title && (b.title.includes('项目管理') || b.title.includes('会计')))
+      );
+
       return {
         id: String(b.id),
         name: b.title,
+        isVip: isVip,
         desc: b.description || `${b.title}核心错题集锦。`,
         count: count,
         totalCount: count,
@@ -145,13 +154,24 @@ Page({
 
   onNavBack() {
     const pages = getCurrentPages();
-    if (pages.length > 1) {
+    const indexIdx = pages.findIndex(p => p.route && p.route.includes('index/index'));
+    if (indexIdx !== -1) {
+      wx.navigateBack({
+        delta: pages.length - 1 - indexIdx
+      });
+    } else if (pages.length > 1) {
       wx.navigateBack();
     } else {
       wx.redirectTo({
         url: '/pages/index/index'
       });
     }
+  },
+
+  onOpenNotifications() {
+    wx.navigateTo({
+      url: '/pages/messages/messages'
+    });
   },
 
   onMoreOptions() {
@@ -170,11 +190,12 @@ Page({
             }
           });
         } else if (res.tapIndex === 1) {
-          wx.showLoading({ title: '正在生成 PDF...' });
-          setTimeout(() => {
-            wx.hideLoading();
-            wx.showToast({ title: '导出成功，已保存至本地', icon: 'success' });
-          }, 1000);
+          const subjectWithErrors = this.data.filteredSubjects.find(s => s.hasErrors && s.count > 0);
+          if (!subjectWithErrors) {
+            wx.showToast({ title: '暂无错题可导出', icon: 'none' });
+            return;
+          }
+          this.downloadAndOpenErrorPDF(subjectWithErrors.id, subjectWithErrors.name);
         } else if (res.tapIndex === 2) {
           const sorted = [...this.data.filteredSubjects].sort((a, b) => b.count - a.count);
           this.setData({ filteredSubjects: sorted });
@@ -299,34 +320,99 @@ Page({
     });
   },
 
+  /**
+   * 导出指定科目错题集为 PDF（背题模式）
+   */
   onExportPDF(e) {
-    const subjectName = e.currentTarget.dataset.name;
-    const count = e.currentTarget.dataset.count;
+    const subjectId = e ? (e.currentTarget.dataset.id || '') : '';
+    const subjectName = e ? (e.currentTarget.dataset.name || '错题集') : '错题集';
+    const count = e ? (e.currentTarget.dataset.count || 0) : 0;
 
-    wx.showLoading({ title: '正在生成 PDF...' });
-    setTimeout(() => {
-      wx.hideLoading();
-      wx.showModal({
-        title: '导出成功',
-        content: `《${subjectName} - 错题集》(共 ${count} 题) 已成功导出为 PDF 文档，已保存至本地。`,
-        confirmText: '去查看',
-        cancelText: '完成',
-        confirmColor: '#0058bc',
-        success: (res) => {
-          if (res.confirm) {
-            wx.showToast({ title: '已加入下载任务', icon: 'success' });
+    if (count <= 0) {
+      wx.showToast({ title: '当前科目暂无未掌握错题', icon: 'none' });
+      return;
+    }
+
+    this.downloadAndOpenErrorPDF(subjectId, subjectName);
+  },
+
+  /**
+   * 统一执行从后端下载并打开 PDF 的逻辑
+   */
+  downloadAndOpenErrorPDF(bankId, subjectName) {
+    const token = wx.getStorageSync('auth_token') || '';
+    const queryParams = [];
+    if (bankId) queryParams.push(`bank_id=${bankId}`);
+    if (token) queryParams.push(`token=${encodeURIComponent(token)}`);
+    const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+
+    const downloadUrl = `${CONFIG.API_BASE_URL}/api/v1/errors/export-pdf${queryString}`;
+
+    wx.showLoading({ title: '正在生成 PDF...', mask: true });
+
+    wx.downloadFile({
+      url: downloadUrl,
+      header: token ? { 'Authorization': `Bearer ${token}` } : {},
+      success: (res) => {
+        wx.hideLoading();
+        if (res.statusCode === 200 && res.tempFilePath) {
+          wx.showToast({ title: '下载成功，正在打开...', icon: 'success' });
+          // 调用微信打开文档接口，showMenu: true 允许手机端右上角菜单转发或保存到本地
+          wx.openDocument({
+            filePath: res.tempFilePath,
+            fileType: 'pdf',
+            showMenu: true,
+            success: () => {
+              console.log('PDF 成功唤起预览:', res.tempFilePath);
+            },
+            fail: (err) => {
+              console.error('wx.openDocument 失败:', err);
+              wx.showModal({
+                title: '打开文档提示',
+                content: `《${subjectName}》错题集 PDF 已成功下载，但在当前系统环境下未能直接调起预览。可在微信文件或手机存储中查看。`,
+                showCancel: false
+              });
+            }
+          });
+        } else {
+          console.error('PDF 下载失败, statusCode:', res.statusCode);
+          let errMsg = '生成导出失败，请重试';
+          if (res.statusCode === 401) {
+            errMsg = '登录已过期，请重新登录';
+          } else if (res.statusCode === 400) {
+            errMsg = '暂无可导出的错题';
           }
+          wx.showToast({
+            title: errMsg,
+            icon: 'none'
+          });
         }
-      });
-    }, 800);
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        console.error('wx.downloadFile 失败:', err);
+        wx.showToast({
+          title: '下载失败，请确保后端服务正常运行',
+          icon: 'none'
+        });
+      }
+    });
   },
 
   onSwitchTab(e) {
     const tab = e.currentTarget.dataset.tab;
     if (tab === 'library') {
-      wx.redirectTo({
-        url: '/pages/index/index'
-      });
+      const pages = getCurrentPages();
+      const indexIdx = pages.findIndex(p => p.route && p.route.includes('index/index'));
+      if (indexIdx !== -1) {
+        wx.navigateBack({
+          delta: pages.length - 1 - indexIdx
+        });
+      } else {
+        wx.redirectTo({
+          url: '/pages/index/index'
+        });
+      }
     } else if (tab === 'profile') {
       wx.redirectTo({
         url: '/pages/profile/profile'

@@ -229,6 +229,26 @@
           <view class="input-desc-text" wx:else>题库名称全局唯一，若与已有题库重名将提示强制修改。</view>
         </view>
 
+        <!-- 题库所属分类选择 (单选) -->
+        <view class="form-group category-form-group">
+          <view class="form-label-row">
+            <text class="form-label">题库所属分类</text>
+            <text class="selected-cat-badge">{{selectedCategoryName || '综合'}}</text>
+          </view>
+          <view class="category-chip-group">
+            <block wx:for="{{categories}}" wx:key="id">
+              <view 
+                class="category-chip {{selectedCategoryId === item.id ? 'category-chip-active' : ''}}"
+                bindtap="onSelectImportCategory"
+                data-id="{{item.id}}"
+                data-name="{{item.name}}"
+              >
+                <text class="category-chip-text">{{item.name}}</text>
+              </view>
+            </block>
+          </view>
+        </view>
+
         <!-- 题库可见性选择 (公开 / 私有) -->
         <view class="form-group visibility-form-group">
           <view class="form-label">发布可见范围与管理权限</view>
