@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: exam-server-seed
+  namespace: exam-prep
+  labels:
+    app.kubernetes.io/name: exam-server
+    app.kubernetes.io/component: db-seeder
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: exam-server
+        app.kubernetes.io/component: db-seeder
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: seeder
+          image: exam-server:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/app/seed"]
+          envFrom:
+            - configMapRef:
+                name: exam-server-config
+            - secretRef:
+                name: exam-server-secret
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

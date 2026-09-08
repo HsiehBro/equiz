@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: exam-prep
+  labels:
+    app.kubernetes.io/name: exam-prep
+    app.kubernetes.io/part-of: smart-quiz-assistant

@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: exam-prep
+
+resources:
+  - 00-namespace.yaml
+  - 01-postgres-secret.yaml
+  - 02-postgres-pvc.yaml
+  - 03-postgres-deployment.yaml
+  - 04-server-configmap.yaml
+  - 05-server-secret.yaml
+  - 06-server-deployment.yaml
+  # 生产环境若需使用 Ingress 或运行初始化题库 Job，可解开下行注释:
+  # - 07-server-ingress.yaml
+  # - 08-seed-job.yaml

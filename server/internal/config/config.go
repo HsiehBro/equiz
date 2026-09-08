@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -49,6 +50,27 @@ var GlobalConfig *Config
 
 func LoadConfig(path string) (*Config, error) {
 	v := viper.New()
+
+	// 1. 设置默认值（确保在无 YAML 文件时纯环境变量也能被完整 Unmarshal）
+	v.SetDefault("server.port", 8080)
+	v.SetDefault("server.mode", "debug")
+	v.SetDefault("database.host", "127.0.0.1")
+	v.SetDefault("database.port", 5432)
+	v.SetDefault("database.user", "postgres")
+	v.SetDefault("database.password", "")
+	v.SetDefault("database.dbname", "exam_prep")
+	v.SetDefault("database.sslmode", "disable")
+	v.SetDefault("database.max_idle_conns", 10)
+	v.SetDefault("database.max_open_conns", 100)
+	v.SetDefault("jwt.secret", "exam_prep_secret_key_2026_super_safe")
+	v.SetDefault("jwt.expire_hours", 72)
+	v.SetDefault("wechat.app_id", "")
+	v.SetDefault("wechat.app_secret", "")
+
+	if path == "" {
+		path = os.Getenv("CONFIG_PATH")
+	}
+
 	if path != "" {
 		v.SetConfigFile(path)
 	} else {
@@ -59,12 +81,13 @@ func LoadConfig(path string) (*Config, error) {
 		v.SetConfigType("yaml")
 	}
 
-	// 允许环境变量覆盖配置
+	// 2. 允许环境变量覆盖配置 (例如 DATABASE_HOST 映射到 database.host)
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
 	if err := v.ReadInConfig(); err != nil {
-		// 如果配置文件不存在，尝试读取 config.example.yaml 或使用默认值
-		fmt.Fprintf(os.Stderr, "Warning: failed to read config file: %v\n", err)
+		// 如果配置文件不存在，尝试依靠环境变量与默认值运行
+		fmt.Fprintf(os.Stderr, "Info: config file not found or skipped, using environment variables and defaults: %v\n", err)
 	}
 
 	var cfg Config

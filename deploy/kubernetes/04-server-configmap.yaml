@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: exam-server-config
+  namespace: exam-prep
+  labels:
+    app.kubernetes.io/name: exam-server
+    app.kubernetes.io/component: backend
+data:
+  SERVER_PORT: "8080"
+  SERVER_MODE: "release"
+  DATABASE_HOST: "postgres-service"
+  DATABASE_PORT: "5432"
+  DATABASE_DBNAME: "equiz_db"
+  DATABASE_SSLMODE: "disable"
+  DATABASE_MAX_IDLE_CONNS: "10"
+  DATABASE_MAX_OPEN_CONNS: "100"
+  JWT_EXPIRE_HOURS: "72"
