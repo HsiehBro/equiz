@@ -14,6 +14,8 @@ type StudyPlan struct {
 	AppReminder    bool          `gorm:"default:true" json:"app_reminder"`
 	WechatReminder bool          `gorm:"default:false" json:"wechat_reminder"`
 	IsActive       bool          `gorm:"default:false;index" json:"is_active"` // 是否为首页/个人中心置顶主计划
+	CheckInDays    int           `gorm:"default:0" json:"check_in_days"`
+	LastCheckInDate string       `gorm:"size:20;default:''" json:"last_check_in_date"`
 	CreatedAt      time.Time     `json:"created_at"`
 	UpdatedAt      time.Time     `json:"updated_at"`
 }
@@ -29,6 +31,7 @@ type SavePlanRequest struct {
 	AppReminder    bool `json:"app_reminder"`
 	WechatReminder bool `json:"wechat_reminder"`
 	IsActive       bool `json:"is_active"`
+	ResetCheckIn   bool `json:"reset_check_in"`
 }
 
 // StudyPlanProgressResponse 学习规划与今日动态进度响应
@@ -37,10 +40,13 @@ type StudyPlanProgressResponse struct {
 	UserID              uint      `json:"user_id"`
 	BankID              uint      `json:"bank_id"`
 	BankTitle           string    `json:"bank_title"`
+	IsVIP               bool      `json:"is_vip"`
 	DailyGoal           int       `json:"daily_goal"`
 	AppReminder         bool      `json:"app_reminder"`
 	WechatReminder      bool      `json:"wechat_reminder"`
 	IsActive            bool      `json:"is_active"`
+	CheckInDays         int       `json:"check_in_days"`
+	LastCheckInDate     string    `json:"last_check_in_date"`
 	TotalQuestions      int       `json:"total_questions"`
 	FinishedQuestions   int       `json:"finished_questions"`
 	TodayCount          int       `json:"today_count"`

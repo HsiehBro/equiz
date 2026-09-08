@@ -43,13 +43,17 @@ type QuestionBank struct {
 	ID              uint                `gorm:"primaryKey" json:"id"`
 	Title           string              `gorm:"size:255;not null;uniqueIndex" json:"title"`
 	Category        string              `gorm:"size:64;default:'综合'" json:"category"`
+	CategoryID      uint                `gorm:"default:1;index" json:"category_id"`
 	Description     string              `gorm:"type:text" json:"description"`
 	CoverURL        string              `gorm:"size:255;default:''" json:"cover_url"`
 	TotalCount      int                 `gorm:"default:0" json:"total_count"`
 	IsOfficial      bool                `gorm:"default:false;index" json:"is_official"`
 	Visibility      string              `gorm:"size:32;default:'public';index" json:"visibility"` // 'public' (公开) | 'private' (私有)
+	ReviewStatus    string              `gorm:"size:32;default:'approved';index" json:"review_status"` // 'approved' (已通过) | 'pending' (待审核) | 'rejected' (已驳回)
+	IsVIP           bool                `gorm:"column:is_vip;default:false;index" json:"is_vip"`       // 是否为 VIP 专属题库
 	CreatorID       uint                `gorm:"default:0;index" json:"creator_id"`
-	SyllabusWeights SyllabusWeightsList `gorm:"type:jsonb" json:"syllabus_weights,omitempty"` // 考纲配比
+	CreatorName     string              `gorm:"size:64;default:''" json:"creator_name,omitempty"`     // 创建者昵称
+	SyllabusWeights SyllabusWeightsList `gorm:"type:jsonb" json:"syllabus_weights,omitempty"`         // 考纲配比
 	CreatedAt       time.Time           `json:"created_at"`
 	UpdatedAt       time.Time           `json:"updated_at"`
 

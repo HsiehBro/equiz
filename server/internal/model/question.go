@@ -84,6 +84,7 @@ type Question struct {
 	// 动态状态（当前用户作答情况与收藏状态，非数据库持久化）
 	UserAnswer   []string `gorm:"-" json:"user_answer,omitempty"`
 	IsBookmarked bool     `gorm:"-" json:"is_bookmarked,omitempty"`
+	BankTitle    string   `gorm:"-" json:"bank_title,omitempty"`
 }
 
 func (Question) TableName() string {
